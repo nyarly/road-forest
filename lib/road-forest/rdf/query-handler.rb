@@ -6,12 +6,16 @@ require 'rdf'
 module RoadForest::RDF
   class NotCredible < StandardError; end
   class QueryHandler
+    include Normalization
+
     class << self
       def cached
-        @cached ||= { :simple => QueryHandler.new.tap do |handler|
-          handler.policy_list(:authoritative, :any)
-          handler.investigator = LiberalInvestigator.new
-        end }
+        @cached ||= {
+          :simple => QueryHandler.new.tap do |handler|
+          handler.policy_list(:must_local, :may_local)
+          handler.investigator = NullInvestigator.new
+          end
+        }
       end
 
       def [](name)
@@ -24,10 +28,11 @@ module RoadForest::RDF
     end
 
     class QueryResults
-      attr_reader :graph_manager, :solutions
+      attr_reader :graph_manager, :context_roles, :solutions
 
-      def initialize(graph_manager, solutions)
+      def initialize(graph_manager, context_roles, solutions)
         @graph_manager = graph_manager
+        @context_roles = context_roles
         @solutions = solutions
       end
 
@@ -42,7 +47,9 @@ module RoadForest::RDF
       def contexts
         @contexts ||= @solutions.map do |solution|
           solution.context
-        end.uniq
+        end.uniq + @context_roles.values.find_all do |context|
+          not context_metadata(context).empty?
+        end
       end
 
       def for_context(context)
@@ -75,19 +82,27 @@ module RoadForest::RDF
       end
     end
 
+    def context_roles(graph_manager, subject_uri)
+      {
+        :local => graph_manager.local_context_node,
+        :subject => subject_uri
+      }
+    end
+
     def query(graph_manager, subject, pattern)
-      results = QueryResults.new(graph_manager,graph_manager.query(pattern))
-      results = check(subject, results)
+      results = QueryResults.new(graph_manager, context_roles(graph_manager, subject), graph_manager.query(pattern))
+      results = check(results)
     rescue NotCredible
       results = investigate(graph_manager, results)
     end
 
-    def check(subject, results)
+    def check(results)
+      contexts = results.contexts
       credence_policies.each do |policy|
-        result = policy.credible(subject, results)
-        return result unless result.nil?
+        contexts = policy.credible(contexts, results)
+        raise NotCredible if contexts.empty?
       end
-      raise NotCredible
+      return results.for_context(contexts.first)
     end
 
     def investigate(graph_manager, results)

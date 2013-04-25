@@ -2,8 +2,21 @@ require 'rdf'
 
 module RoadForest::RDF
   module Normalization
-    Vocabs = RDF::Vocabulary.each_with_object({}) do |vocab, hash|
-      hash[vocab.__prefix__.to_s] = vocab
+    Vocabs = Hash.new do |h,k|
+      vocab = RDF::Vocabulary.find do |vocab|
+        vocab.__prefix__.to_s == k
+      end
+      h[k] = vocab unless vocab.nil?
+      vocab
+    end
+
+    def normalize_statement(subject, predicate, object, context)
+      subject = normalize_resource(subject) || RDF::Node.new
+      predicate = normalize_uri(predicate)
+      object = normalize_term(object) || RDF::Node.new
+      context = normalize_resource(context)
+
+      RDF::Statement.new(subject, predicate, object, :context => context)
     end
 
     def normalize_tuple(tuple)

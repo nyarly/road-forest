@@ -6,7 +6,7 @@ module RoadForest::RDF
     end
   end
 
-  class LiberalInvestigator
+  class NullInvestigator
     def pursue(graph_manager, results)
       []
     end

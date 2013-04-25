@@ -88,6 +88,7 @@ describe RoadForest::RDF do
     end
 
     it "should enumerate forward properties" do
+      puts graph_manager.graph_dump(:nquads)
       step.forward_properties.should include([:dc, :creator])
       step.forward_properties.should include([:dc, :date])
       step.forward_properties.should_not include([:foaf, :familyName])

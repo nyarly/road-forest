@@ -2,9 +2,11 @@ module RoadForest::RDF
   module Credence
     def self.policies
       @policies ||= {
-        :authoritative => AnyAuthoritative.new,
         :any => Any.new,
-        :must_authoritative => MustBeAuthoritative.new
+        :may_subject => RoleIfAvailable.new(:subject),
+        :must_subject => NoneIfRoleAbsent.new(:subject),
+        :may_local => RoleIfAvailable.new(:local),
+        :must_local => NoneIfRoleAbsent.new(:local)
       }
     end
 
@@ -21,25 +23,39 @@ module RoadForest::RDF
     end
 
     #If there are any results for the subject context, they're good
-    class AnyAuthoritative
-      def credible(subject, results)
-        results.for_context(subject)
+    class RoleIfAvailable
+      def initialize(role)
+        @role = role
+      end
+      attr_reader :role
+
+      def credible(contexts, results)
+        if contexts.include?(results.context_roles[role])
+          [results.context_roles[role]]
+        else
+          contexts
+        end
       end
     end
 
     class Any
-      def credible(subject, results)
-        results.for_context(results.contexts.last)
+      def credible(contexts, results)
+        contexts
       end
     end
 
     #Unless we have results for the subject context, nothing is valid
-    class MustBeAuthoritative
-      def credible(subject, results)
-        if results.for_context(subject).nil?
-          raise NotCredible
+    class NoneIfRoleAbsent
+      def initialize(role)
+        @role = role
+      end
+      attr_reader :role
+
+      def credible(contexts, results)
+        if contexts.include?(results.context_roles[role])
+          contexts
         else
-          nil
+          []
         end
       end
     end
