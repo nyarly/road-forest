@@ -8,7 +8,7 @@ module RoadForest::RDF
     include Normalization
 
     attr_reader :repository, :current_impulse, :local_context_node
-    attr_accessor :default_query_manager, :debug_io
+    attr_accessor :default_query_manager, :debug_io, :http_client
 
     def initialize(repo = nil)
       @repository = repo || RDF::Repository.new
@@ -19,9 +19,16 @@ module RoadForest::RDF
     end
 
     def next_impulse
+      return if quiet_impulse?
+      #mark ended?
+      #chain impulses?
       @current_impulse = RDF::Node.new
       repository.insert(normalize_statement(@current_impulse, [:dc, 'type'], [:rf, 'Impulse'], nil))
       repository.insert(normalize_statement(@current_impulse, [:rf, 'begunAt'], Time.now, nil))
+    end
+
+    def quiet_impulse?
+      repository.query([nil, nil, @current_impulse, false]).empty?
     end
 
     #repo cleanup - expired graphs
@@ -98,18 +105,27 @@ module RoadForest::RDF
       return step
     end
 
-    def query(pattern)
-      RDF::Query.new do |query|
-        query.pattern(pattern + [:context])
-      end.execute(@repository).filter do |solution|
+    def find_statements(pattern)
+      @repository.query(pattern).find_all do |statement|
+        not statement.context.nil?
+      end
+    end
+
+    def query(query)
+      context = RDF::Query::Variable.new(:context)
+      query.patterns.each do |pattern|
+        pattern.context = context
+      end
+      query.execute(@repository).filter do |solution|
         not solution.context.nil?
       end
     end
 
-    def query_unnamed(pattern)
-      RDF::Query.new do |query|
-        query.pattern(pattern + [false])
-      end.execute(@repository)
+    def query_unnamed(query)
+      query.patterns.each do |pattern|
+        pattern.context = false
+      end
+      query.execute(@repository)
     end
   end
 end

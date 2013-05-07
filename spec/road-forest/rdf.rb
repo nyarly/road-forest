@@ -10,6 +10,17 @@ describe RoadForest::RDF do
   #merging graphs
 
   describe RoadForest::RDF::GraphManager do
+    before :each do
+      graph_manager.default_query_manager = query_manager
+    end
+
+    let :query_manager do
+      RoadForest::RDF::QueryHandler.new do |handler|
+        handler.policy_list(:may_subject)
+        handler.investigator = RoadForest::RDF::NullInvestigator.new
+      end
+    end
+
     let :root_body do
       manager = RoadForest::RDF::GraphManager.new
       step = manager.start("http://lrdesign.com/test-rdf")
@@ -64,7 +75,7 @@ describe RoadForest::RDF do
 
   describe RoadForest::RDF::GraphFocus do
     let :main_subject do
-      RDF::Node.new(:main)
+      RDF::URI.new("http://test.com/main")
     end
 
     let :creator do
@@ -88,7 +99,6 @@ describe RoadForest::RDF do
     end
 
     it "should enumerate forward properties" do
-      puts graph_manager.graph_dump(:nquads)
       step.forward_properties.should include([:dc, :creator])
       step.forward_properties.should include([:dc, :date])
       step.forward_properties.should_not include([:foaf, :familyName])
@@ -118,13 +128,17 @@ describe RoadForest::RDF do
     it "should be able to add properties with []=" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query([:subject, RDF::DC.dateCopyrighted, :value]).should_not be_empty
+      graph_manager.query do |query|
+        query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
+      end.should_not be_empty
     end
 
     it "should be able to add properties with set" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query( [:subject, RDF::DC.dateCopyrighted, :value] ).should_not be_empty
+      graph_manager.query do |query|
+        query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
+      end.should_not be_empty
     end
   end
 

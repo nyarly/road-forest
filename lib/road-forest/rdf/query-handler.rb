@@ -10,12 +10,19 @@ module RoadForest::RDF
 
     class << self
       def cached
-        @cached ||= {
-          :simple => QueryHandler.new.tap do |handler|
-          handler.policy_list(:must_local, :may_local)
-          handler.investigator = NullInvestigator.new
+        @cached ||=
+          begin
+            cached = {}
+            cached[:simple] = QueryHandler.new do |handler|
+              handler.policy_list(:must_local, :may_local)
+              handler.investigators = [NullInvestigator.new]
+            end
+            cached[:http] = QueryHandler.new do |handler|
+              handler.policy_list(:may_subject, :any) #XXX
+              handler.investigators = [HTTPInvestigator.new, NullInvestigator.new]
+            end
+            cached
           end
-        }
       end
 
       def [](name)
@@ -27,29 +34,50 @@ module RoadForest::RDF
       end
     end
 
-    class QueryResults
-      attr_reader :graph_manager, :context_roles, :solutions
+    class ContextNotes
+      attr_reader :graph_manager, :context_roles
 
-      def initialize(graph_manager, context_roles, solutions)
+      def initialize(graph_manager, context_roles, raw_contexts)
         @graph_manager = graph_manager
         @context_roles = context_roles
-        @solutions = solutions
+        @raw_contexts = raw_contexts
+      end
+
+      def contexts
+        @contexts ||= (@raw_contexts +
+                       @context_roles.values.find_all do |context|
+          not context_metadata(context).empty?
+                       end).uniq
+      end
+
+      def context_metadata(context)
+        query = RDF::Query.new do
+          do |query|
+            query.pattern [context, :property, :value]
+          end
+        end
+        graph_manager.query_unnamed(query).select(:property, :value)
+      end
+    end
+
+    class CommonResults < ContextNotes
+      attr_reader :items
+
+      def initialize(graph_manager, context_roles, query_pattern)
+        @items = query(query_pattern)
+        super(graph_manager, context_roles, items.map(&:context))
+      end
+
+      def http_client
+        graph_mananger.http_client
       end
 
       def by_context
         @by_context ||= Hash[contexts.map do |context|
-          [context, @solutions.filter do |solution|
-            solution.context == context
+          [context, @items.filter do |item|
+            item.context == context
           end]
         end]
-      end
-
-      def contexts
-        @contexts ||= @solutions.map do |solution|
-          solution.context
-        end.uniq + @context_roles.values.find_all do |context|
-          not context_metadata(context).empty?
-        end
       end
 
       def for_context(context)
@@ -60,20 +88,45 @@ module RoadForest::RDF
         if context_metadata(context).empty? #We've never checked
           nil
         else
-          RDF::Query::Solutions.new
+          empty_result
         end
       end
 
-      def context_metadata(context)
-        graph_manager.query_unnamed([context, :property, :value]).select(:property, :value)
+      def requery
+        self.class.new(graph_manager, context_roles, query_pattern)
+      end
+    end
+
+    class StatementResults < CommonResults
+      alias statements items
+
+      def query
+        graph_manager.find_statements(query_pattern)
+      end
+
+      def empty_result
+        []
+      end
+    end
+
+    class QueryResults < CommonResults
+      alias solutions items
+
+      def query
+        graph_manager.query(query_pattern)
+      end
+
+      def empty_result
+        RDF::Query::Solutions.new
       end
     end
 
     attr_accessor :investigator, :investigation_limit, :credence_policies
     def initialize
-      @investigator = nil
+      @investigators = []
       @investigation_limit = 3
       @credence_policies = []
+      yield self if block_given?
     end
 
     def policy_list(*names)
@@ -90,23 +143,34 @@ module RoadForest::RDF
     end
 
     def query(graph_manager, subject, pattern)
-      results = QueryResults.new(graph_manager, context_roles(graph_manager, subject), graph_manager.query(pattern))
+      query = RDF::Query.new do |query|
+        query.pattern(pattern)
+      end
+
+      results = QueryResults.new(graph_manager, context_roles(graph_manager, subject), query)
       results = check(results)
-    rescue NotCredible
-      results = investigate(graph_manager, results)
+    end
+
+    def find_statements(graph_manager, subject, pattern)
+      results = StatementResults.new(graph_manager, context_roles(graph_manager, subject), pattern)
+      results = check(results)
     end
 
     def check(results)
-      contexts = results.contexts
-      credence_policies.each do |policy|
-        contexts = policy.credible(contexts, results)
-        raise NotCredible if contexts.empty?
+      investigators.each do |investigator|
+        catch :not_credible do
+          contexts = results.contexts
+          credence_policies.each do |policy|
+            contexts = policy.credible(contexts, results)
+            if contexts.empty?
+              throw :not_credible
+            end
+          end
+          return results.for_context(contexts.first)
+        end
+        results = investigator.pursue(results, graph_manager)
       end
-      return results.for_context(contexts.first)
-    end
-
-    def investigate(graph_manager, results)
-      investigator.pursue(results, graph_manager)
+      raise NoCredibleResults
     end
   end
 end
