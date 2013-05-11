@@ -1,53 +1,59 @@
 module RoadForest
   class Model
-    def initialize(services)
-      @memoized_data = Hash.new{|h,k| h[k] = find_data(params)}
+    def initialize(route_name, params, services)
+      @route_name = route_name
+      @params = params
       @services = services
+      @data = nil
+    end
+    attr_reader :route_name, :params, :services, :data
+
+    def path_for(route_name = nil, params = nil)
+      services.router.path_for(route_name, (params || self.params).to_hash)
     end
 
-    def graph_for(route_name, params)
-      walker = ATST::Walker.new
-      walker.start_walk(@services.router.path_for(route_name, params.to_hash)
+    def my_path
+      path_for(route_name, params)
     end
 
-    def find_data(params)
+    def reset
+    end
+
+    def exists?
+      !data.nil?
+    end
+
+    def etag
       nil
     end
 
-    def data_for(params)
-      @memoized_data[params]
-    end
-
-    def resource_exists?(params)
-      !data_for(params).nil?
-    end
-
-    def etag(params)
+    def last_modified
       nil
     end
 
-    def last_modified(params)
+    def expires
       nil
     end
 
-    def expires(params)
-      nil
+    def new_results
+      results = Results.new
+      yield results if block_given?
+      return results
     end
 
-    #This is also "create" if there's no existing thing at "params"
-    def update(params, graph)
-      Results.new
+    def update(graph)
+      new_results
     end
 
-    def add_child(params, graph)
-      Results.new
+    def add_child(graph)
+      new_results
     end
 
-    def retreive(params)
-      Results.new
+    def retreive
+      new_results
     end
 
-    def delete(params)
+    def delete
       false
     end
   end

@@ -1,3 +1,5 @@
+require 'road-forest/rdf'
+
 module RoadForest
   class ExconAdapter
 
@@ -20,6 +22,9 @@ module RoadForest
 
     def credence_block
       focus = CredenceFocus.new
+      focus.graph_manager = @graph
+      focus.subject = @url
+
       @graph.next_impulse
       begin
         focus.reset_promises

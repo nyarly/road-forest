@@ -1,29 +1,27 @@
+require 'webmachine'
+
 module RoadForest
   class Dispatcher < Webmachine::Dispatcher
-    def initialize
+    include Resource::Handlers
+    def initialize(services)
       super(method(:create_resource))
+      @services = services
       @route_names = {}
     end
+    attr_accessor :services
 
-    def add_route(name, *args, &block)
-      route = Route.new(*args, &block)
+    def add_route(name, path_spec, resource_type, model_class, bindings = nil)
+      resource = bundle_typed_resource(resource_type, model_class, name)
+      route = Route.new(path_spec, resource, bindings || {})
+      yield route if block_given?
       @route_names[name] = route
+      @routes << route
       route
     end
     alias add add_route
 
     def route_for_name(name)
       @route_names.fetch(name)
-    end
-
-    def bundle(resource_class, &block)
-      ResourceBundle.new(resource_class, &block)
-    end
-
-    def bundle_model(resource_class, model_class)
-      bundle(resource_class) do |resource, request, response|
-        resource.model = model_class.new(services)
-      end
     end
 
     class Route < Webmachine::Dispatcher::Route

@@ -15,10 +15,19 @@ module RoadForest::RDF
   class HTTPInvestigator
     def pursue(results)
       document = results.http_client.get(results.context_roles[:subject])
-      graph_manager.insert_document(document)
-      results.requery
+      case document.code
+      when (200..299)
+        results.graph_manager.insert_document(document)
+        results.requery
+      when (300..399)
+        #client should follow redirects
+      when (400..499)
+      when (500..599)
+        raise NotCredible #hrm
+      end
+      return results
     rescue NotCredible
-      return []
+      return results
     end
   end
 end

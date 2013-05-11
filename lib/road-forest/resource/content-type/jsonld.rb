@@ -1,3 +1,5 @@
+require 'json/ld'
+
 module RoadForest
   #Also: "blob" resource
   #Not yourself - simple file service
@@ -35,19 +37,19 @@ module RoadForest
   module Resource
     module ContentType
       def self.types_provided(modules)
-        modules.map do |mod|
-          mod.content_types.map do |type|
+        modules.inject([]) do |array, mod|
+          array + mod.content_types.map do |type|
             [type, mod.to_source_method]
           end
-        end.flatten
+        end
       end
 
       def self.types_accepted(modules)
-        modules.map do |mod|
-          mod.content_types.map do |type|
+        modules.inject([]) do |array, mod|
+          array + mod.content_types.map do |type|
             [type, mod.from_source_method]
           end
-        end.flatten
+        end
       end
 
       module JSONLD
@@ -55,11 +57,11 @@ module RoadForest
           ["application/ld+json"]
         end
 
-        def self.to_source_handler
+        def self.to_source_method
           :to_jsonld
         end
 
-        def self.from_source_handler
+        def self.from_source_method
           :from_jsonld
         end
 
@@ -72,7 +74,7 @@ module RoadForest
         end
 
         def to_jsonld
-          JSON::from_graph(@model.retreive(params))
+          JSON::from_graph(@model.retreive)
         end
 
         def from_jsonld
@@ -81,7 +83,7 @@ module RoadForest
           #Location header
           #response body
           graph = JSONLD.to_graph(@request.body)
-          result = update_model
+          result = update_model(graph)
 
           if result.go_to_resource
             @response.location = result.go_to_resource

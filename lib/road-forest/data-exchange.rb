@@ -4,17 +4,20 @@ module RoadForest
   class Parameters
     def initialize
       @path_info = {}
-      @get_params = {}
+      @query_params = {}
       @remainder = []
+      yield self if block_given?
     end
-    attr_accessor :path_info, :get_params, :remainder
+    attr_accessor :path_info, :query_params, :remainder
 
     def [](field_name)
-      @path_info[field_name] || @get_params[field_name]
+      return remainder if field_Name == '*'
+      @path_info[field_name] || @query_params[field_name]
     end
 
     def fetch(field_name)
-      @path_info[field_name] || @get_params.fetch(field_name)
+      return remainder if field_Name == '*'
+      @path_info[field_name] || @query_params.fetch(field_name)
     end
 
     def slice(*fields)
@@ -24,17 +27,23 @@ module RoadForest
     end
 
     def to_hash
-      @get_params.merge(@path_info).merge('*' => @remainder)
+      (query_params||{}).merge(path_info||{}).merge('*' => remainder)
     end
   end
 
   #The results of processing an RDF update - could include a new graph, or a
   #different resource (url) to look at
-  class Result
+  class Results
     attr_accessor :graph, :subject_resource
 
     def initialize(subject=nil, graph=nil)
       @graph, @subject_resource = graph, subject
+      yield self if block_given?
+    end
+
+    def start_graph(resource)
+      @graph ||= RDF::GraphManager.new
+      return @graph.start_walk(resource)
     end
   end
 end

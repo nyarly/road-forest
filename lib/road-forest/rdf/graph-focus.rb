@@ -7,21 +7,24 @@ module RoadForest::RDF
   class GraphReading
     include Normalization
 
-    attr_accessor :graph_manager, :subject, :query_manager
+    attr_accessor :graph_manager, :subject
     alias rdf subject
 
     def initialize
       @graph_manager = nil
       @subject = nil
-      @query_manager = nil
+    end
+
+    def query_manager
+      graph_manager.default_query_manager
     end
 
     def forward_properties
-      query_properties( [ subject, :property, :value ] )
+      query_properties( [ normalize_resource(subject), :property, :value ] )
     end
 
     def reverse_properties
-      query_properties( [ :reverse, :property, subject ] )
+      query_properties( [ :reverse, :property, normalize_resource(subject) ] )
     end
 
     def get(prefix, property = nil)
@@ -65,7 +68,6 @@ module RoadForest::RDF
       next_step = self.class.new
       next_step.subject = value
       next_step.graph_manager = graph_manager
-      next_step.query_manager = query_manager
       next_step
     end
 
@@ -78,7 +80,7 @@ module RoadForest::RDF
     end
 
     def query_properties(pattern)
-      solutions = query_manager.query(graph_manager, subject, pattern)
+      solutions = query_manager.query(graph_manager, normalize_resource(subject), pattern)
       solutions.map do |solution|
         prop = solution.property
         if qname = prop.qname
@@ -99,12 +101,8 @@ module RoadForest::RDF
       builder = GraphBuilder.new
       builder.graph_manager = graph_manager
       builder.subject = subject
-      builder.query_manager = query_manager
 
       builder.destination_graph = sub.graph_manager
-
-      yield builder
-
       return sub
     end
 
@@ -141,15 +139,15 @@ module RoadForest::RDF
     protected
 
     def reverse_query_value(prefix, property=nil)
-      query_value([ :value, normalize_property(prefix, property), subject])
+      query_value([ :value, normalize_property(prefix, property), normalize_resource(subject)])
     end
 
     def forward_query_value(prefix, property=nil)
-      query_value([ subject, normalize_property(prefix, property), :value])
+      query_value([ normalize_resource(subject), normalize_property(prefix, property), :value])
     end
 
     def query_value(pattern)
-      solutions = query_manager.query(graph_manager, subject, pattern)
+      solutions = query_manager.query(graph_manager, normalize_resource(subject), pattern)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end

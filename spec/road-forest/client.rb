@@ -1,11 +1,18 @@
-describe RoadForest::Server do
+require 'road-forest/client'
+require 'road-forest/server'
+require 'road-forest/test-support'
+
+describe RoadForest::RemoteHost do
+  let :services do
+    RoadForest::ServicesHost.new
+  end
+
   let :test_server do
-    RoadForest::TestServer.new(TestApplication) do |services|
-    end
+    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new(services))
   end
 
   let :client do
-    TestClient.new(test_server)
+    RFTest::Client.new(test_server)
   end
 
   it "should extract data from server responses" do
@@ -19,47 +26,111 @@ describe RoadForest::Server do
   end
 end
 
-class TestApplication < RoadForest::Application
-  def routes
-    :root, [], bundle_model(ReadOnly, Models::Navigation)
-    :unresolved_needs, ["unresolved_needs"], bundle_model(List, Models::UnresolvedNeedsList)
-    :need, ["needs", '*'], bundle_model(LeafItem, Models::Need)
+module RFTest
+  module Vocabulary
+    class LC < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/logical-construct#"); end
+    class Nav < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/site-navigation#"); end
   end
-end
 
-class TestClient
-  def initialize(server)
-    @server = server
-  end
-  attr_reader :server
+  class Application < RoadForest::Application
+    def setup
+      router.add  :root,              [],                    :read_only,     Models::Navigation
+      router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
+      router.add  :need,              ["needs",'*'],         :leaf,          Models::Need
+    end
 
-  def find_needs
-    needs = server.credence_block do |start|
-      start[:lc, "unsatisfied-needs"].all(:lc, "needs").each do |need|
-        new_need = need.build_graph do |need|
-          need[:lc, "path"]
-          need[:lc, "file"]
+    module Models
+      class Navigation < RoadForest::Model
+        def exists?
+          true
         end
-        #Either
-        new_need[[:lc, "file"]] = files.find(new_need[:lc, "path"]).contents
-        server.put(new_need)
 
-        #OR
+        def update(graph)
+          return false
+        end
 
-        file = new_need[:lc, "file"]
-        server.raw_put(file, files.find(new_need[:lc, "path"])) #mime-type?
+        def retreive
+          new_results do |results|
+            graph = results.start_graph(my_path)
+            graph[:rdfs, "Class"] = [:nav, "Menu"]
+            graph.add_node([:nav, :item], "#unresolved") do |unresolved|
+              unresolved[:rdfs, "Class"] = [:nav, "Entry"]
+              unresolved[:nav, "label"] = "Unresolved"
+              unresolved[:nav, "target"] = path_for(:unresolved_needs)
+            end
+          end
+        end
+      end
+
+      class UnresolvedNeedsList < RoadForest::Model
+        def exists?
+          true
+        end
+
+        def update(graph)
+
+        end
+
+        def retreive
+          new_results do |results|
+            results.start_graph(my_path) do |graph|
+              graph.add_list(:lc, "needs") do |list|
+                list.add uri_for(:need, '*' => "test/file")
+              end
+            end
+          end
+        end
+      end
+
+      class Need < RoadForest::Model
+        def exists?
+          true
+        end
+
+        def update(graph)
+
+        end
+
+        def retreive
+          new_results do |results|
+            results.start_graph(my_path) do |graph|
+              graph[[:lc, "path"]] = params.remainder
+              graph[[:lc, "file"]] = "/files/#{params.remainder}"
+            end
+          end
+        end
       end
     end
   end
 
-  def satisfy(need)
-    server.credence_block do |start|
-      new_need = start[:lc, "needs"].build_graph do |needs|
-        needs[:lc, "need_form"].and_descendants(5) #for a depth stop
-      end
+  class Client
+    def initialize(server)
+      @server = server
+    end
+    attr_reader :server
 
-      new_need[[:lc, "path"]] = "Manifest"
-      server.post(new_need)
+    def find_needs
+      needs = server.credence_block do |start|
+        start.all(:nav, "item").find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
+        end.first(:nav, "target").all(:lc, "needs").each do |need|
+          need.build_graph do |need|
+            need[:lc, "path"]
+            need[:lc, "file"]
+          end
+        end
+      end
+    end
+
+    def satisfy(need)
+      server.credence_block do |start|
+        new_need = start[:lc, "needs"].build_graph do |needs|
+          needs[:lc, "need_form"].and_descendants(5) #for a depth stop
+        end
+
+        new_need[[:lc, "path"]] = "Manifest"
+        server.post(new_need)
+      end
     end
   end
 end

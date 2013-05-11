@@ -2,6 +2,8 @@ module RoadForest
   module Resource
     module Role
       module Writable
+        class IncludeOrder < StandardError; end
+
         def self.allowed_methods
           %w[POST PUT DELETE]
         end

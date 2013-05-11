@@ -52,6 +52,7 @@ module RoadForest::RDF
     end
 
     def insert_document(document)
+      p document
       reader = RDF::Reader.for(:content_type => document.content_type) do
         sample = document.body.read(1000)
         document.body.rewind

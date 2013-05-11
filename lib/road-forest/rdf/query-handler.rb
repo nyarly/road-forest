@@ -51,25 +51,25 @@ module RoadForest::RDF
       end
 
       def context_metadata(context)
-        query = RDF::Query.new do
-          do |query|
-            query.pattern [context, :property, :value]
-          end
+        query = RDF::Query.new do |query|
+          query.pattern [context, :property, :value]
         end
         graph_manager.query_unnamed(query).select(:property, :value)
       end
     end
 
     class CommonResults < ContextNotes
-      attr_reader :items
+      attr_reader :items, :query_pattern
 
       def initialize(graph_manager, context_roles, query_pattern)
-        @items = query(query_pattern)
+        @query_pattern = query_pattern
+        @graph_manager = graph_manager
+        @items = query
         super(graph_manager, context_roles, items.map(&:context))
       end
 
       def http_client
-        graph_mananger.http_client
+        graph_manager.http_client
       end
 
       def by_context
@@ -121,7 +121,7 @@ module RoadForest::RDF
       end
     end
 
-    attr_accessor :investigator, :investigation_limit, :credence_policies
+    attr_accessor :investigators, :investigation_limit, :credence_policies
     def initialize
       @investigators = []
       @investigation_limit = 3
@@ -168,7 +168,7 @@ module RoadForest::RDF
           end
           return results.for_context(contexts.first)
         end
-        results = investigator.pursue(results, graph_manager)
+        results = investigator.pursue(results)
       end
       raise NoCredibleResults
     end

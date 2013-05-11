@@ -1,5 +1,11 @@
 require 'road-forest/remote-host'
-require 'addressable'
+require 'road-forest/rdf/graph-manager'
+require 'road-forest/rdf/document'
+require 'addressable/uri'
+require 'webmachine/headers'
+require 'webmachine/request'
+require 'webmachine/response'
+require 'webmachine/decision/flow'
 
 module RoadForest
   module TestSupport
@@ -10,9 +16,56 @@ module RoadForest
       end
 
       def build_graph_manager
-        manager = GraphManager.new
-        manager.default_query_manager = QueryHandler[:http]
+        manager = RDF::GraphManager.new
+        manager.default_query_manager = RDF::QueryHandler[:http]
         manager.http_client = HTTPClient.new(@app, @url)
+        manager
+      end
+    end
+
+    class FSM < ::Webmachine::Decision::FSM
+      #Um, actually *don't* handle exceptions
+      def handle_exceptions
+        yield.tap do |result|
+          p result
+        end
+      end
+
+      def run
+        state = Webmachine::Decision::Flow::START
+        trace_request(request)
+        loop do
+          trace_decision(state)
+          result = handle_exceptions { send(state) }
+          case result
+          when Fixnum # Response code
+            respond(result)
+            break
+          when Symbol # Next state
+            state = result
+          else # You bwoke it
+            raise InvalidResource, t('fsm_broke', :state => state, :result => result.inspect)
+          end
+        end
+      ensure
+        trace_response(response)                                                                                                                           end
+    end
+
+    class DispatcherFacade < BasicObject
+      def initialize(dispatcher)
+        @dispatcher = dispatcher
+      end
+
+      def method_missing(method, *args, &block)
+        @dispatcher.__send__(method, *args, &block)
+      end
+
+      def dispatch(request, response)
+        if resource = @dispatcher.find_resource(request, response)
+          FSM.new(resource, request, response).run
+        else
+          Webmachine.render_error(404, request, response)
+        end
       end
     end
 
@@ -21,17 +74,18 @@ module RoadForest
         @app = app
         @default_url = url
         @exchanges = []
+        @dispatcher = DispatcherFacade.new(@app.dispatcher)
       end
 
       def do_request(method, uri)
         uri = Addressable::URI.parse(uri)
-        uri.host = @default_url unless uri.schema == "https" #XXX
+        uri.host = @default_url unless uri.scheme == "https" #XXX
 
         exchange = Exchange.new
 
         exchange.method = method
         exchange.uri = uri
-        exchange.dispatcher = @app.dispatcher
+        exchange.dispatcher = @dispatcher
 
         @exchanges << exchange
 
@@ -42,7 +96,7 @@ module RoadForest
 
         exchange.do_request
 
-        document = Document.new
+        document = RDF::Document.new
         document.content_type = exchange.response.headers["Content-Type"]
         document.code = exchange.response.code
         document.body_string = exchange.response.body
@@ -68,6 +122,7 @@ module RoadForest
           @res = nil
         end
         attr_accessor :uri, :method, :body, :dispatcher
+        attr_reader :headers, :query_params
 
         # Returns the request object.
         def request
@@ -84,7 +139,7 @@ module RoadForest
           @headers[name] = value
         end
 
-        def headers(hash)
+        def headers=(hash)
           hash.each do |key, value|
             header(key, value)
           end
@@ -94,7 +149,7 @@ module RoadForest
           @query_params[name] = value
         end
 
-        def query_params(hash)
+        def query_params=(hash)
           hash.each do |key, value|
             query_param(key, value)
           end
@@ -102,13 +157,13 @@ module RoadForest
 
         def do_request
           self.uri = Addressable::URI.parse(uri)
-          uri.query_values = uri.query_values.merge(query_params)
+          uri.query_values = (uri.query_values || {}).merge(query_params)
 
 
           @req = Webmachine::Request.new(method, uri, headers, body)
           @res = Webmachine::Response.new
 
-          dispatcher.dispatch(req, res)
+          dispatcher.dispatch(@req, @res)
 
           return @res
         end
