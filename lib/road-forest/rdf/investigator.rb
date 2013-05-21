@@ -18,7 +18,7 @@ module RoadForest::RDF
       case document.code
       when (200..299)
         results.graph_manager.insert_document(document)
-        results.requery
+        results = results.requery
       when (300..399)
         #client should follow redirects
       when (400..499)

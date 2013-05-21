@@ -12,7 +12,7 @@ module RoadForest
     class RemoteHost < ::RoadForest::RemoteHost
       def initialize(app)
         @app = app
-        super("http://road-forest.test-domain.com")
+        super(app.canonical_host)
       end
 
       def build_graph_manager
@@ -27,7 +27,7 @@ module RoadForest
       #Um, actually *don't* handle exceptions
       def handle_exceptions
         yield.tap do |result|
-          p result
+          #p result
         end
       end
 
@@ -100,6 +100,7 @@ module RoadForest
         document.content_type = exchange.response.headers["Content-Type"]
         document.code = exchange.response.code
         document.body_string = exchange.response.body
+        document.source = uri
 
         return document
       end

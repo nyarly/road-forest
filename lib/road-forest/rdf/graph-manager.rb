@@ -53,6 +53,7 @@ module RoadForest::RDF
 
     def insert_document(document)
       p document
+      puts document.body_string
       reader = RDF::Reader.for(:content_type => document.content_type) do
         sample = document.body.read(1000)
         document.body.rewind
@@ -62,12 +63,14 @@ module RoadForest::RDF
     end
 
     def insert_reader(context, reader)
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(context).inspect}"
       context = normalize_resource(context)
       delete_statements(:context => context)
       reader.each_statement do |statement|
         statement.context = context
         record_statement(statement)
       end
+      puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_dump(:nquads))}"
     end
 
     def insert_statement(*args)
@@ -91,7 +94,15 @@ module RoadForest::RDF
     end
     alias add_statement insert_statement
 
+    def replace(original, statement)
+      unless original == statement
+        repository.delete(original)
+        repository.insert(statement)
+      end
+    end
+
     def record_statement(statement)
+      puts; puts "#{__FILE__}:#{__LINE__} => #{[statement, statement.context].inspect}"
       repository.insert(statement)
 
       repository.delete([statement.context, expand_curie([:rf, "impulse"]), nil])
@@ -102,7 +113,6 @@ module RoadForest::RDF
       step = GraphFocus.new
       step.subject = normalize_resource(subject)
       step.graph_manager = self
-      step.query_manager = default_query_manager
       return step
     end
 
@@ -112,14 +122,21 @@ module RoadForest::RDF
       end
     end
 
+    def each_statement(context, &block)
+      @repository.query(:context => context) do |statement|
+        yield statement
+      end
+    end
+
     def query(query)
       context = RDF::Query::Variable.new(:context)
       query.patterns.each do |pattern|
         pattern.context = context
       end
       query.execute(@repository).filter do |solution|
+        puts; puts "#{__FILE__}:#{__LINE__} => #{(solution).inspect}"
         not solution.context.nil?
-      end
+      end.tap{|value| puts "#{__FILE__}:#{__LINE__} => #{{query => value}.inspect}"}
     end
 
     def query_unnamed(query)

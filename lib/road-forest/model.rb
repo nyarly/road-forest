@@ -12,6 +12,10 @@ module RoadForest
       services.router.path_for(route_name, (params || self.params).to_hash)
     end
 
+    def canonical_host
+      services.canonical_host
+    end
+
     def my_path
       path_for(route_name, params)
     end

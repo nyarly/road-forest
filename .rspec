@@ -5,3 +5,6 @@
 -I ~/ruby/rspec-config
 -I ./lib
 -r alert-after-running
+--pattern spec/**/*.rb
+-I spec_support
+-r helper.rb

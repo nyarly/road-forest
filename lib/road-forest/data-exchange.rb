@@ -43,7 +43,28 @@ module RoadForest
 
     def start_graph(resource)
       @graph ||= RDF::GraphManager.new
-      return @graph.start_walk(resource)
+      return @graph.start(resource)
+    end
+
+    def absolutize(root_uri)
+      @graph.each_statement(:local) do |statement|
+        original = statement.dup
+        if ::RDF::URI === statement.subject and statement.subject.relative?
+          statement.subject = root_uri.join(statement.subject)
+        end
+
+        if statement.predicate.relative?
+          statement.predicate = root_uri.join(statement.predicate)
+        end
+
+        if ::RDF::URI === statement.object and statement.object.relative?
+          statement.object = root_uri.join(statement.object)
+        end
+
+        if statement != original
+          @graph.replace(original, statement)
+        end
+      end
     end
   end
 end

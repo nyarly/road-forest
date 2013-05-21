@@ -1,39 +1,6 @@
 require 'json/ld'
 
 module RoadForest
-  #Also: "blob" resource
-  #Not yourself - simple file service
-  #  allowed_methods - GET, HEAD
-  #  post_is_create: default
-  #  process_post: default
-  #  content_types_accepted: defaults
-  #Yourself - file transfer endpoint
-  #  allowed_methods - GET, HEAD, POST, PUT, DELETE
-  #  post_is_create: true
-  #  process_post: default (unused)
-  #  content_types_accepted: @model.update(params, blob) - update vs. create?
-
-  #Other concerns:
-  #Content type handling (iow: RDF<->text format)
-  #Authentication
-  #Authorization
-  #Content encoding (gzip, compress)
-  #Charsets
-  #Languages
-  #Exception handling
-  #
-  #HTML related:
-  #  Method coercion (POST that means DELETE/PUT)
-  #  Params -> graph
-  #  Form rendering
-  #
-  #Cacheing - last_modified, expires, etag(+ W/)
-  #
-  #
-  #Blending concern-focused modules
-  #e.g. content_types_accepted - quality metrics, accept variants...
-  #variance, conflict, options are related to the above (i.e. blended concerns)
-
   module Resource
     module ContentType
       def self.types_provided(modules)
@@ -66,15 +33,21 @@ module RoadForest
         end
 
         def self.from_graph(rdf)
-          JSON::LD::fromRDF(rdf)
+          JSON::LD::Writer.buffer do |writer|
+            rdf.each_statement(:local) do |statement|
+              writer << statement
+            end
+          end
         end
 
         def self.to_graph(source)
-          graph = JSON::LD::API.toRDF(source)
+          reader = JSON::LD::Reader.new(source)
+          reader.graph
         end
 
         def to_jsonld
-          JSON::from_graph(@model.retreive)
+          result = retreive_model
+          JSONLD::from_graph(result.graph)
         end
 
         def from_jsonld

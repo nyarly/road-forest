@@ -132,8 +132,17 @@ module RoadForest::RDF
       graph_manager.delete_statements([subject, normalize_property(property, extra)])
     end
 
-    def node_at(property, url=nil)
-      wrap_node(set(property, normalize_resource(url) || RDF::Node.new))
+    def set_node(property, url=nil)
+      node = wrap_node(set(property, normalize_resource(url) || RDF::Node.new))
+      yield node if block_given?
+      node
+    end
+    alias node_at set_node
+
+    def add_node(property, url=nil)
+      node = wrap_node(add(property, normalize_resource(url) || RDF::Node.new))
+      yield node if block_given?
+      node
     end
 
     protected

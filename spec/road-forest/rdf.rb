@@ -17,7 +17,7 @@ describe RoadForest::RDF do
     let :query_manager do
       RoadForest::RDF::QueryHandler.new do |handler|
         handler.policy_list(:may_subject)
-        handler.investigator = RoadForest::RDF::NullInvestigator.new
+        handler.investigators = [RoadForest::RDF::NullInvestigator.new]
       end
     end
 
@@ -128,17 +128,17 @@ describe RoadForest::RDF do
     it "should be able to add properties with []=" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query do |query|
+      graph_manager.query(RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end.should_not be_empty
+      end).should_not be_empty
     end
 
     it "should be able to add properties with set" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query do |query|
+      graph_manager.query(RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end.should_not be_empty
+      end).should_not be_empty
     end
   end
 

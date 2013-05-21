@@ -8,7 +8,7 @@ describe RoadForest::RemoteHost do
   end
 
   let :test_server do
-    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new(services))
+    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new("http://road-forest.test-domain.com/", services))
   end
 
   let :client do
@@ -24,6 +24,8 @@ describe RoadForest::RemoteHost do
       pattern(:subject, [:lc, "file"], nil)
     end
   end
+
+  it "should return correct content-type"
 end
 
 module RFTest
@@ -49,7 +51,7 @@ module RFTest
           return false
         end
 
-        def retreive
+        def retrieve
           new_results do |results|
             graph = results.start_graph(my_path)
             graph[:rdfs, "Class"] = [:nav, "Menu"]
@@ -71,7 +73,7 @@ module RFTest
 
         end
 
-        def retreive
+        def retrieve
           new_results do |results|
             results.start_graph(my_path) do |graph|
               graph.add_list(:lc, "needs") do |list|
@@ -91,7 +93,7 @@ module RFTest
 
         end
 
-        def retreive
+        def retrieve
           new_results do |results|
             results.start_graph(my_path) do |graph|
               graph[[:lc, "path"]] = params.remainder
@@ -111,9 +113,9 @@ module RFTest
 
     def find_needs
       needs = server.credence_block do |start|
-        start.all(:nav, "item").find do |nav_item|
+        start.all(:nav, "item").tap{|value| puts "#{__FILE__}:#{__LINE__} => #{(value).inspect}"}.find do |nav_item|
           nav_item[:nav, "label"] == "Unresolved"
-        end.first(:nav, "target").all(:lc, "needs").each do |need|
+        end.all(:lc, "needs").each do |need|
           need.build_graph do |need|
             need[:lc, "path"]
             need[:lc, "file"]

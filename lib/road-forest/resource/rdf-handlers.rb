@@ -50,6 +50,13 @@ module RoadForest
         @model.expires
       end
 
+      def retrieve_model
+        results = @model.retrieve
+        results.absolutize(@model.canonical_host)
+        results
+      end
+      alias retreive_model retrieve_model
+
 #      def known_methods
 #        super + ["PATCH"]
 #      end
