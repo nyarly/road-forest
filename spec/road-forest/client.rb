@@ -19,13 +19,17 @@ describe RoadForest::RemoteHost do
     client.find_needs
     client.needs.should_not be_empty
 
-    test_server.should have_pattern do
+    test_server.should match_query do
       pattern(:subject, [:lc, "path"], nil)
       pattern(:subject, [:lc, "file"], nil)
     end
   end
 
-  it "should return correct content-type"
+  it "should return correct content-type" do
+    test_server.http_exchanges.each do |exchange|
+      exchange.response["Content-Type"].should == "application/json"
+    end
+  end
 end
 
 module RFTest
@@ -77,7 +81,7 @@ module RFTest
           new_results do |results|
             results.start_graph(my_path) do |graph|
               graph.add_list(:lc, "needs") do |list|
-                list.add uri_for(:need, '*' => "test/file")
+                list << path_for(:need, '*' => "test/file")
               end
             end
           end
@@ -109,17 +113,16 @@ module RFTest
     def initialize(server)
       @server = server
     end
-    attr_reader :server
+    attr_reader :server, :needs
+
 
     def find_needs
-      needs = server.credence_block do |start|
-        start.all(:nav, "item").tap{|value| puts "#{__FILE__}:#{__LINE__} => #{(value).inspect}"}.find do |nav_item|
+      server.credence_block do |start|
+        @needs = []
+        start.all(:nav, "item").find do |nav_item|
           nav_item[:nav, "label"] == "Unresolved"
-        end.all(:lc, "needs").each do |need|
-          need.build_graph do |need|
-            need[:lc, "path"]
-            need[:lc, "file"]
-          end
+        end.first(:nav, "target").first(:lc, "needs").as_list.each do |need|
+          @needs << [need[:lc, "path"], need[:lc, "file"]]
         end
       end
     end

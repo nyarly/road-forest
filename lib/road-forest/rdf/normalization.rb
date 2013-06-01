@@ -32,7 +32,7 @@ module RoadForest::RDF
       when /^_:/
         from = RDF::Resource.new(from)
       when String
-        from = uri(from)
+        from = interned_uri(from)
       when Symbol
         from = RDF::Node.new(from)
       else
@@ -47,7 +47,7 @@ module RoadForest::RDF
       when nil
       when RDF::URI
       else
-        from = uri(from)
+        from = interned_uri(from)
       end
       return from
     end
@@ -68,7 +68,7 @@ module RoadForest::RDF
       case from
       when Array
         prefix, property = *from
-        return uri(Vocabs[prefix.to_s][property])
+        return interned_uri(Vocabs[prefix.to_s][property])
       else
         return from
       end
@@ -95,6 +95,11 @@ module RoadForest::RDF
       nil
     end
 
+    def interned_uri(value)
+
+      RDF::URI.intern(uri(value))
+    end
+
     def uri(value)
       if root_url
         value = root_url.join(value)
@@ -104,7 +109,6 @@ module RoadForest::RDF
 
       value.validate!
       value.canonicalize!
-      value = RDF::URI.intern(value)
 
       value
     end

@@ -2,6 +2,9 @@ require 'road-forest/rdf'
 require 'road-forest/rdf/document'
 require 'rdf/rdfa'
 
+require 'webmachine/application'
+require 'road-forest/resource/rdf-handlers'
+
 describe RoadForest::RDF do
   let :graph_manager do
     RoadForest::RDF::GraphManager.new

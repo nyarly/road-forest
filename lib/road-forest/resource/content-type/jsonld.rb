@@ -1,3 +1,5 @@
+#@require 'rdf/rdfa' #XXX Otherwise json-ld grabs RDFa documents. Awaiting fix
+#upstream
 require 'json/ld'
 
 module RoadForest
@@ -33,6 +35,8 @@ module RoadForest
         end
 
         def self.from_graph(rdf)
+          #puts; puts "#{__FILE__}:#{__LINE__} =>
+          ##{(rdf.graph_dump(:ntriples)).inspect}"
           JSON::LD::Writer.buffer do |writer|
             rdf.each_statement(:local) do |statement|
               writer << statement

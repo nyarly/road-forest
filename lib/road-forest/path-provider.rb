@@ -12,7 +12,7 @@ module RoadForest
     # @return [String] the URL
     def path_for(name, vars = {})
       route = @dispatcher.route_for_name(name)
-      route.build_path(vars)
+      ::RDF::URI.parse(route.build_path(vars))
     end
   end
 end

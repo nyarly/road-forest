@@ -7,6 +7,63 @@ module RoadForest::RDF
   class GraphManager
     include Normalization
 
+    #The interface supported by ::RDF::Graph
+    include ::RDF::Countable
+    include ::RDF::Durable
+    include ::RDF::Enumerable
+    include ::RDF::Mutable
+    include ::RDF::Queryable
+    include ::RDF::Resource
+
+    #nb: methods Graph overrides:
+    #[[:graph?
+    #[RDF::Resource
+    #RDF::Term
+    #RDF::Value]]
+    #
+    #[:empty?
+    #[RDF::Enumerable
+    #RDF::Countable]]
+    #
+    #[:contexts
+    #[RDF::Enumerable]]
+    #
+    #[:delete_statement
+    #[RDF::Mutable]]
+    #
+    #[:count
+    #[RDF::Queryable
+    #
+    #RDF::Enumerable
+    #RDF::Countable
+    #Enumerable]]
+    #
+    #[:each_graph
+    #[RDF::Enumerable]]
+    #
+    #[:insert_statement
+    #[RDF::Mutable
+    #RDF::Writable]]
+    #
+    #[:load!
+    #[RDF::Mutable]]
+    #
+    #[:query_pattern
+    #[RDF::Queryable]]
+    #
+    #[:has_statement?
+    #[RDF::Enumerable]]
+    #
+    #[:durable?
+    #[RDF::Durable]]]
+    #
+    #Notes: currently thinking that the GM should respond to queries of all
+    #kinds with credible responses. Clients that want to prevent network access
+    #should have an interface to get a "no investigation" GM (with same repo)
+    #There's implications for "each" here - since we shouldn't leak less
+    #credible statements... and current design separates query handler
+
+
     attr_reader :repository, :current_impulse, :local_context_node
     attr_accessor :default_query_manager, :debug_io, :http_client
 
@@ -19,7 +76,7 @@ module RoadForest::RDF
     end
 
     def next_impulse
-      return if quiet_impulse?
+      return if !@current_impulse.nil? and quiet_impulse?
       #mark ended?
       #chain impulses?
       @current_impulse = RDF::Node.new
@@ -28,7 +85,7 @@ module RoadForest::RDF
     end
 
     def quiet_impulse?
-      repository.query([nil, nil, @current_impulse, false]).empty?
+      repository.query([nil, nil, @current_impulse, false]).to_a.empty?
     end
 
     #repo cleanup - expired graphs
@@ -51,9 +108,21 @@ module RoadForest::RDF
       repository.delete(pattern)
     end
 
+    def named_graph(context)
+      ::RDF::Graph.new(context, :data => repository)
+    end
+
+    def named_list(context, values = nil)
+      ::RDF::List.new(nil, named_graph(context), values)
+    end
+
+    def create_list(values = nil)
+      named_list(local_context_node, values)
+    end
+
     def insert_document(document)
-      p document
-      puts document.body_string
+      #puts; puts "#{__FILE__}:#{__LINE__} => #{(document).inspect}"
+      #puts document.body_string
       reader = RDF::Reader.for(:content_type => document.content_type) do
         sample = document.body.read(1000)
         document.body.rewind
@@ -62,18 +131,24 @@ module RoadForest::RDF
       insert_reader(document.source, reader)
     end
 
+    def normalize_context(term)
+      term = uri(term)
+      term.fragment = nil
+      term
+    end
+
     def insert_reader(context, reader)
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(context).inspect}"
-      context = normalize_resource(context)
+      #puts; puts "#{__FILE__}:#{__LINE__} => #{(context).inspect}"
+      context = normalize_context(context)
       delete_statements(:context => context)
       reader.each_statement do |statement|
         statement.context = context
         record_statement(statement)
       end
-      puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_dump(:nquads))}"
+      #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_dump(:nquads))}"
     end
 
-    def insert_statement(*args)
+    def add_statement(*args)
       case args.length
       when 1
         subject, predicate, object, context = *args.first
@@ -92,21 +167,27 @@ module RoadForest::RDF
 
       record_statement(normalize_statement(subject, predicate, object, context))
     end
-    alias add_statement insert_statement
+
+    def insert_statement(statement)
+      repository.insert(statement)
+
+      repository.delete([statement.context, expand_curie([:rf, "impulse"]), nil])
+      repository.insert(normalize_statement(statement.context, [:rf, "impulse"], current_impulse, nil))
+    end
+    alias record_statement insert_statement
+
+    def delete_statement(statement)
+      repository.query(statement) do |statement|
+        next if statement.context.nil?
+        repository.delete(statement)
+      end
+    end
 
     def replace(original, statement)
       unless original == statement
         repository.delete(original)
         repository.insert(statement)
       end
-    end
-
-    def record_statement(statement)
-      puts; puts "#{__FILE__}:#{__LINE__} => #{[statement, statement.context].inspect}"
-      repository.insert(statement)
-
-      repository.delete([statement.context, expand_curie([:rf, "impulse"]), nil])
-      repository.insert(normalize_statement(statement.context, [:rf, "impulse"], current_impulse, nil))
     end
 
     def start(subject)
@@ -116,27 +197,51 @@ module RoadForest::RDF
       return step
     end
 
-    def find_statements(pattern)
-      @repository.query(pattern).find_all do |statement|
-        not statement.context.nil?
-      end
-    end
-
     def each_statement(context, &block)
       @repository.query(:context => context) do |statement|
         yield statement
       end
     end
 
-    def query(query)
-      context = RDF::Query::Variable.new(:context)
+    def durable?
+      @repository.durable?
+    end
+
+    #XXX Credence? Default context?
+    def each(&block)
+      if @repository.respond_to?(:query)
+        @repository.query(:context => false, &block)
+      elsif @repository.respond_to?(:each)
+        @repository.each(&block)
+      else
+        @repository.to_a.each(&block)
+      end
+    end
+
+    def context_variable
+      @context_variable ||= RDF::Query::Variable.new(:context)
+    end
+
+    def query_execute(query, &block)
       query.patterns.each do |pattern|
-        pattern.context = context
+        pattern.context = context_variable
       end
       query.execute(@repository).filter do |solution|
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(solution).inspect}"
         not solution.context.nil?
-      end.tap{|value| puts "#{__FILE__}:#{__LINE__} => #{{query => value}.inspect}"}
+      end.each(&block)
+    end
+
+    def query_pattern(pattern, &block)
+      pattern = pattern.dup
+      pattern.context = context_variable
+      @repository.query(pattern) do |statement|
+        next if statement.context.nil?
+        yield statement if block_given?
+      end
+    end
+
+    def unnamed_graph
+      ::RDF::Graph.new(nil, :data => @repository)
     end
 
     def query_unnamed(query)

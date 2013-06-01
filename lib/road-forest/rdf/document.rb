@@ -5,7 +5,7 @@ module RoadForest::RDF
   class Document
     attr_accessor :content_type, :code, :source, :root_url, :body, :body_string
     def initialize
-      @context_type = "text/html"
+      @content_type = "text/html"
       @code = 200
       @body_string = ""
     end

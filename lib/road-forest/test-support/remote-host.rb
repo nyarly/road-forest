@@ -21,6 +21,10 @@ module RoadForest
         manager.http_client = HTTPClient.new(@app, @url)
         manager
       end
+
+      def http_exchanges
+        @graph.http_client.exchanges
+      end
     end
 
     class FSM < ::Webmachine::Decision::FSM
@@ -76,10 +80,11 @@ module RoadForest
         @exchanges = []
         @dispatcher = DispatcherFacade.new(@app.dispatcher)
       end
+      attr_reader :exchanges
 
       def do_request(method, uri)
         uri = Addressable::URI.parse(uri)
-        uri.host = @default_url unless uri.scheme == "https" #XXX
+        uri = @default_url.join(uri)
 
         exchange = Exchange.new
 

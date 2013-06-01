@@ -5,18 +5,18 @@ module RoadForest
     def initialize
       @path_info = {}
       @query_params = {}
-      @remainder = []
+      @path_tokens = []
       yield self if block_given?
     end
-    attr_accessor :path_info, :query_params, :remainder
+    attr_accessor :path_info, :query_params, :path_tokens
 
     def [](field_name)
-      return remainder if field_Name == '*'
+      return path_tokens if field_Name == '*'
       @path_info[field_name] || @query_params[field_name]
     end
 
     def fetch(field_name)
-      return remainder if field_Name == '*'
+      return path_tokens if field_Name == '*'
       @path_info[field_name] || @query_params.fetch(field_name)
     end
 
@@ -26,8 +26,12 @@ module RoadForest
       end
     end
 
+    def remainder
+      @remainder = @path_tokens.join("/")
+    end
+
     def to_hash
-      (query_params||{}).merge(path_info||{}).merge('*' => remainder)
+      (query_params||{}).merge(path_info||{}).merge('*' => path_tokens)
     end
   end
 
@@ -43,7 +47,9 @@ module RoadForest
 
     def start_graph(resource)
       @graph ||= RDF::GraphManager.new
-      return @graph.start(resource)
+      focus = @graph.start(resource)
+      yield focus if block_given?
+      return focus
     end
 
     def absolutize(root_uri)

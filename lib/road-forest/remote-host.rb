@@ -7,7 +7,7 @@ module RoadForest
 
   class RemoteHost
     def initialize(well_known_url)
-      @url = well_known_url
+      @url = ::RDF::URI.parse(well_known_url)
       @graph = build_graph_manager
     end
 
@@ -25,11 +25,11 @@ module RoadForest
       focus.graph_manager = @graph
       focus.subject = @url
 
-      @graph.next_impulse
       begin
+        @graph.next_impulse
         focus.reset_promises
         yield focus
-      end while @graph.quiet_impulse?
+      end until @graph.quiet_impulse?
 
       focus.fulfill_promises
     end
@@ -73,14 +73,13 @@ module RoadForest
 
   class CredenceFocus < RDF::GraphFocus
     def reset_promises
-
     end
 
     def fulfill_promises
     end
 
-    def sub_graph
-      graph_builder = GraphBuilder.new
+    def build_graph
+      graph_builder = RDF::GraphBuilder.new
 
       credence_block do
         yield graph_builder
@@ -88,11 +87,5 @@ module RoadForest
 
       return graph_builder.focus
     end
-  end
-
-  class GraphBuilder
-
-
-
   end
 end

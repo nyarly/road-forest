@@ -4,8 +4,67 @@ require 'road-forest/rdf/normalization'
 require 'road-forest/rdf/creates-graph'
 
 module RoadForest::RDF
+  class GraphCollection
+    include Enumerable
+  end
+
+  class MultivaluedProperty < GraphCollection
+    attr_reader :graph, :subject, :property
+    def initialize(graph, subject, property)
+      @graph, @subject, @propery = graph, subject, property
+    end
+
+    def values
+      query_value(graph, subject, property)
+    end
+
+    def each
+      if block_given?
+        values.each do |value|
+          yield unwrap_value(value)
+        end
+      else
+        values.each
+      end
+    end
+
+    def add(value)
+      add_statement(subject, property, value)
+    end
+  end
+
+  module FocusWrapping
+    def wrap_node(value)
+      next_step = GraphFocus.new
+      next_step.subject = value
+      next_step.graph_manager = graph_manager
+      next_step
+    end
+
+    def unwrap_value(value)
+      if value.respond_to? :object
+        value.object
+      else
+        wrap_node(value)
+      end
+    end
+  end
+
+  class FocusList < ::RDF::List
+    include FocusWrapping
+
+    alias graph_manager graph
+
+    def each
+      super do |value|
+        yield unwrap_value(value)
+      end
+    end
+  end
+
   class GraphReading
     include Normalization
+    include FocusWrapping
 
     attr_accessor :graph_manager, :subject
     alias rdf subject
@@ -52,6 +111,10 @@ module RoadForest::RDF
       return reverse_query_value(prefix, property)
     end
 
+    def as_list
+      FocusList.new(@subject, @graph_manager)
+    end
+
     protected
     def single_or_enum(values)
       case values.length
@@ -61,21 +124,6 @@ module RoadForest::RDF
         return values.first
       else
         return values.enum_for(:each)
-      end
-    end
-
-    def wrap_node(value)
-      next_step = self.class.new
-      next_step.subject = value
-      next_step.graph_manager = graph_manager
-      next_step
-    end
-
-    def unwrap_value(value)
-      if value.respond_to? :object
-        value.object
-      else
-        wrap_node(value)
       end
     end
 
@@ -143,6 +191,13 @@ module RoadForest::RDF
       node = wrap_node(add(property, normalize_resource(url) || RDF::Node.new))
       yield node if block_given?
       node
+    end
+
+    def add_list(property, extra=nil)
+      list = graph_manager.create_list
+      graph_manager.add_statement(subject, normalize_property(property, extra), list.subject)
+      yield list if block_given?
+      return list
     end
 
     protected

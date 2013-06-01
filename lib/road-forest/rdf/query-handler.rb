@@ -74,7 +74,7 @@ module RoadForest::RDF
 
       def by_context
         @by_context ||= Hash[contexts.map do |context|
-          [context, @items.filter do |item|
+          [context, @items.find_all do |item|
             item.context == context
           end]
         end]
@@ -113,9 +113,6 @@ module RoadForest::RDF
       alias solutions items
 
       def query
-        puts; puts "#{__FILE__}:#{__LINE__} => \n#{(query_pattern).inspect}"
-        puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_manager.graph_dump(:ntriples))}\n\n"
-
         graph_manager.query(query_pattern)
       end
 
@@ -161,7 +158,6 @@ module RoadForest::RDF
 
     def check(results)
       investigators.each do |investigator|
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(results.items).inspect}"
         catch :not_credible do
           contexts = results.contexts
           credence_policies.each do |policy|
