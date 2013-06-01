@@ -26,8 +26,10 @@ describe RoadForest::RemoteHost do
   end
 
   it "should return correct content-type" do
+    client.find_needs
+    test_server.http_exchanges.should_not be_empty
     test_server.http_exchanges.each do |exchange|
-      exchange.response["Content-Type"].should == "application/json"
+      exchange.response.headers["Content-Type"].should == "application/ld+json"
     end
   end
 end
