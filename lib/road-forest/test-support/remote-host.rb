@@ -16,8 +16,7 @@ module RoadForest
       end
 
       def build_graph_manager
-        manager = RDF::GraphManager.new
-        manager.default_query_manager = RDF::QueryHandler[:http]
+        manager = RDF::GraphManager.http
         manager.http_client = HTTPClient.new(@app, @url)
         manager
       end

@@ -26,10 +26,9 @@ HTML related:
 
 Cacheing - last_modified, expires, etag(+ W/)
 
-
-Blending concern-focused modules
-e.g. content_types_accepted - quality metrics, accept variants...
-variance, conflict, options are related to the above (i.e. blended concerns)
+Blending concern-focused modules e.g. content_types_accepted - quality metrics,
+accept variants...  variance, conflict, options are related to the above (i.e.
+blended concerns)
 
 test build_graph
 
@@ -42,3 +41,26 @@ property replace
 repo autovacuum
 
 collect vocabs used to generate a graph - build curies for representations that work that way
+
+*** Pure Mad Science ***
+
+Statistical front-loading - based on human definitions of resource graphs, and
+emperical collection of client behavior (e.g. GET resourceB, Referer:
+resourceA, (X-)Triggering-Property: propC), determine properties to front-load
+into requests for resourceA to reduce the likelihood of subsequent request for
+B. Contributing factors include the size of the extra data, impact on cacheing,
+actual impact on subsequent requests (since propC shadows some non-negative
+number of other properties we need about resourceB.)
+
+Consider case of an list of users page - client wants names and roles for all
+users. So UserList -> User1,User2,User3 etc because of foaf:name and also
+authn:role. Once we front load both foaf:name and authn:name, UserList ->
+User17, because that's the particular user we want. But: foaf:name makes not
+impact by itself (except to change the triggering property), and both aren't an
+absolute impact. On the other extreme, front-loading everything from User into
+UserList probably stops requests for User17, but the network transfer is
+greater as a result.
+
+Certainly, there's a tendancy for everything to be front loaded, and as clients
+change we might need to experimentally roll back a front-loading to see if that
+triggers more requests.

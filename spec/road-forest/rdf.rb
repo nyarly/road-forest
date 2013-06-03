@@ -7,23 +7,15 @@ require 'road-forest/resource/rdf-handlers'
 
 describe RoadForest::RDF do
   let :graph_manager do
-    RoadForest::RDF::GraphManager.new
+    RoadForest::RDF::GraphManager.new do |handler|
+      handler.policy_list(:may_subject)
+      handler.investigators = [RoadForest::RDF::NullInvestigator.new]
+    end
   end
 
   #merging graphs
 
   describe RoadForest::RDF::GraphManager do
-    before :each do
-      graph_manager.default_query_manager = query_manager
-    end
-
-    let :query_manager do
-      RoadForest::RDF::QueryHandler.new do |handler|
-        handler.policy_list(:may_subject)
-        handler.investigators = [RoadForest::RDF::NullInvestigator.new]
-      end
-    end
-
     let :root_body do
       manager = RoadForest::RDF::GraphManager.new
       step = manager.start("http://lrdesign.com/test-rdf")

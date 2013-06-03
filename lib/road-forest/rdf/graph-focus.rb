@@ -41,8 +41,8 @@ module RoadForest::RDF
       next_step
     end
 
-    def unwrap_value(value)
-      if value.respond_to? :object
+  def unwrap_value(value)
+    if value.respond_to? :object
         value.object
       else
         wrap_node(value)
@@ -74,16 +74,12 @@ module RoadForest::RDF
       @subject = nil
     end
 
-    def query_manager
-      graph_manager.default_query_manager
-    end
-
     def forward_properties
-      query_properties( [ normalize_resource(subject), :property, :value ] )
+      query_properties( ::RDF::Query.new{|q| q.pattern [ normalize_resource(subject), :property, :value ]} )
     end
 
     def reverse_properties
-      query_properties( [ :reverse, :property, normalize_resource(subject) ] )
+      query_properties( ::RDF::Query.new{|q| q.pattern [ :reverse, :property, normalize_resource(subject) ]} )
     end
 
     def get(prefix, property = nil)
@@ -127,8 +123,8 @@ module RoadForest::RDF
       end
     end
 
-    def query_properties(pattern)
-      solutions = query_manager.query(graph_manager, normalize_resource(subject), pattern)
+    def query_properties(query)
+      solutions = graph_manager.credible_query(normalize_resource(subject), query)
       solutions.map do |solution|
         prop = solution.property
         if qname = prop.qname
@@ -203,15 +199,15 @@ module RoadForest::RDF
     protected
 
     def reverse_query_value(prefix, property=nil)
-      query_value([ :value, normalize_property(prefix, property), normalize_resource(subject)])
+      query_value(::RDF::Query.new{|q| q.pattern [ :value, normalize_property(prefix, property), normalize_resource(subject)]})
     end
 
     def forward_query_value(prefix, property=nil)
-      query_value([ normalize_resource(subject), normalize_property(prefix, property), :value])
+      query_value(::RDF::Query.new{|q| q.pattern [ normalize_resource(subject), normalize_property(prefix, property), :value]})
     end
 
     def query_value(pattern)
-      solutions = query_manager.query(graph_manager, normalize_resource(subject), pattern)
+      solutions = graph_manager.credible_query(normalize_resource(subject), pattern)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end

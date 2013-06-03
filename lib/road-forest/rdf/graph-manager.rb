@@ -1,7 +1,11 @@
 require 'rdf'
 require 'road-forest/rdf/graph-focus'
-require 'road-forest/rdf/query-handler'
 require 'road-forest/rdf/vocabulary'
+
+require 'road-forest/rdf/credence'
+require 'road-forest/rdf/credible-results'
+require 'road-forest/rdf/investigator'
+
 
 module RoadForest::RDF
   class GraphManager
@@ -14,6 +18,22 @@ module RoadForest::RDF
     include ::RDF::Mutable
     include ::RDF::Queryable
     include ::RDF::Resource
+
+    class << self
+      def simple
+        self.new do |handler|
+          handler.policy_list(:must_local, :may_local)
+          handler.investigators = [NullInvestigator.new]
+        end
+      end
+
+      def http
+        self.new do |handler|
+          handler.policy_list(:may_subject, :any) #XXX
+          handler.investigators = [HTTPInvestigator.new, NullInvestigator.new]
+        end
+      end
+    end
 
     #nb: methods Graph overrides:
     #[[:graph?
@@ -65,14 +85,31 @@ module RoadForest::RDF
 
 
     attr_reader :repository, :current_impulse, :local_context_node
-    attr_accessor :default_query_manager, :debug_io, :http_client
+    attr_accessor :debug_io, :http_client
+    attr_accessor :investigators, :investigation_limit, :credence_policies
 
     def initialize(repo = nil)
+      @investigators = []
+      @investigation_limit = 3
+      @credence_policies = []
       @repository = repo || RDF::Repository.new
       @debug_io = nil
-      @default_query_manager = QueryHandler[:simple]
       @local_context_node = RDF::Node.new(:local)
       next_impulse
+      yield self if block_given?
+    end
+
+    def policy_list(*names)
+      self.credence_policies = names.map do |name|
+        Credence.policy(name)
+      end
+    end
+
+    def context_roles(subject_uri)
+      {
+        :local => local_context_node,
+        :subject => subject_uri
+      }
     end
 
     def next_impulse
@@ -238,6 +275,28 @@ module RoadForest::RDF
         next if statement.context.nil?
         yield statement if block_given?
       end
+    end
+
+    def credible_query(subject, query)
+      results = QueryResults.new(self, context_roles(subject), query)
+      results = check(results)
+    end
+
+    def check(results)
+      investigators.each do |investigator|
+        catch :not_credible do
+          contexts = results.contexts
+          credence_policies.each do |policy|
+            contexts = policy.credible(contexts, results)
+            if contexts.empty?
+              throw :not_credible
+            end
+          end
+          return results.for_context(contexts.first)
+        end
+        results = investigator.pursue(results)
+      end
+      raise NoCredibleResults
     end
 
     def unnamed_graph
