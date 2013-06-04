@@ -20,6 +20,10 @@ module RoadForest
       path_for(route_name, params)
     end
 
+    def my_url
+      Addressable::URI.parse(canonical_host.to_s).join(my_path).to_s
+    end
+
     def reset
     end
 

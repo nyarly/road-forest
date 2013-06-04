@@ -30,7 +30,7 @@ module RoadForest
       #Um, actually *don't* handle exceptions
       def handle_exceptions
         yield.tap do |result|
-          #p result
+          #p result #ok
         end
       end
 

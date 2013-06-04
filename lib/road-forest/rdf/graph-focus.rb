@@ -38,6 +38,7 @@ module RoadForest::RDF
       next_step = GraphFocus.new
       next_step.subject = value
       next_step.graph_manager = graph_manager
+      next_step.root_url = self.root_url #XXX
       next_step
     end
 
@@ -55,6 +56,8 @@ module RoadForest::RDF
 
     alias graph_manager graph
 
+    attr_accessor :root_url
+
     def each
       super do |value|
         yield unwrap_value(value)
@@ -66,12 +69,13 @@ module RoadForest::RDF
     include Normalization
     include FocusWrapping
 
-    attr_accessor :graph_manager, :subject
+    attr_accessor :graph_manager, :subject, :root_url
     alias rdf subject
 
     def initialize
       @graph_manager = nil
       @subject = nil
+      @root_url = nil
     end
 
     def forward_properties

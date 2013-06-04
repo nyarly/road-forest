@@ -230,6 +230,7 @@ module RoadForest::RDF
     def start(subject)
       step = GraphFocus.new
       step.subject = normalize_resource(subject)
+      step.root_url = step.subject
       step.graph_manager = self
       return step
     end

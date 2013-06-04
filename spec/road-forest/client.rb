@@ -59,7 +59,7 @@ module RFTest
 
         def retrieve
           new_results do |results|
-            graph = results.start_graph(my_path)
+            graph = results.start_graph(my_url)
             graph[:rdfs, "Class"] = [:nav, "Menu"]
             graph.add_node([:nav, :item], "#unresolved") do |unresolved|
               unresolved[:rdfs, "Class"] = [:nav, "Entry"]

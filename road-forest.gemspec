@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.files		= %w[
   ]
 
-  spec.test_file        = "spec_help/gem_test_suite.rb"
+  spec.test_file        = "spec_support/gem_test_suite.rb"
   spec.licenses = ["MIT"]
   spec.require_paths = %w[lib/]
   spec.rubygems_version = "1.3.5"
@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.rdoc_options	+= ["--title", "#{spec.name}-#{spec.version} Documentation"]
 
   spec.add_dependency("rdf", ">= 1.0.4")
-  spec.add_dependency("json-ld", "~> 0.1.0")
+  spec.add_dependency("json-ld", "~> 1.0.0")
 
   spec.add_dependency("webmachine", ">= 1.1.0")
   spec.add_dependency("addressable", "~> 2.2.8")
