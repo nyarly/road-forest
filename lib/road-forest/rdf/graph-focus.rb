@@ -36,9 +36,9 @@ module RoadForest::RDF
   module FocusWrapping
     def wrap_node(value)
       next_step = GraphFocus.new
+      next_step.root_url = self.root_url #XXX
       next_step.subject = value
       next_step.graph_manager = graph_manager
-      next_step.root_url = self.root_url #XXX
       next_step
     end
 
@@ -76,6 +76,14 @@ module RoadForest::RDF
       @graph_manager = nil
       @subject = nil
       @root_url = nil
+    end
+
+    def subject=(target)
+      @subject = target
+      case target
+      when ::RDF::URI
+        @root_url = target
+      end
     end
 
     def forward_properties
