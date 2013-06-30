@@ -29,7 +29,7 @@ module RoadForest
       end
 
       def failure_message_for_should
-        "expected #{actual.inspect} to have the same elements as #{expected.inspect}"
+        "expected #{@actual.inspect} to have the same elements as #{@expected.inspect}"
       end
     end
 
@@ -63,4 +63,5 @@ end
 
 RSpec::configure do |config|
   config.include RoadForest::Testing::MatcherMethods
+  config.include RoadForest::Testing::HelperMethods
 end

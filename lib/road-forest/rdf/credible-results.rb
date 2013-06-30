@@ -60,7 +60,7 @@ module RoadForest::RDF
     end
 
     def query
-      graph_manager.query(query_pattern)
+      graph_manager.credible_query(query_pattern)
     end
 
     def requery

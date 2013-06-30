@@ -2,7 +2,7 @@ require 'road-forest/client'
 require 'road-forest/server'
 require 'road-forest/test-support'
 
-describe RoadForest::RemoteHost do
+describe RoadForest::RemoteHost, :pending => "refactor of query handling" do
   let :services do
     RoadForest::ServicesHost.new
   end
@@ -27,6 +27,7 @@ describe RoadForest::RemoteHost do
 
   it "should return correct content-type" do
     client.find_needs
+    #test_server.http_exchanges.each{|ex| puts ex.response.body}
     test_server.http_exchanges.should_not be_empty
     test_server.http_exchanges.each do |exchange|
       exchange.response.headers["Content-Type"].should == "application/ld+json"
@@ -123,7 +124,8 @@ module RFTest
         @needs = []
         start.all(:nav, "item").find do |nav_item|
           nav_item[:nav, "label"] == "Unresolved"
-        end.first(:nav, "target").first(:lc, "needs").as_list.each do |need|
+        end.first(:nav, "target").first(:lc, "needs").tap{|value| puts "#{__FILE__}:#{__LINE__} => #{(value).inspect}"}.as_list.each do |need|
+          p need
           @needs << [need[:lc, "path"], need[:lc, "file"]]
         end
       end

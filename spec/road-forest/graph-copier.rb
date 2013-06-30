@@ -1,14 +1,27 @@
+require 'road-forest/test-support/matchers'
 require 'road-forest/rdf/graph-copier'
 
-describe RoadForest::RDF::GraphCopier do
+#Leaving notes since being interrupted
+#
+#GC needs to tessellate the graph in the same way that Parceller should -
+#probably should make sure that works first. Basically same resource should ==
+#same subgraph copied, since otherwise client omission of a property isn't
+#distinguishable from the intent to delete it. Only copy once so that you don't
+#overwrite client changes.
+#
+#Also: "single put" involves a whole extra level of server code to accept the
+#put, parcel it out, confirm IMS headers across everyone... so that's a v2
+#feature
+
+describe RoadForest::RDF::GraphCopier, :pending => "review of API" do
   class TestVoc < ::RDF::Vocabulary("http://test.com/");end
 
   let :start_subject do
-    RDF::Resource.new
+    RDF::Node.new
   end
 
   let :other_subject do
-    RDF::Resource.new
+    RDF::Node.new
   end
 
   let :starting_statements do
@@ -20,7 +33,7 @@ describe RoadForest::RDF::GraphCopier do
 
   let :other_statements do
     [
-      [other_subject, TestVoc[:a], 7]
+      [other_subject, TestVoc[:a], 13]
     ]
   end
 
@@ -43,12 +56,16 @@ describe RoadForest::RDF::GraphCopier do
     end
   end
 
+  it "reads the notes above, unless it wants the hose again" do
+    fail "shoulda read the notes"
+  end
+
   it "should have a target graph" do
     copier.target_graph.should be_an_instance_of(::RDF::Graph)
   end
 
   it "should have statements about starting subject" do
-    statements_from_graph(copier.target_graph).that_match_query(:subject => starting_subject).should be_equivalent_to(starting_statements)
+    statements_from_graph(copier.target_graph).that_match_query(:subject => start_subject).should be_equivalent_to(starting_statements)
   end
 
   it "should not have statements about other subject" do
@@ -56,7 +73,7 @@ describe RoadForest::RDF::GraphCopier do
   end
 
   it "should get statements about other subject" do
-    copier[[:test, :other]]
+    copier[[:testvoc, :other]]
 
     statements_from_graph(copier.target_graph).that_match_query(:subject => other_subject).should be_equivalent_to(other_statements)
   end

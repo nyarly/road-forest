@@ -117,13 +117,15 @@ describe RoadForest::RDF do
     end
 
     it "should walk forward to properties" do
+      p step[:dc,:creator]
+      p step[:dc,:creator][:foaf,:givenname]
       step[:dc,:creator][:foaf,:givenname].should == "Judson"
     end
 
     it "should be able to add properties with []=" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query(RDF::Query.new do |query|
+      graph_manager.credible_query(RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
       end).should_not be_empty
     end
@@ -131,7 +133,7 @@ describe RoadForest::RDF do
     it "should be able to add properties with set" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.query(RDF::Query.new do |query|
+      graph_manager.credible_query(RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
       end).should_not be_empty
     end

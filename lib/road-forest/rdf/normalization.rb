@@ -6,6 +6,7 @@ module RoadForest::RDF
       vocab = RDF::Vocabulary.find do |vocab|
         vocab.__prefix__.to_s == k
       end
+      #p k => vocab
       h[k] = vocab unless vocab.nil?
       vocab
     end
@@ -41,6 +42,19 @@ module RoadForest::RDF
       return from
     end
 
+    def normalize_context(from)
+      case from
+      when Array
+        from = expand_curie(from)
+      when RDF::URI, Addressable::URI, String
+        from = uri(from)
+      else
+        return nil
+      end
+      from.fragment = nil
+      return RDF::URI.intern(from.to_s)
+    end
+
     def normalize_uri(from)
       from = expand_curie(from)
       case from
@@ -68,6 +82,7 @@ module RoadForest::RDF
       case from
       when Array
         prefix, property = *from
+
         return interned_uri(Vocabs[prefix.to_s][property])
       else
         return from

@@ -42,9 +42,28 @@ repo autovacuum
 
 collect vocabs used to generate a graph - build curies for representations that work that way
 
+BGP queries should be solveable *across* resources - currently all patterns get
+a :context variable applied that all have to match, but it seems reasonable
+that multiple resources might participate in a solution.
+
 *** Pure Mad Science ***
 
-Statistical front-loading - based on human definitions of resource graphs, and
+Single Graph Update
+client should be able to alter the graph as needed, build
+a single sub-graph that contains all their modifications, and PUT the graph to
+a single resource. With parcelling, it's reasonable to break the graph up and
+distribute to Resource models, but the challenge is at the If-Modified-Since
+step: the graph has to be broken up, and we have to check the Modified time of
+all concerned resources.  (Although existing Parcel.resources_for() works...)
+
+There also doesn't seem to be a way to manage Etag If-Mod behavior...
+
+We'd have to collect error messages and decide which status takes precedence
+
+
+
+Statistical Front Loading
+based on human definitions of resource graphs, and
 emperical collection of client behavior (e.g. GET resourceB, Referer:
 resourceA, (X-)Triggering-Property: propC), determine properties to front-load
 into requests for resourceA to reduce the likelihood of subsequent request for

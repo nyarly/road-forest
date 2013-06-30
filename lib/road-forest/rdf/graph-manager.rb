@@ -1,6 +1,7 @@
 require 'rdf'
 require 'road-forest/rdf/graph-focus'
 require 'road-forest/rdf/vocabulary'
+require 'road-forest/rdf/normalization'
 
 require 'road-forest/rdf/credence'
 require 'road-forest/rdf/credible-results'
@@ -8,6 +9,24 @@ require 'road-forest/rdf/investigator'
 
 
 module RoadForest::RDF
+  class ContextFascade
+    include ::RDF::Countable
+    include ::RDF::Enumerable
+    include ::RDF::Queryable
+
+    def initialize(manager, resource)
+      @manager, @resource = manager, resource
+    end
+
+    def query_execute(query, &block)
+      @manager.query(ContextualQuery.from(query, @resource), &block)
+    end
+
+    def query_pattern(pattern, &block)
+      @manager.query(ContextualQuery.new([pattern], :subject_context => @resource), &block)
+    end
+  end
+
   class GraphManager
     include Normalization
 
@@ -105,13 +124,6 @@ module RoadForest::RDF
       end
     end
 
-    def context_roles(subject_uri)
-      {
-        :local => local_context_node,
-        :subject => subject_uri
-      }
-    end
-
     def next_impulse
       return if !@current_impulse.nil? and quiet_impulse?
       #mark ended?
@@ -166,12 +178,6 @@ module RoadForest::RDF
         sample
       end.new(document.body, :base_uri => document.root_url) #consider :processor_graph
       insert_reader(document.source, reader)
-    end
-
-    def normalize_context(term)
-      term = uri(term)
-      term.fragment = nil
-      term
     end
 
     def insert_reader(context, reader)
@@ -264,9 +270,12 @@ module RoadForest::RDF
       query.patterns.each do |pattern|
         pattern.context = context_variable
       end
+      p query.patterns.map(&:to_hash)
+      #puts repository_dump(:nquads)
       query.execute(@repository).filter do |solution|
         not solution.context.nil?
-      end.each(&block)
+      end.tap{|value| puts "#{__FILE__}:#{__LINE__} => #{(value).inspect}"}.each(&block)
+      p :done
     end
 
     def query_pattern(pattern, &block)
@@ -278,9 +287,54 @@ module RoadForest::RDF
       end
     end
 
-    def credible_query(subject, query)
-      results = QueryResults.new(self, context_roles(subject), query)
+    alias credible_query query
+
+    #XXX no block or enum
+    def query(query, &block)
+      results = QueryResults.new(self, context_roles(infer_context(query)), query)
       results = check(results)
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(results).inspect}"
+      if block_given?
+        results.each(&block)
+      else
+        results
+      end
+    end
+
+    def context_roles(subject_uri)
+      {
+        :local => local_context_node,
+        :subject => subject_uri
+      }
+    end
+
+    #@param pattern(RDF::Query, RDF::Statement, Array(RDF::Term), Hash
+    def infer_context(query)
+      subjects = []
+      objects = []
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.class).inspect}"
+      case query
+      when ContextualQuery
+        return query.subject_context
+      when RDF::Query
+        query.patterns.each do |pattern|
+          subjects << pattern.subject
+          objects << pattern.object
+        end
+      when RDF::Statement
+        subjects << query.subject
+        objects << query.object
+      when Array
+        subjects << query[0]
+        object << query[0]
+      when Hash
+        subjects << query[:subject]
+        objects << query[:object]
+      end
+
+      return (subjects + objects).find do |term|
+        normalize_context(term).tap{|value| puts "#{__FILE__}:#{__LINE__} => #{({:context => value, :query => query}).inspect}"}
+      end
     end
 
     def check(results)
@@ -305,10 +359,7 @@ module RoadForest::RDF
     end
 
     def query_unnamed(query)
-      query.patterns.each do |pattern|
-        pattern.context = false
-      end
-      query.execute(@repository)
+      query.execute(unnamed_graph)
     end
   end
 end

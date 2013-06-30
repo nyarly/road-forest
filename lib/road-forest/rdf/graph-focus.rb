@@ -2,6 +2,7 @@ require 'rdf'
 require 'road-forest/rdf'
 require 'road-forest/rdf/normalization'
 require 'road-forest/rdf/creates-graph'
+require 'road-forest/rdf/contextual-query'
 
 module RoadForest::RDF
   class GraphCollection
@@ -36,7 +37,11 @@ module RoadForest::RDF
   module FocusWrapping
     def wrap_node(value)
       next_step = GraphFocus.new
-      next_step.root_url = self.root_url #XXX
+      if ::RDF::Node === value
+        next_step.root_url = self.root_url
+      else
+        next_step.root_url = normalize_context(value)
+      end
       next_step.subject = value
       next_step.graph_manager = graph_manager
       next_step
@@ -86,12 +91,18 @@ module RoadForest::RDF
       end
     end
 
+    def build_query
+      ContextualQuery.new([], {:subject_context => @root_url}) do |query|
+        yield query
+      end
+    end
+
     def forward_properties
-      query_properties( ::RDF::Query.new{|q| q.pattern [ normalize_resource(subject), :property, :value ]} )
+      query_properties( build_query{|q| q.pattern [ normalize_resource(subject), :property, :value ]} )
     end
 
     def reverse_properties
-      query_properties( ::RDF::Query.new{|q| q.pattern [ :reverse, :property, normalize_resource(subject) ]} )
+      query_properties( build_query{|q| q.pattern [ :reverse, :property, normalize_resource(subject) ]} )
     end
 
     def get(prefix, property = nil)
@@ -120,7 +131,8 @@ module RoadForest::RDF
     end
 
     def as_list
-      FocusList.new(@subject, @graph_manager)
+      graph = ContextFascade.new(@graph_manager, @root_url)
+      FocusList.new(@subject, graph)
     end
 
     protected
@@ -136,7 +148,7 @@ module RoadForest::RDF
     end
 
     def query_properties(query)
-      solutions = graph_manager.credible_query(normalize_resource(subject), query)
+      solutions = graph_manager.query(query)
       solutions.map do |solution|
         prop = solution.property
         if qname = prop.qname
@@ -211,15 +223,15 @@ module RoadForest::RDF
     protected
 
     def reverse_query_value(prefix, property=nil)
-      query_value(::RDF::Query.new{|q| q.pattern [ :value, normalize_property(prefix, property), normalize_resource(subject)]})
+      query_value(build_query{|q| q.pattern [ :value, normalize_property(prefix, property), normalize_resource(subject)]})
     end
 
     def forward_query_value(prefix, property=nil)
-      query_value(::RDF::Query.new{|q| q.pattern [ normalize_resource(subject), normalize_property(prefix, property), :value]})
+      query_value(build_query{|q| q.pattern [ normalize_resource(subject), normalize_property(prefix, property), :value]})
     end
 
     def query_value(pattern)
-      solutions = graph_manager.credible_query(normalize_resource(subject), pattern)
+      solutions = graph_manager.query(pattern)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end
