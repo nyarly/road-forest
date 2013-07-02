@@ -7,6 +7,9 @@ require 'road-forest/rdf/credence'
 require 'road-forest/rdf/credible-results'
 require 'road-forest/rdf/investigator'
 
+require 'road-forest/rdf/resource-query'
+require 'road-forest/rdf/resource-pattern'
+
 
 module RoadForest::RDF
   class ContextFascade
@@ -14,16 +17,48 @@ module RoadForest::RDF
     include ::RDF::Enumerable
     include ::RDF::Queryable
 
-    def initialize(manager, resource)
-      @manager, @resource = manager, resource
+    def initialize(manager, resource, skepticism)
+      @manager, @resource, @skepticism = manager, resource, skepticism
     end
 
     def query_execute(query, &block)
-      @manager.query(ContextualQuery.from(query, @resource), &block)
+      ResourceQuery.from(query, @resource, @skepticism).execute(@manager, &block)
     end
 
     def query_pattern(pattern, &block)
-      @manager.query(ContextualQuery.new([pattern], :subject_context => @resource), &block)
+      ResourcePattern.from(query, {:context_roles => {:subject => @resource}}).execute(@manager, &block)
+    end
+  end
+
+  class SourceSkepticism
+    class << self
+      def simple
+        skeptic = self.new
+        skeptic.policy_list(:must_local, :may_local)
+        skeptic.investigators = [NullInvestigator.new]
+        skeptic
+      end
+
+      def http
+        skeptic = self.new
+        skeptic.policy_list(:may_subject, :any) #XXX
+        skeptic.investigators = [HTTPInvestigator.new, NullInvestigator.new]
+        skeptic
+      end
+    end
+
+    def initialize
+      @investigators = []
+      @investigation_limit = 3
+      @credence_policies = []
+    end
+
+    attr_accessor :investigators, :investigation_limit, :credence_policies
+
+    def policy_list(*names)
+      self.credence_policies = names.map do |name|
+        Credence.policy(name)
+      end
     end
   end
 
@@ -37,22 +72,6 @@ module RoadForest::RDF
     include ::RDF::Mutable
     include ::RDF::Queryable
     include ::RDF::Resource
-
-    class << self
-      def simple
-        self.new do |handler|
-          handler.policy_list(:must_local, :may_local)
-          handler.investigators = [NullInvestigator.new]
-        end
-      end
-
-      def http
-        self.new do |handler|
-          handler.policy_list(:may_subject, :any) #XXX
-          handler.investigators = [HTTPInvestigator.new, NullInvestigator.new]
-        end
-      end
-    end
 
     #nb: methods Graph overrides:
     #[[:graph?
@@ -105,23 +124,15 @@ module RoadForest::RDF
 
     attr_reader :repository, :current_impulse, :local_context_node
     attr_accessor :debug_io, :http_client
-    attr_accessor :investigators, :investigation_limit, :credence_policies
+    attr_accessor :source_skepticism
 
     def initialize(repo = nil)
-      @investigators = []
-      @investigation_limit = 3
-      @credence_policies = []
       @repository = repo || RDF::Repository.new
       @debug_io = nil
       @local_context_node = RDF::Node.new(:local)
+      @source_skepticism = nil
       next_impulse
       yield self if block_given?
-    end
-
-    def policy_list(*names)
-      self.credence_policies = names.map do |name|
-        Credence.policy(name)
-      end
     end
 
     def next_impulse
@@ -238,6 +249,7 @@ module RoadForest::RDF
       step.subject = normalize_resource(subject)
       step.root_url = step.subject
       step.graph_manager = self
+      step.source_skepticism = source_skepticism
       return step
     end
 
@@ -262,51 +274,35 @@ module RoadForest::RDF
       end
     end
 
+    #XXX Needed, maybe, if we need to handle constant patterns
+    #def include?(statement)
+    #end
+
     def context_variable
       @context_variable ||= RDF::Query::Variable.new(:context)
     end
 
     def query_execute(query, &block)
-      query.patterns.each do |pattern|
-        pattern.context = context_variable
-      end
-      p query.patterns.map(&:to_hash)
+      #XXX Weird edge case of GM getting queried with a vanilla RDF::Query...
+      #needs tests, thought
+      query = ResourceQuery.from(query)
       #puts repository_dump(:nquads)
-      query.execute(@repository).filter do |solution|
+      query.execute(self).filter do |solution|
         not solution.context.nil?
-      end.tap{|value| puts "#{__FILE__}:#{__LINE__} => #{(value).inspect}"}.each(&block)
-      p :done
+      end.each(&block)
     end
 
     def query_pattern(pattern, &block)
-      pattern = pattern.dup
-      pattern.context = context_variable
-      @repository.query(pattern) do |statement|
-        next if statement.context.nil?
+      pattern.execute(@repository, {}, :context_roles => {:local => local_context_node}) do |statement|
         yield statement if block_given?
       end
     end
 
-    alias credible_query query
-
-    #XXX no block or enum
-    def query(query, &block)
-      results = QueryResults.new(self, context_roles(infer_context(query)), query)
-      results = check(results)
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(results).inspect}"
-      if block_given?
-        results.each(&block)
-      else
-        results
-      end
-    end
-
-    def context_roles(subject_uri)
-      {
-        :local => local_context_node,
-        :subject => subject_uri
-      }
-    end
+    #Queryable::query can call
+    #  query_execute (as a strange shorthand - avoid)
+    #  query_pattern (if really needed)
+    #  each (if query is blank - needs special handling)
+    #  include? (if query is constant === "is this statement there?")
 
     #@param pattern(RDF::Query, RDF::Statement, Array(RDF::Term), Hash
     def infer_context(query)
@@ -335,23 +331,6 @@ module RoadForest::RDF
       return (subjects + objects).find do |term|
         normalize_context(term).tap{|value| puts "#{__FILE__}:#{__LINE__} => #{({:context => value, :query => query}).inspect}"}
       end
-    end
-
-    def check(results)
-      investigators.each do |investigator|
-        catch :not_credible do
-          contexts = results.contexts
-          credence_policies.each do |policy|
-            contexts = policy.credible(contexts, results)
-            if contexts.empty?
-              throw :not_credible
-            end
-          end
-          return results.for_context(contexts.first)
-        end
-        results = investigator.pursue(results)
-      end
-      raise NoCredibleResults
     end
 
     def unnamed_graph

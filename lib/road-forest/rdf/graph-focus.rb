@@ -74,13 +74,14 @@ module RoadForest::RDF
     include Normalization
     include FocusWrapping
 
-    attr_accessor :graph_manager, :subject, :root_url
+    attr_accessor :graph_manager, :subject, :root_url, :source_skepticism
     alias rdf subject
 
     def initialize
       @graph_manager = nil
       @subject = nil
       @root_url = nil
+      @source_skepticism = nil
     end
 
     def subject=(target)
@@ -92,17 +93,19 @@ module RoadForest::RDF
     end
 
     def build_query
-      ContextualQuery.new([], {:subject_context => @root_url}) do |query|
+      ResourceQuery.new([], {}) do |query|
+        query.subject_context = @root_url
+        query.source_skepticism = @source_skepticism
         yield query
       end
     end
 
     def forward_properties
-      query_properties( build_query{|q| q.pattern [ normalize_resource(subject), :property, :value ]} )
+      query_properties( build_query{|q| q.pattern([ normalize_resource(subject), :property, :value ])} )
     end
 
     def reverse_properties
-      query_properties( build_query{|q| q.pattern [ :reverse, :property, normalize_resource(subject) ]} )
+      query_properties( build_query{|q| q.pattern([ :reverse, :property, normalize_resource(subject)])} )
     end
 
     def get(prefix, property = nil)
@@ -131,7 +134,7 @@ module RoadForest::RDF
     end
 
     def as_list
-      graph = ContextFascade.new(@graph_manager, @root_url)
+      graph = ContextFascade.new(@graph_manager, @root_url, @source_skepticism)
       FocusList.new(@subject, graph)
     end
 
@@ -148,8 +151,7 @@ module RoadForest::RDF
     end
 
     def query_properties(query)
-      solutions = graph_manager.query(query)
-      solutions.map do |solution|
+      query.execute(graph_manager).map do |solution|
         prop = solution.property
         if qname = prop.qname
           qname
@@ -223,11 +225,15 @@ module RoadForest::RDF
     protected
 
     def reverse_query_value(prefix, property=nil)
-      query_value(build_query{|q| q.pattern [ :value, normalize_property(prefix, property), normalize_resource(subject)]})
+      query_value(build_query{|q|
+        q.pattern([ :value, normalize_property(prefix, property), normalize_resource(subject)])
+      })
     end
 
     def forward_query_value(prefix, property=nil)
-      query_value(build_query{|q| q.pattern [ normalize_resource(subject), normalize_property(prefix, property), :value]})
+      query_value(build_query{|q|
+        q.pattern([ normalize_resource(subject), normalize_property(prefix, property), :value])
+      })
     end
 
     def query_value(pattern)
