@@ -5,8 +5,9 @@ module RoadForest::RDF
   class ResourceQuery < ::RDF::Query
     def initialize(patterns = [], options = {}, &block)
       @subject_context = options[:subject_context]
+      @source_skepticism = options[:source_skepticism]
       super
-      patterns = @patterns
+      patterns = @patterns.dup
       @patterns.clear
       patterns.each do |pattern|
         pattern(pattern)
@@ -30,10 +31,21 @@ module RoadForest::RDF
       self
     end
 
-    def self.from(other, subject_context = nil)
+    def self.from(other, subject_context = nil, source_skepticism = nil)
       query = self.new
-      query.subject_context = subject_context
-      query.source_skepticism = source_skepticism
+
+      if subject_context.nil? and other.respond_to?(:subject_context)
+        query.subject_context = other.subject_context
+      else
+        query.subject_context = subject_context
+      end
+
+      if source_skepticism.nil? and other.respond_to?(:source_skepticism)
+        query.source_skepticism = other.source_skepticism
+      else
+        query.source_skepticism = source_skepticism
+      end
+
       other.patterns.each do |pattern|
         query.pattern(pattern)
       end

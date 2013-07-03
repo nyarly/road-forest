@@ -44,6 +44,7 @@ module RoadForest::RDF
       end
       next_step.subject = value
       next_step.graph_manager = graph_manager
+      next_step.source_skepticism = source_skepticism
       next_step
     end
 
@@ -105,7 +106,7 @@ module RoadForest::RDF
     end
 
     def reverse_properties
-      query_properties( build_query{|q| q.pattern([ :reverse, :property, normalize_resource(subject)])} )
+      query_properties( build_query{|q| q.pattern([ :value, :property, normalize_resource(subject)])} )
     end
 
     def get(prefix, property = nil)
@@ -236,8 +237,8 @@ module RoadForest::RDF
       })
     end
 
-    def query_value(pattern)
-      solutions = graph_manager.query(pattern)
+    def query_value(query)
+      solutions = query.execute(graph_manager)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end

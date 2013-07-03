@@ -35,14 +35,14 @@ module RoadForest::RDF
       def simple
         skeptic = self.new
         skeptic.policy_list(:must_local, :may_local)
-        skeptic.investigators = [NullInvestigator.new]
+        skeptic.investigator_list(:null)
         skeptic
       end
 
       def http
         skeptic = self.new
         skeptic.policy_list(:may_subject, :any) #XXX
-        skeptic.investigators = [HTTPInvestigator.new, NullInvestigator.new]
+        skeptic.investigator_list(:http, :null)
         skeptic
       end
     end
@@ -58,6 +58,12 @@ module RoadForest::RDF
     def policy_list(*names)
       self.credence_policies = names.map do |name|
         Credence.policy(name)
+      end
+    end
+
+    def investigator_list(*names)
+      self.investigators = names.map do |name|
+        Investigator[name].new
       end
     end
   end
@@ -285,16 +291,26 @@ module RoadForest::RDF
     def query_execute(query, &block)
       #XXX Weird edge case of GM getting queried with a vanilla RDF::Query...
       #needs tests, thought
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.patterns).inspect}"
       query = ResourceQuery.from(query)
       #puts repository_dump(:nquads)
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.patterns).inspect}"
       query.execute(self).filter do |solution|
-        not solution.context.nil?
+        puts; puts "#{__FILE__}:#{__LINE__} => #{(solution).inspect}"
+        solution.respond_to?(:context) and not solution.context.nil?
       end.each(&block)
     end
 
     def query_pattern(pattern, &block)
-      pattern.execute(@repository, {}, :context_roles => {:local => local_context_node}) do |statement|
-        yield statement if block_given?
+      case pattern
+      when ResourcePattern
+        pattern.execute(@repository, {}, :context_roles => {:local => local_context_node}) do |statement|
+          yield statement if block_given?
+        end
+      else
+        pattern.execute(@repository, {}) do |statement|
+          yield statement if block_given?
+        end
       end
     end
 

@@ -8,8 +8,10 @@ require 'road-forest/resource/rdf-handlers'
 describe RoadForest::RDF do
   let :graph_manager do
     RoadForest::RDF::GraphManager.new do |handler|
-      handler.policy_list(:may_subject)
-      handler.investigators = [RoadForest::RDF::NullInvestigator.new]
+      handler.source_skepticism = RoadForest::RDF::SourceSkepticism.new.tap do |skept|
+        skept.policy_list(:may_subject)
+        skept.investigator_list(:null)
+      end
     end
   end
 
@@ -117,25 +119,23 @@ describe RoadForest::RDF do
     end
 
     it "should walk forward to properties" do
-      p step[:dc,:creator]
-      p step[:dc,:creator][:foaf,:givenname]
       step[:dc,:creator][:foaf,:givenname].should == "Judson"
     end
 
     it "should be able to add properties with []=" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.credible_query(RDF::Query.new do |query|
+      RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end).should_not be_empty
+      end.execute(graph_manager).should_not be_empty
     end
 
     it "should be able to add properties with set" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
-      graph_manager.credible_query(RDF::Query.new do |query|
+      RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end).should_not be_empty
+      end.execute(graph_manager).should_not be_empty
     end
   end
 
