@@ -12,12 +12,14 @@ module RoadForest
     end
 
     def build_graph_manager
-      RDF::GraphManager.new
+      graph_manager = RDF::GraphManager.new
+      graph_manager.http_client = http_client
+      return graph_manager
     end
 
-    attr_writer :web_client
-    def web_client
-      @web_client ||= ExconAdapter.new
+    attr_writer :http_client
+    def http_client
+      @http_client ||= ExconAdapter.new
     end
 
     def credence_block
@@ -34,25 +36,39 @@ module RoadForest
       focus.fulfill_promises
     end
 
-    def put(focus)
+    def render_graph(graph)
 
     end
 
-    def post(focus)
+    def putting
+      target_graph = ::RDF::Graph.new
+      updater = UpdateCollector.new(@graph, target_graph)
 
+      annealer = CredenceAnnealer.new(@graph)
+      annealer.resolve do
+        yield updater
+      end
+
+      target_graph.each_context do |context|
+        http_client.put(context) do |request|
+          graph = ::RDF::Graph.new(context, :data => target_graph)
+          request.body = render_graph(graph)
+        end
+      end
     end
 
-    def delete(focus)
-
+    def getting
+      reader = GraphReader.new(@graph)
+      annealer = CredenceAnnealer.new(@graph)
+      annealer.resolve do
+        yield reader
+      end
     end
 
-    def raw_put(focus, data, options=nil)
-
-    end
-
-    def raw_post(focus, data, options=nil)
-
-    end
+    #TODO:
+    #def deleting
+    #def posting
+    #def patching
   end
 
   #Things that have to happen:

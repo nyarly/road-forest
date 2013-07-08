@@ -163,44 +163,33 @@ module RoadForest::RDF
     end
   end
 
-  class GraphFocus < GraphReading
-    include CreatesGraph
-
-    def sub_graph
-      sub = new_graph(subject)
-
-      builder = GraphBuilder.new
-      builder.graph_manager = graph_manager
-      builder.subject = subject
-
-      builder.destination_graph = sub.graph_manager
-      return sub
-    end
-
-    def set(property, value, extra=nil)
+  module GraphWriting
+    def normalize_triple(property, value, extra=nil)
       if not extra.nil?
         property = [property, value]
         value = extra
       end
+      return normalize_property(property), value
+    end
 
-      delete(normalize_property(property))
+    def set(property, value, extra=nil)
+      property, value = normalize_triple(property, value, extra)
+
+      delete(property)
       add(property, value)
       return value
     end
     alias_method :[]=, :set
 
     def add(property, value, extra=nil)
-      # Begin able to step[value] << would be neat...
-      if not extra.nil?
-        property = [property, value]
-        value = extra
-      end
-      graph_manager.add_statement(subject, normalize_property(property), value)
+      property, value = normalize_triple(property, value, extra)
+
+      target_graph.insert([subject, property, value])
       return value
     end
 
     def delete(property, extra=nil)
-      graph_manager.delete_statements([subject, normalize_property(property, extra)])
+      target_graph.delete([subject, normalize_property(property, extra), :value])
     end
 
     def set_node(property, url=nil)
@@ -217,10 +206,31 @@ module RoadForest::RDF
     end
 
     def add_list(property, extra=nil)
-      list = graph_manager.create_list
-      graph_manager.add_statement(subject, normalize_property(property, extra), list.subject)
+      list = target_graph.create_list
+      target_graph.add_statement(subject, normalize_property(property, extra), list.subject)
       yield list if block_given?
       return list
+    end
+
+  end
+
+  class GraphFocus < GraphReading
+    include CreatesGraph
+    include GraphWriting
+
+    def target_graph
+      graph_manager
+    end
+
+    def sub_graph
+      sub = new_graph(subject)
+
+      builder = GraphBuilder.new
+      builder.graph_manager = graph_manager
+      builder.subject = subject
+
+      builder.destination_graph = sub.graph_manager
+      return sub
     end
 
     protected

@@ -118,6 +118,64 @@ module RFTest
     end
     attr_reader :server, :needs
 
+    def satisfy_needs
+      server.putting do |graph|
+        graph.all(:nav, "item").find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
+        end.first(:nav, "target").first(:lc, "needs").as_list.each do |need|
+          need[[:lc, "path"]] = "Manifest"
+        end
+      end
+    end
+
+    #Configurables:
+    #Remote URL
+    #HTTP client details
+    #
+    #Credence policy
+    #  client default
+    #  "exchange" default
+    #  read use
+    #
+    #
+    def satisfy_needs_no_dsl
+      graph_manager = GraphManager.new
+
+      http_client = HTTPClient.new(server)
+
+      graph_manager.http_client = http_client
+
+      updater = UpdateCollector.new(graph_mananger)
+
+      annealer = CredenceAnnealer.new(graph_manager)
+      annealer.resolve do
+        updater.all(:nav, "item").find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
+        end.first(:nav, "target").first(:lc, "needs").as_list.each do |need|
+          need[[:lc, "path"]] = "Manifest"
+        end
+      end
+
+      updater.updated_resources.each do |resource|
+        http_client.put(resource) do |request|
+          request.body = server.render_graph(updated.updated_graph_for(resource))
+        end
+      end
+    end
+
+    #XXX posts still need design
+    def add_needs
+      server.get do |graph|
+        need_list = graph.all(:nav, "item").find do |nav_item|
+          nav_item[:nav, "label"] == "Needs"
+        end.first(:nav, "target")
+
+        server.post_new(form_action) do |graph|
+          graph[[:lc, "path"]] = "cookbooks.tgz"
+          graph[[:lc, "fingerprint"]] = md5hash
+        end
+      end
+    end
 
     def find_needs
       server.credence_block do |start|
