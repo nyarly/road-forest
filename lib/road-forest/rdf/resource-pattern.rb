@@ -31,6 +31,10 @@ module RoadForest::RDF
     attr_accessor :context_roles, :source_skepticism
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
+      unless queryable.is_a? RoadForest::RDF::GraphManager
+        return super(queryable, bindings || {}, &block)
+      end
+
       investigation = Investigation.new
       investigation.queryable = queryable
       investigation.context_roles = (query_context_roles || {}).merge(context_roles)

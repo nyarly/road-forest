@@ -49,6 +49,13 @@ describe RoadForest::RDF::GraphCopier, :pending => "review of API" do
     end
   end
 
+  let :document do
+    RoadForest::RDF::Document.new.tap do |doc|
+      doc.source =
+      doc.body_string = source_graph.dump(:rdfa)
+    end
+  end
+
   let :copier do
     RoadForest::RDF::GraphCopier.new.tap do |copier|
       copier.source_graph = source_graph

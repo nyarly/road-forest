@@ -19,23 +19,15 @@ module RoadForest::RDF
 
     def copy_context
       unless target_graph.has_context?(root_url)
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(:copy).inspect}"
-        puts "#{__FILE__}:#{__LINE__} => #{(root_url).inspect}"
-        puts "#{__FILE__}:#{__LINE__} => #{(target_graph.contexts.to_a).inspect}"
         parceller.graph_for(root_url).each_statement do |statement|
           statement.context = root_url
           target_graph << statement
-          puts; puts "#{__FILE__}:#{__LINE__} => #{(statement.context).inspect}"
-          puts "#{__FILE__}:#{__LINE__} => #{(target_graph.contexts.to_a).inspect}"
         end
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(target_graph.statements.map(&:context)).inspect}"
-        puts "#{__FILE__}:#{__LINE__} => #{(target_graph.contexts.to_a).inspect}"
       end
     end
 
     def add(property, value, extra=nil)
       copy_context
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(:add).inspect}"
       property, value = normalize_triple(property, value, extra)
       target_graph.insert([subject, property, value, root_url])
     end
@@ -47,11 +39,22 @@ module RoadForest::RDF
 
     def delete(property, extra=nil)
       copy_context
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(:delete).inspect}"
       property, value = normalize_triple(property, value, extra)
       target_graph.query([subject, property]) do |statement|
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(statement).inspect}"
         target_graph.delete(statement)
+      end
+    end
+
+    def query_value(query)
+      source_result = super
+      target_result = query.execute(target_graph).map do |solution|
+        unwrap_value(solution.value)
+      end
+
+      if target_result.empty?
+        source_result
+      else
+        target_result
       end
     end
   end

@@ -72,8 +72,8 @@ module RoadForest::RDF
     include Normalization
 
     #The interface supported by ::RDF::Graph
-    include ::RDF::Countable
-    include ::RDF::Durable
+      include ::RDF::Countable
+      include ::RDF::Durable
     include ::RDF::Enumerable
     include ::RDF::Mutable
     include ::RDF::Queryable
@@ -259,8 +259,13 @@ module RoadForest::RDF
       return step
     end
 
-    def each_statement(context, &block)
-      @repository.query(:context => context) do |statement|
+    def each_statement(context=nil, &block)
+      query = {}
+      unless context.nil?
+        query[:context] = context
+      end
+
+      @repository.query(query) do |statement|
         yield statement
       end
     end
@@ -356,5 +361,5 @@ module RoadForest::RDF
     def query_unnamed(query)
       query.execute(unnamed_graph)
     end
+    end
   end
-end
