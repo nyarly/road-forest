@@ -57,5 +57,11 @@ module RoadForest::RDF
         target_result
       end
     end
+
+    def wrap_node(value)
+      focus = super
+      focus.target_graph = self.target_graph
+      focus
+    end
   end
 end

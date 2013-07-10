@@ -296,12 +296,8 @@ module RoadForest::RDF
     def query_execute(query, &block)
       #XXX Weird edge case of GM getting queried with a vanilla RDF::Query...
       #needs tests, thought
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.patterns).inspect}"
       query = ResourceQuery.from(query)
-      #puts repository_dump(:nquads)
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.patterns).inspect}"
       query.execute(self).filter do |solution|
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(solution).inspect}"
         solution.respond_to?(:context) and not solution.context.nil?
       end.each(&block)
     end
@@ -310,10 +306,12 @@ module RoadForest::RDF
       case pattern
       when ResourcePattern
         pattern.execute(@repository, {}, :context_roles => {:local => local_context_node}) do |statement|
+          next if statement.context.nil?
           yield statement if block_given?
         end
       else
         pattern.execute(@repository, {}) do |statement|
+          next if statement.context.nil?
           yield statement if block_given?
         end
       end
@@ -329,7 +327,6 @@ module RoadForest::RDF
     def infer_context(query)
       subjects = []
       objects = []
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(query.class).inspect}"
       case query
       when ContextualQuery
         return query.subject_context
@@ -350,7 +347,7 @@ module RoadForest::RDF
       end
 
       return (subjects + objects).find do |term|
-        normalize_context(term).tap{|value| puts "#{__FILE__}:#{__LINE__} => #{({:context => value, :query => query}).inspect}"}
+        normalize_context(term)
       end
     end
 

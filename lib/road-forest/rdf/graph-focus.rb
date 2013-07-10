@@ -35,8 +35,12 @@ module RoadForest::RDF
   end
 
   module FocusWrapping
+    def new_focus
+      self.class.new
+    end
+
     def wrap_node(value)
-      next_step = GraphFocus.new
+      next_step = new_focus
       if ::RDF::Node === value
         next_step.root_url = self.root_url
       else
@@ -62,7 +66,11 @@ module RoadForest::RDF
 
     alias graph_manager graph
 
-    attr_accessor :root_url
+    attr_accessor :root_url, :node_class
+
+    def new_focus
+      node_class.new
+    end
 
     def each
       super do |value|
@@ -136,7 +144,9 @@ module RoadForest::RDF
 
     def as_list
       graph = ContextFascade.new(@graph_manager, @root_url, @source_skepticism)
-      FocusList.new(@subject, graph)
+      list = FocusList.new(@subject, graph)
+      list.node_class = self.class
+      list
     end
 
     protected

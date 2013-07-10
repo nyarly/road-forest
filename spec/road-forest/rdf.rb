@@ -122,7 +122,7 @@ describe RoadForest::RDF do
       step[:dc,:creator][:foaf,:givenname].should == "Judson"
     end
 
-    it "should be able to add properties with []=" do
+    it "should be able to add properties with []=", :pending => "Should GraphManagers accept local writes?" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|
@@ -130,7 +130,7 @@ describe RoadForest::RDF do
       end.execute(graph_manager).should_not be_empty
     end
 
-    it "should be able to add properties with set" do
+    it "should be able to add properties with set", :pending => "Should GraphManagers accept local writes?" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|

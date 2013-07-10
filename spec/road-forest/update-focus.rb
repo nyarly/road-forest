@@ -74,9 +74,11 @@ describe RoadForest::RDF::UpdateFocus do
 
     resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
 
+    resource_graph.query(:object => RoadForest::RDF::Vocabulary::RF[:Impulse]).should be_empty
+    resource_graph.query(simple_statement).should be_empty
+
     resource_graph.query(blank_node_statement).should_not be_empty
     resource_graph.query([context_node, Voc[:a], 17]).should_not be_empty
-    resource_graph.query(simple_statement).should be_empty
   end
 
   it "should copy entire context when blank node is written to" do
@@ -86,10 +88,20 @@ describe RoadForest::RDF::UpdateFocus do
 
     resource_graph.query(blank_node_statement).should_not be_empty
     resource_graph.query(simple_statement).should_not be_empty
-    resource_graph.query([blank_node, Voc[:c], "jagular"]).should_not be_empty
+    resource_graph.query([nil, Voc[:c], "jagular", context_node]).should_not be_empty
   end
 
-  it "should trigger a Manager query just by writing"
+  it "should trigger (only one) Manager query just by writing" do
+    updater[Voc[:d]] = 14
+    updater[Voc[:e]] = "fourteen"
+
+    resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
+
+    resource_graph.query(blank_node_statement).should_not be_empty
+    resource_graph.query(simple_statement).should_not be_empty
+    resource_graph.query([context_node, Voc[:d], 14]).should_not be_empty
+    resource_graph.query([context_node, Voc[:e], "fourteen"]).should_not be_empty
+  end
 
   it "should return statements that have been written" do
     updater[Voc[:a]] = 17
