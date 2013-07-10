@@ -22,20 +22,6 @@ module RoadForest
       @http_client ||= ExconAdapter.new
     end
 
-    def credence_block
-      focus = CredenceFocus.new
-      focus.graph_manager = @graph
-      focus.subject = @url
-
-      begin
-        @graph.next_impulse
-        focus.reset_promises
-        yield focus
-      end until @graph.quiet_impulse?
-
-      focus.fulfill_promises
-    end
-
     def render_graph(graph)
 
     end

@@ -46,6 +46,40 @@ BGP queries should be solveable *across* resources - currently all patterns get
 a :context variable applied that all have to match, but it seems reasonable
 that multiple resources might participate in a solution.
 
+
+*** API challenges ***
+
+The GraphManager ought not to have defaults for SourceSkepticism - keep that in
+the RemoteHost or other client code. Likewise, GM doesn't start GraphFoci. Both
+of those are the result of scope creep on GM.
+
+Remove the _:local context - it doesn't make sense on the GM. Writes to a GM
+should come from 3 places:
+
+ * A GraphFocus, that has an implicit context to write to.
+ * Raw #insert by client code - in which case, vaya con Dios
+ * #insert_document, which has an explicit context to write to.
+
+GM's should also accept non-ResourceQuery|Patterns. Simple to RQ|P.from(q|p),
+with infered contexts.
+
+Infered contexts raises this interesting point: every pattern potentially has 6
+contexts to consider as credible:
+
+ * Its context
+ * Its subject
+ * Its object
+ * Contexts mentioned in its query
+ * Subjects mentioned in its query
+ * Objects mentioned in its query
+
+(Not every pattern will have all 6) (Also - more than one of any may result in
+an empty result - a Query with two contexts I *think* means "statements must
+have this context and that context" which is impossible.)
+
+That said, these resources might then form the basis of a credence review
+
+
 *** Pure Mad Science ***
 
 Single Graph Update
@@ -57,7 +91,7 @@ step: the graph has to be broken up, and we have to check the Modified time of
 all concerned resources.  (Although existing Parcel.resources_for() works...)
 
 There also doesn't seem to be a way to manage Etag If-Mod behavior...
-
+</->
 We'd have to collect error messages and decide which status takes precedence
 
 

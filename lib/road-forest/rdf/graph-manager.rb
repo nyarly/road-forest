@@ -142,7 +142,7 @@ module RoadForest::RDF
     end
 
     def next_impulse
-      return if !@current_impulse.nil? and quiet_impulse?
+      return if !@current_impulse.nil? and raw_quiet_impulse?
       #mark ended?
       #chain impulses?
       @current_impulse = RDF::Node.new
@@ -151,6 +151,10 @@ module RoadForest::RDF
     end
 
     def quiet_impulse?
+      raw_quiet_impulse?
+    end
+
+    def raw_quiet_impulse?
       repository.query([nil, nil, @current_impulse, false]).to_a.empty?
     end
 
