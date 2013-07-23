@@ -1,0 +1,17 @@
+Review names of everything - rename many things.
+Review location of everything - move many things.
+
+GraphManager shouldn't handle GraphFocuses directly. i.e. GM#start should be removed.
+GraphFocus should either take args to ::new or yield self
+
+Tests on the server side
+
+Every method in RDF::Normalization
+
+GraphFocus:
+  source
+  root_url
+
+SourceSkepticism -> SourceRigor
+
+GraphManager -> ?MetaGraph ?ProvenanceGraph

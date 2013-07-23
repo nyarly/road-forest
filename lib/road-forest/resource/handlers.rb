@@ -5,6 +5,7 @@ module RoadForest
         @registry ||= {}
       end
 
+
       def self.register(handler_type, klass)
         registry[handler_type] = klass
 

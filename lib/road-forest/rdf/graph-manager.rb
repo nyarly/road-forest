@@ -26,7 +26,11 @@ module RoadForest::RDF
     end
 
     def query_pattern(pattern, &block)
-      ResourcePattern.from(query, {:context_roles => {:subject => @resource}}).execute(@manager, &block)
+      ResourcePattern.from(pattern, {:context_roles => {:subject => @resource}, :source_skepticism => @skepticism}).execute(@manager, &block)
+    end
+
+    def each(&block)
+      @manager.each(&block)
     end
   end
 

@@ -5,8 +5,14 @@ module RoadForest::RDF
   class UpdateFocus < GraphFocus
     attr_accessor :target_graph
 
-    alias source_graph graph_manager
     alias source_graph= graph_manager=
+    alias source_graph graph_manager
+
+    def dup
+      other = super
+      other.target_graph = target_graph
+      other
+    end
 
     def parceller
       @parceller ||=

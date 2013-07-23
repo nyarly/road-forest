@@ -36,7 +36,7 @@ module RoadForest::RDF
 
   module FocusWrapping
     def new_focus
-      self.class.new
+      dup
     end
 
     def wrap_node(value)
@@ -52,8 +52,8 @@ module RoadForest::RDF
       next_step
     end
 
-  def unwrap_value(value)
-    if value.respond_to? :object
+    def unwrap_value(value)
+      if value.respond_to? :object
         value.object
       else
         wrap_node(value)
@@ -62,14 +62,15 @@ module RoadForest::RDF
   end
 
   class FocusList < ::RDF::List
+    include Normalization
     include FocusWrapping
 
     alias graph_manager graph
 
-    attr_accessor :root_url, :node_class
+    attr_accessor :root_url, :base_node, :source_skepticism
 
     def new_focus
-      node_class.new
+      base_node.dup
     end
 
     def each
@@ -93,11 +94,24 @@ module RoadForest::RDF
       @source_skepticism = nil
     end
 
-    def subject=(target)
-      @subject = target
-      case target
+    def dup
+      other = self.class.new
+      other.graph_manager = graph_manager
+      other.subject = subject
+      other.root_url = root_url
+      other.source_skepticism = source_skepticism
+      other
+    end
+
+    def root_url=(*value) #XXX curies?
+      @root_url = normalize_resource(value)
+    end
+
+    def subject=(*value)
+      @subject = normalize_resource(value)
+      case @subject
       when ::RDF::URI
-        @root_url = target
+        @root_url ||= @subject
       end
     end
 
@@ -145,7 +159,8 @@ module RoadForest::RDF
     def as_list
       graph = ContextFascade.new(@graph_manager, @root_url, @source_skepticism)
       list = FocusList.new(@subject, graph)
-      list.node_class = self.class
+      list.base_node = self
+      list.source_skepticism = source_skepticism
       list
     end
 
@@ -216,8 +231,8 @@ module RoadForest::RDF
     end
 
     def add_list(property, extra=nil)
-      list = target_graph.create_list
-      target_graph.add_statement(subject, normalize_property(property, extra), list.subject)
+      list = ::RDF::List.new(nil, target_graph)
+      target_graph.insert([subject, normalize_property(property, extra), list.subject])
       yield list if block_given?
       return list
     end

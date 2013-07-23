@@ -16,7 +16,8 @@ module RoadForest
       end
 
       def build_graph_manager
-        manager = RDF::GraphManager.http
+        manager = RDF::GraphManager.new
+        manager.source_skepticism = RDF::SourceSkepticism.http
         manager.http_client = HTTPClient.new(@app, @url)
         manager
       end
@@ -51,7 +52,8 @@ module RoadForest
           end
         end
       ensure
-        trace_response(response)                                                                                                                           end
+        trace_response(response)
+      end
     end
 
     class DispatcherFacade < BasicObject

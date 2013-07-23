@@ -38,7 +38,7 @@ module RoadForest
           #puts; puts "#{__FILE__}:#{__LINE__} =>
           ##{(rdf.graph_dump(:ntriples)).inspect}"
           JSON::LD::Writer.buffer do |writer|
-            rdf.each_statement(:local) do |statement|
+            rdf.each_statement do |statement|
               writer << statement
             end
           end

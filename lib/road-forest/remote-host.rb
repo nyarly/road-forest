@@ -1,4 +1,6 @@
 require 'road-forest/rdf'
+require 'road-forest/rdf/update-focus'
+require 'road-forest/credence-annealer'
 
 module RoadForest
   class ExconAdapter
@@ -26,16 +28,26 @@ module RoadForest
 
     end
 
-    def putting
-      target_graph = ::RDF::Graph.new
-      updater = UpdateCollector.new(@graph, target_graph)
-
+    def anneal(focus)
       annealer = CredenceAnnealer.new(@graph)
       annealer.resolve do
-        yield updater
+        yield focus
       end
+    end
 
+    def putting(&block)
+      target_graph = ::RDF::Graph.new
+      updater = RDF::UpdateFocus.new
+      updater.source_graph = @graph
+      updater.target_graph = target_graph
+      updater.subject = @url
+      updater.source_skepticism = @graph.source_skepticism
+
+      anneal(updater, &block)
+
+      puts; puts "#{__FILE__}:#{__LINE__} => #{(target_graph.dump(:nquads))}"
       target_graph.each_context do |context|
+        puts; puts "#{__FILE__}:#{__LINE__} => #{(context).inspect}"
         http_client.put(context) do |request|
           graph = ::RDF::Graph.new(context, :data => target_graph)
           request.body = render_graph(graph)
@@ -43,12 +55,10 @@ module RoadForest
       end
     end
 
-    def getting
+    def getting(&block)
       reader = GraphReader.new(@graph)
-      annealer = CredenceAnnealer.new(@graph)
-      annealer.resolve do
-        yield reader
-      end
+
+      anneal(reader, &block)
     end
 
     #TODO:

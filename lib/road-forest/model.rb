@@ -43,9 +43,16 @@ module RoadForest
       nil
     end
 
+    def fill_graph(graph)
+    end
+
+    def fill_results(results)
+      fill_graph(results.start_graph(my_url))
+    end
+
     def new_results
       results = Results.new
-      yield results if block_given?
+      fill_results(results)
       return results
     end
 
@@ -57,9 +64,10 @@ module RoadForest
       new_results
     end
 
-    def retreive
+    def retrieve
       new_results
     end
+    alias retreive retrieve
 
     def delete
       false

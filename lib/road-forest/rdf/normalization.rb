@@ -81,9 +81,15 @@ module RoadForest::RDF
     def expand_curie(from)
       case from
       when Array
-        prefix, property = *from
-
-        return interned_uri(Vocabs[prefix.to_s][property])
+        case from.length
+        when 2
+          prefix, property = *from
+          return interned_uri(Vocabs[prefix.to_s][property])
+        when 1
+          return expand_curie(from.first)
+        else
+          return from
+        end
       else
         return from
       end

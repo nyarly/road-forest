@@ -49,6 +49,10 @@ that multiple resources might participate in a solution.
 
 *** API challenges ***
 
+Client behavior should get packed up in a tidy bunch of chains and blocks, but
+if there's an error, Ruby's default exceptions aren't helpful.  NullObjects of
+some kind?
+
 The GraphManager ought not to have defaults for SourceSkepticism - keep that in
 the RemoteHost or other client code. Likewise, GM doesn't start GraphFoci. Both
 of those are the result of scope creep on GM.
@@ -81,6 +85,21 @@ That said, these resources might then form the basis of a credence review
 
 
 *** Pure Mad Science ***
+
+Omniscient test server.
+
+Basically: RemoteHost collects the requests that get made and records them.
+Play against server, and then "flatten" resulting meta-graph. TestServer simply
+replies to everything with flattened graph - possibly changing state (graph) on
+PUT/POST/DELETE.
+
+Two sets of test files:
+
+client -> server requests, the responses of which can be tested and recorded
+
+server -> client responses, used as fixtures for client tests - right things
+displayed / correct POSTs made.
+
 
 Single Graph Update
 client should be able to alter the graph as needed, build

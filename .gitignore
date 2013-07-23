@@ -12,3 +12,5 @@ publish/
 yardoc/
 gh-pages/
 .sass-cache/
+errors.err
+.cadre/

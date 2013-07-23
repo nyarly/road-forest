@@ -67,7 +67,7 @@ module RoadForest::RDF
       document = investigation.http_client.get(investigation.context_roles[:subject])
       case document.code
       when (200..299)
-        investigation.graph_manager.insert_document(document)
+        investigation.queryable.insert_document(document)
       when (300..399)
         #client should follow redirects
       when (400..499)

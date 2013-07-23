@@ -46,21 +46,20 @@ module RoadForest
     end
 
     def start_graph(resource)
-      @graph ||= RDF::GraphManager.new
-      focus = @graph.start(resource)
+      @graph ||= ::RDF::Graph.new
+      focus = RDF::GraphFocus.new
+      focus.graph_manager = @graph
+      focus.subject = resource
+
       yield focus if block_given?
       return focus
     end
 
     def absolutize(root_uri)
-      @graph.each_statement(:local) do |statement|
+      @graph.each_statement do |statement|
         original = statement.dup
         if ::RDF::URI === statement.subject and statement.subject.relative?
           statement.subject = root_uri.join(statement.subject)
-        end
-
-        if statement.predicate.relative?
-          statement.predicate = root_uri.join(statement.predicate)
         end
 
         if ::RDF::URI === statement.object and statement.object.relative?
@@ -68,7 +67,8 @@ module RoadForest
         end
 
         if statement != original
-          @graph.replace(original, statement)
+          @graph.delete(original)
+          @graph.insert(statement)
         end
       end
     end
