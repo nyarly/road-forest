@@ -18,12 +18,16 @@ module RoadForest
       def build_graph_manager
         manager = RDF::GraphManager.new
         manager.source_skepticism = RDF::SourceSkepticism.http
-        manager.http_client = HTTPClient.new(@app, @url)
+        manager.http_client = http_client
         manager
       end
 
+      def http_client
+        @http_client ||= HTTPClient.new(@app, @url)
+      end
+
       def http_exchanges
-        @graph.http_client.exchanges
+        http_client.exchanges
       end
     end
 

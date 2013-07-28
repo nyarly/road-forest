@@ -25,7 +25,7 @@ module RoadForest
     end
 
     def render_graph(graph)
-
+      Resource::ContentType::JSONLD.from_graph(graph)
     end
 
     def anneal(focus)
@@ -36,7 +36,7 @@ module RoadForest
     end
 
     def putting(&block)
-      target_graph = ::RDF::Graph.new
+      target_graph = ::RDF::Repository.new
       updater = RDF::UpdateFocus.new
       updater.source_graph = @graph
       updater.target_graph = target_graph

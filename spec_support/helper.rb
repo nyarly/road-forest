@@ -4,6 +4,6 @@ RSpec.configure do |config|
     %r{gems/rspec-core}
   ]
   config.run_all_when_everything_filtered = true
-  config.add_formatter(Cadre::RSpec::LibnotifyFormatter)
+  config.add_formatter(Cadre::RSpec::NotifyOnCompleteFormatter)
   config.add_formatter(Cadre::RSpec::QuickfixFormatter)
 end

@@ -4,7 +4,13 @@ require 'road-forest/test-support'
 
 describe RoadForest::RemoteHost do
   let :services do
-    RoadForest::ServicesHost.new
+    RFTest::ServicesHost.new.tap do |host|
+      host.file_records = [
+        RFTest::FileRecord.new("one", false),
+        RFTest::FileRecord.new("two", false),
+        RFTest::FileRecord.new("three", false)
+      ]
+    end
   end
 
   let :server do
@@ -26,8 +32,17 @@ describe RoadForest::RemoteHost do
         needs = target.first(:lc, "needs").as_list
 
         needs.each do |need|
-          need[[:lc, "path"]] = "Manifest"
+          need[[:lc, "resolved"]] = true
         end
+      end
+    end
+
+    it "should change the server state" do
+      Webmachine::Trace.traces.each do |trace|
+        pp [trace, Webmachine::Trace.fetch(trace)]
+      end
+      services.file_records.each do |record|
+        record.resolved.should == true
       end
     end
 
@@ -54,11 +69,22 @@ module RFTest
     class Nav < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/site-navigation#"); end
   end
 
+  class ServicesHost < ::RoadForest::ServicesHost
+    attr_accessor :file_records
+
+    def initialize
+      @file_records = []
+    end
+  end
+
+  FileRecord = Struct.new(:name, :resolved)
+
+
   class Application < RoadForest::Application
     def setup
       router.add  :root,              [],                    :read_only,     Models::Navigation
       router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
-      router.add  :need,              ["needs",'*'],         :leaf,          Models::Need
+      router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
     end
 
     module Models
@@ -92,23 +118,28 @@ module RFTest
 
         def fill_graph(graph)
           graph.add_list(:lc, "needs") do |list|
-            list << path_for(:need, '*' => "test/file")
+            services.file_records.each do |record|
+              if !record.resolved
+                list << path_for(:need, '*' => record.name)
+              end
+            end
           end
         end
       end
 
       class Need < RoadForest::Model
-        def exists?
-          true
+        def data
+          @data ||= services.file_records.find do |record|
+            record.name == params.remainder
+          end
         end
 
         def update(graph)
-
+          data.resolved = graph[[:lc, "resolved"]]
         end
 
         def fill_graph(graph)
-          graph[[:lc, "path"]] = params.remainder
-          graph[[:lc, "file"]] = "/files/#{params.remainder}"
+          graph[[:lc, "resolved"]] = data.resolved
         end
       end
     end

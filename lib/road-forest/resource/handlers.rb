@@ -5,7 +5,6 @@ module RoadForest
         @registry ||= {}
       end
 
-
       def self.register(handler_type, klass)
         registry[handler_type] = klass
 
@@ -44,14 +43,19 @@ module RoadForest
         Handler.new(resource_class, &block)
       end
 
-      def bundle_model(resource_class, model_class, route_name)
+      def bundle_typed_resource(resource_type, model_class, route_name)
+        resource_class = Resource::Handlers.registry.fetch(resource_type)
         bundle(resource_class) do |resource, request, response|
           resource.model = model_class.new(route_name, resource.params, services)
         end
       end
 
-      def bundle_typed_resource(resource_type, model_class, route_name)
-        bundle_model(Resource::Handlers.registry.fetch(resource_type), model_class, route_name)
+      def bundle_traced_resource(resource_type, model_class, route_name)
+        resource_class = Resource::Handlers.registry.fetch(resource_type)
+        bundle(resource_class) do |resource, request, response|
+          resource.model = model_class.new(route_name, resource.params, services)
+          resource.trace = true
+        end
       end
     end
   end

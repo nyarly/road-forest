@@ -15,11 +15,16 @@ module RoadForest
       register :read_only
 
       attr_accessor :model
+      attr_accessor :trace
 
       include ContentType::JSONLD
 
       def content_type_modules
         [ContentType::JSONLD]
+      end
+
+      def trace?
+        !!@trace
       end
 
       def content_types_provided
@@ -53,7 +58,7 @@ module RoadForest
       def retrieve_model
         results = @model.retrieve
         results.absolutize(@model.canonical_host)
-        results
+        results.graph
       end
       alias retreive_model retrieve_model
 

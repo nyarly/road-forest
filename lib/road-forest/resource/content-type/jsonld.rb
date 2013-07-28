@@ -50,8 +50,7 @@ module RoadForest
         end
 
         def to_jsonld
-          result = retreive_model
-          JSONLD::from_graph(result.graph)
+          result = ContentType::JSONLD.from_graph(retreive_model)
         end
 
         def from_jsonld
