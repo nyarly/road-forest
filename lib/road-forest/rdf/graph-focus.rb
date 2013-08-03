@@ -21,6 +21,7 @@ module RoadForest::RDF
 
     def each
       if block_given?
+        other
         values.each do |value|
           yield unwrap_value(value)
         end
@@ -84,7 +85,7 @@ module RoadForest::RDF
     include Normalization
     include FocusWrapping
 
-    attr_accessor :graph_manager, :subject, :root_url, :source_skepticism
+    attr_accessor :graph_manager, :subject, :root_url, :source_skepticism, :graph_transfer
     alias rdf subject
 
     def initialize
@@ -92,6 +93,7 @@ module RoadForest::RDF
       @subject = nil
       @root_url = nil
       @source_skepticism = nil
+      @graph_transfer = nil
     end
 
     def dup
@@ -100,6 +102,7 @@ module RoadForest::RDF
       other.subject = subject
       other.root_url = root_url
       other.source_skepticism = source_skepticism
+      other.graph_transfer = graph_transfer
       other
     end
 
@@ -119,6 +122,7 @@ module RoadForest::RDF
       ResourceQuery.new([], {}) do |query|
         query.subject_context = @root_url
         query.source_skepticism = @source_skepticism
+        query.graph_transfer = graph_transfer
         yield query
       end
     end
@@ -144,6 +148,8 @@ module RoadForest::RDF
       return forward_query_value( prefix, property )
     end
 
+    #XXX Maybe rev should return a decorator, so it looks like:
+    #focus.rev.get(...) or focus.rev.all(...)
     def rev(prefix, property = nil)
       return single_or_enum(reverse_query_value( prefix, property))
     end

@@ -87,41 +87,66 @@ module RoadForest
       end
       attr_reader :exchanges
 
-      def do_request(method, uri)
+      def do_request(request)
+        uri = request.url
+
         uri = Addressable::URI.parse(uri)
         uri = @default_url.join(uri)
 
         exchange = Exchange.new
 
-        exchange.method = method
+        exchange.method = request.method
         exchange.uri = uri
+        exchange.body = request.body
         exchange.dispatcher = @dispatcher
 
         @exchanges << exchange
 
         exchange.header('Host', [uri.host, uri.port].compact.join(':'))
         exchange.header('Accept', '*/*')
+        request.headers.each do |name, value|
+          exchange.header(name, value)
+        end
 
         yield exchange if block_given?
 
         exchange.do_request
 
-        document = RDF::Document.new
-        document.content_type = exchange.response.headers["Content-Type"]
-        document.code = exchange.response.code
-        document.body_string = exchange.response.body
-        document.source = uri
+        response = HTTP::Response.new
+        response.headers = exchange.response.headers.dup
+        response.status = exchange.response.code
+        response.body_string = exchange.response.body
 
-        return document
+        return response
       end
 
-      def head(url, &block); do_request('HEAD', url, &block); end
-      def get(url, &block); do_request('GET', url, &block); end
-      def post(url, &block); do_request('POST', url, &block); end
-      def put(url, &block); do_request('PUT', url, &block); end
-      def patch(url, &block); do_request('PATCH', url, &block); end
-      def delete(url, &block); do_request('DELETE', url, &block); end
-      def options(url, &block); do_request('OPTIONS', url, &block); end
+      def head(url, &block)
+        do_request('HEAD', url, &block)
+      end
+
+      def get(url, &block)
+        do_request('GET', url, &block)
+      end
+
+      def post(url, &block)
+        do_request('POST', url, &block)
+      end
+
+      def put(url, &block)
+        do_request('PUT', url, &block)
+      end
+
+      def patch(url, &block)
+        do_request('PATCH', url, &block)
+      end
+
+      def delete(url, &block)
+        do_request('DELETE', url, &block)
+      end
+
+      def options(url, &block)
+        do_request('OPTIONS', url, &block)
+      end
 
       class Exchange
         def initialize

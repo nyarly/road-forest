@@ -46,6 +46,14 @@ BGP queries should be solveable *across* resources - currently all patterns get
 a :context variable applied that all have to match, but it seems reasonable
 that multiple resources might participate in a solution.
 
+HTTP behaviors:
+Handling status codes -
+  Empty vs. full responses (200 v 204)
+  3xx and Location following
+  4xx - sometimes correctable, otherwise...
+  5xx
+
+
 
 *** API challenges ***
 

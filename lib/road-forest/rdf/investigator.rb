@@ -64,10 +64,10 @@ module RoadForest::RDF
     register :http
 
     def pursue(investigation)
-      document = investigation.http_client.get(investigation.context_roles[:subject])
-      case document.code
+      response = investigation.graph_transfer.make_request("GET", investigation.context_roles[:subject])
+      case response.status
       when (200..299)
-        investigation.queryable.insert_document(document)
+        investigation.queryable.insert_graph(response.url, response.graph)
       when (300..399)
         #client should follow redirects
       when (400..499)

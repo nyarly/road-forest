@@ -32,7 +32,7 @@ module RoadForest::RDF
       when RDF::Resource
       when /^_:/
         from = RDF::Resource.new(from)
-      when String
+      when String, RDF::URI, Addressable::URI
         from = interned_uri(from)
       when Symbol
         from = RDF::Node.new(from)
@@ -128,6 +128,9 @@ module RoadForest::RDF
         value = RDF::URI.new(value)
       end
 
+      if !value.query.nil? and value.query.empty?
+        value.query = nil
+      end
       value.validate!
       value.canonicalize!
 

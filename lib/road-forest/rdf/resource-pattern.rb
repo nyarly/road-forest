@@ -20,15 +20,18 @@ module RoadForest::RDF
           raise ArgumentError, "expected RoadForest::RDF::ResourcePattern, RDF::Query::Pattern, RDF::Statement, Hash, or Array, but got #{pattern.inspect}"
       end
 
-      pattern.context_roles = options[:context_roles] unless options.nil?
-      pattern.source_skepticism = options[:source_skepticism] unless options.nil?
+      unless options.nil?
+        pattern.context_roles = options[:context_roles]
+        pattern.source_skepticism = options[:source_skepticism]
+        pattern.graph_transfer = options[:graph_transfer]
+      end
 
       yield pattern if block_given?
 
       pattern
     end
 
-    attr_accessor :context_roles, :source_skepticism
+    attr_accessor :context_roles, :source_skepticism, :graph_transfer
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
       unless queryable.is_a? RoadForest::RDF::GraphManager
@@ -39,6 +42,7 @@ module RoadForest::RDF
       investigation.queryable = queryable
       investigation.context_roles = (query_context_roles || {}).merge(context_roles)
       investigation.source_skepticism = source_skepticism
+      investigation.graph_transfer = graph_transfer
 
       results = investigation.result do |results|
         super(queryable, bindings || {}) do |statement|
@@ -55,7 +59,7 @@ module RoadForest::RDF
     end
 
     class Investigation
-      attr_accessor :context_roles, :queryable, :results, :source_skepticism
+      attr_accessor :context_roles, :queryable, :results, :source_skepticism, :graph_transfer
 
       def initialize
         @results = []

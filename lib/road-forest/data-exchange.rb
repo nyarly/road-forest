@@ -38,18 +38,18 @@ module RoadForest
   #The results of processing an RDF update - could include a new graph, or a
   #different resource (url) to look at
   class Results
-    attr_accessor :graph, :subject_resource
+    attr_accessor :graph, :subject_resource, :go_to_resource
 
     def initialize(subject=nil, graph=nil)
       @graph, @subject_resource = graph, subject
       yield self if block_given?
     end
 
-    def start_graph(resource)
+    def start_graph(resource=nil)
       @graph ||= ::RDF::Graph.new
       focus = RDF::GraphFocus.new
       focus.graph_manager = @graph
-      focus.subject = resource
+      focus.subject = resource || @subject_resource
 
       yield focus if block_given?
       return focus

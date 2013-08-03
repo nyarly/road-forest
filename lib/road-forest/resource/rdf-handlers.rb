@@ -1,4 +1,3 @@
-require 'road-forest/resource/content-type/jsonld'
 require 'road-forest/resource/role/writable'
 require 'road-forest/resource/role/has-children'
 require 'road-forest/resource/handlers'
@@ -14,21 +13,40 @@ module RoadForest
 
       register :read_only
 
-      attr_accessor :model
+      attr_accessor :model, :services
       attr_accessor :trace
-
-      include ContentType::JSONLD
-
-      def content_type_modules
-        [ContentType::JSONLD]
-      end
 
       def trace?
         !!@trace
       end
 
+      #Overridden rather than metaprogram content type methods
+      def send(*args)
+        if args.length == 1 and not services.nil?
+          services.type_handling.fetch(args.first).call(self)
+        else
+          super
+        end
+      rescue KeyError
+        super
+      end
+
+      def method(name)
+        if services.nil?
+          super
+        else
+          services.type_handling.fetch(name).method(:call)
+        end
+      rescue KeyError
+        super
+      end
+
       def content_types_provided
-        ContentType::types_provided(content_type_modules)
+        services.type_handling.renderers.type_map
+      end
+
+      def provide_type(handler)
+        handler.from_graph(retreive_model)
       end
 
       def params
@@ -37,6 +55,12 @@ module RoadForest
           params.query_params = @request.query_params
           params.path_tokens = @request.path_tokens
         end
+      end
+
+      def render_to_body(result_graph)
+        type, renderer = services.type_handling.choose_renderer(request["Accept"])
+        response.headers["Content-Type"] = type.content_type_header
+        response.body = renderer.from_graph(result_graph)
       end
 
       def resource_exists?

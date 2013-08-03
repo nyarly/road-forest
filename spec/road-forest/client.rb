@@ -20,27 +20,36 @@ describe RoadForest::RemoteHost do
   describe "putting data to server" do
 
     before :each do
-      server.putting do |graph|
-        items = graph.all(:nav, "item")
+      begin
+        server.putting do |graph|
+          items = graph.all(:nav, "item")
 
-        unresolved = items.find do |nav_item|
-          nav_item[:nav, "label"] == "Unresolved"
+          unresolved = items.find do |nav_item|
+            nav_item[:nav, "label"] == "Unresolved"
+          end
+
+          target = unresolved.first(:nav, "target")
+
+          needs = target.first(:lc, "needs").as_list
+
+          needs.each do |need|
+            need[[:lc, "resolved"]] = true
+          end
         end
-
-        target = unresolved.first(:nav, "target")
-
-        needs = target.first(:lc, "needs").as_list
-
-        needs.each do |need|
-          need[[:lc, "resolved"]] = true
-        end
+      rescue
+        raise
       end
     end
 
     it "should change the server state" do
-      Webmachine::Trace.traces.each do |trace|
-        pp [trace, Webmachine::Trace.fetch(trace)]
+      tracing = true
+      tracing = false
+      if tracing
+        Webmachine::Trace.traces.each do |trace|
+          pp [trace, Webmachine::Trace.fetch(trace)]
+        end
       end
+
       services.file_records.each do |record|
         record.resolved.should == true
       end
@@ -134,7 +143,8 @@ module RFTest
           end
         end
 
-        def update(graph)
+        def update(results)
+          graph = results.start_graph
           data.resolved = graph[[:lc, "resolved"]]
         end
 

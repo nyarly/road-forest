@@ -216,6 +216,15 @@ module RoadForest::RDF
       #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_dump(:nquads))}"
     end
 
+    def insert_graph(context, graph)
+      context = normalize_context(context)
+      delete_statements(:context => context)
+      graph.each_statement do |statement|
+        statement.context = context
+        record_statement(statement)
+      end
+    end
+
     def add_statement(*args)
       case args.length
       when 1

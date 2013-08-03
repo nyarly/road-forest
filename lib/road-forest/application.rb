@@ -3,6 +3,7 @@ require 'road-forest/resource/handlers'
 require 'road-forest/dispatcher'
 require 'road-forest/path-provider'
 require 'road-forest/resource/rdf-handlers'
+require 'road-forest/http/type-handling-engine'
 
 module RoadForest
   class Application < Webmachine::Application
@@ -30,6 +31,7 @@ module RoadForest
       @services = service_host
       @services.canonical_host = @canonical_host
       @services.router = PathProvider.new(@dispatcher)
+      @services.type_handling ||= HTTP::TypeHandlingEngine.default
     end
   end
 end

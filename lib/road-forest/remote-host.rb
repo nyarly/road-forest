@@ -1,9 +1,17 @@
 require 'road-forest/rdf'
 require 'road-forest/rdf/update-focus'
 require 'road-forest/credence-annealer'
+require 'road-forest/http/graph-transfer'
 
 module RoadForest
   class ExconAdapter
+
+  end
+
+  class ContentTranslater
+    def initialize(graph)
+      @graph = graph
+    end
 
   end
 
@@ -24,6 +32,12 @@ module RoadForest
       @http_client ||= ExconAdapter.new
     end
 
+    def graph_transfer
+      @graph_transfer ||= HTTP::GraphTransfer.new.tap do |transfer|
+        transfer.http_client = http_client
+      end
+    end
+
     def render_graph(graph)
       Resource::ContentType::JSONLD.from_graph(graph)
     end
@@ -42,21 +56,22 @@ module RoadForest
       updater.target_graph = target_graph
       updater.subject = @url
       updater.source_skepticism = @graph.source_skepticism
+      updater.graph_transfer = graph_transfer
 
       anneal(updater, &block)
 
-      puts; puts "#{__FILE__}:#{__LINE__} => #{(target_graph.dump(:nquads))}"
       target_graph.each_context do |context|
-        puts; puts "#{__FILE__}:#{__LINE__} => #{(context).inspect}"
-        http_client.put(context) do |request|
-          graph = ::RDF::Graph.new(context, :data => target_graph)
-          request.body = render_graph(graph)
-        end
+        graph = ::RDF::Graph.new(context, :data => target_graph)
+        graph_transfer.put(context, graph)
       end
     end
 
     def getting(&block)
       reader = GraphReader.new(@graph)
+      reader.source_graph = @graph
+      reader.subject = @url
+      reader.source_skepticism = @graph.source_skepticism
+      reader.graph_transfer = graph_transfer
 
       anneal(reader, &block)
     end
