@@ -22,7 +22,7 @@ module RoadForest::RDF
 
       unless options.nil?
         pattern.context_roles = options[:context_roles]
-        pattern.source_skepticism = options[:source_skepticism]
+        pattern.source_rigor = options[:source_rigor]
         pattern.graph_transfer = options[:graph_transfer]
       end
 
@@ -31,7 +31,7 @@ module RoadForest::RDF
       pattern
     end
 
-    attr_accessor :context_roles, :source_skepticism, :graph_transfer
+    attr_accessor :context_roles, :source_rigor, :graph_transfer
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
       unless queryable.is_a? RoadForest::RDF::GraphManager
@@ -41,7 +41,7 @@ module RoadForest::RDF
       investigation = Investigation.new
       investigation.queryable = queryable
       investigation.context_roles = (query_context_roles || {}).merge(context_roles)
-      investigation.source_skepticism = source_skepticism
+      investigation.source_rigor = source_rigor
       investigation.graph_transfer = graph_transfer
 
       results = investigation.result do |results|
@@ -59,7 +59,7 @@ module RoadForest::RDF
     end
 
     class Investigation
-      attr_accessor :context_roles, :queryable, :results, :source_skepticism, :graph_transfer
+      attr_accessor :context_roles, :queryable, :results, :source_rigor, :graph_transfer
 
       def initialize
         @results = []
@@ -74,11 +74,11 @@ module RoadForest::RDF
       end
 
       def investigators
-        source_skepticism.investigators
+        source_rigor.investigators
       end
 
       def credence_policies
-        source_skepticism.credence_policies
+        source_rigor.credence_policies
       end
 
       def result

@@ -1,3 +1,5 @@
+require 'road-forest/application/results'
+
 module RoadForest
   class Model
     def initialize(route_name, params, services)
@@ -51,7 +53,7 @@ module RoadForest
     end
 
     def new_results
-      results = Results.new
+      results = Application::Results.new
       fill_results(results)
       return results
     end

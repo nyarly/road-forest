@@ -1,4 +1,4 @@
-module RoadForest
+class RoadForest::Application
   #XXX Worth doing some meta to get sanity checking of configs here? Better
   #fail early if there's no DB configured, right?
   class ServicesHost

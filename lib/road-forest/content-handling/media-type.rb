@@ -1,6 +1,6 @@
 module RoadForest
-  module HTTP
-    #@credit goes to Sean Cribbs & Ruby Webmachine for this code
+  module ContentHandling
+    #@credit goes to Sean Cribbs & Ruby Webmachine for the basis of this code
     #
     # Encapsulates a MIME media type, with logic for matching types.
     class MediaType

@@ -1,0 +1,24 @@
+Client API classes:
+  RF::RemoteHost
+
+Objects accessed through API:
+  GraphFocus
+  HTTPClient
+  SourceRigor
+  Investigator
+
+
+Server API classes:
+  RF::Application
+  RF::Model (+subclasses)
+
+Objects accessed through API:
+  RF::Dispatcher
+  RF::RDFHandler
+  (RDF::BlobHandler)
+
+
+Common API classes:
+
+Accessed objects:
+  MediaType

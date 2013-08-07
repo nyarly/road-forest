@@ -17,7 +17,7 @@ module RoadForest
 
       def build_graph_manager
         manager = RDF::GraphManager.new
-        manager.source_skepticism = RDF::SourceSkepticism.http
+        manager.source_rigor = RDF::SourceRigor.http
         manager.http_client = http_client
         manager
       end

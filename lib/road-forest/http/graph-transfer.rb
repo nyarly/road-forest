@@ -1,6 +1,6 @@
 require 'road-forest/http/message'
 require 'road-forest/http/graph-response'
-require 'road-forest/http/type-handling-engine'
+require 'road-forest/content-handling/engine'
 
 module RoadForest
   module HTTP
@@ -13,7 +13,7 @@ module RoadForest
       end
 
       def type_handling
-        @type_handling ||= TypeHandlingEngine.default
+        @type_handling ||= ContentHandling::Engine.default
       end
 
       def put(url, graph)

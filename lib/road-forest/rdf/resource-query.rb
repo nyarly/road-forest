@@ -5,7 +5,7 @@ module RoadForest::RDF
   class ResourceQuery < ::RDF::Query
     def initialize(patterns = [], options = {}, &block)
       @subject_context = options[:subject_context]
-      @source_skepticism = options[:source_skepticism]
+      @source_rigor = options[:source_rigor]
       super
       patterns = @patterns.dup
       @patterns.clear
@@ -14,7 +14,7 @@ module RoadForest::RDF
       end
     end
 
-    attr_accessor :subject_context, :source_skepticism, :graph_transfer
+    attr_accessor :subject_context, :source_rigor, :graph_transfer
     attr_accessor :patterns, :variables, :solutions, :options
 
     def <<(pattern)
@@ -25,14 +25,14 @@ module RoadForest::RDF
       options = {
         :context_roles => {:subject => subject_context},
         :graph_transfer => graph_transfer,
-        :source_skepticism => source_skepticism
+        :source_rigor => source_rigor
       }.merge(options || {})
 
       @patterns << ResourcePattern.from(pattern, options)
       self
     end
 
-    def self.from(other, subject_context = nil, source_skepticism = nil)
+    def self.from(other, subject_context = nil, source_rigor = nil)
       query = self.new
 
       if subject_context.nil? and other.respond_to?(:subject_context)
@@ -41,10 +41,10 @@ module RoadForest::RDF
         query.subject_context = subject_context
       end
 
-      if source_skepticism.nil? and other.respond_to?(:source_skepticism)
-        query.source_skepticism = other.source_skepticism
+      if source_rigor.nil? and other.respond_to?(:source_rigor)
+        query.source_rigor = other.source_rigor
       else
-        query.source_skepticism = source_skepticism
+        query.source_rigor = source_rigor
       end
 
       other.patterns.each do |pattern|

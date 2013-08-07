@@ -78,7 +78,7 @@ module RFTest
     class Nav < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/site-navigation#"); end
   end
 
-  class ServicesHost < ::RoadForest::ServicesHost
+  class ServicesHost < ::RoadForest::Application::ServicesHost
     attr_accessor :file_records
 
     def initialize

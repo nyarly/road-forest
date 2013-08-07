@@ -3,144 +3,30 @@ require 'road-forest/rdf/graph-focus'
 require 'road-forest/rdf/vocabulary'
 require 'road-forest/rdf/normalization'
 
-require 'road-forest/rdf/credence'
-require 'road-forest/rdf/credible-results'
-require 'road-forest/rdf/investigator'
-
 require 'road-forest/rdf/resource-query'
 require 'road-forest/rdf/resource-pattern'
 
-
 module RoadForest::RDF
-  class ContextFascade
-    include ::RDF::Countable
-    include ::RDF::Enumerable
-    include ::RDF::Queryable
-
-    def initialize(manager, resource, skepticism)
-      @manager, @resource, @skepticism = manager, resource, skepticism
-    end
-
-    def query_execute(query, &block)
-      ResourceQuery.from(query, @resource, @skepticism).execute(@manager, &block)
-    end
-
-    def query_pattern(pattern, &block)
-      ResourcePattern.from(pattern, {:context_roles => {:subject => @resource}, :source_skepticism => @skepticism}).execute(@manager, &block)
-    end
-
-    def each(&block)
-      @manager.each(&block)
-    end
-  end
-
-  class SourceSkepticism
-    class << self
-      def simple
-        skeptic = self.new
-        skeptic.policy_list(:must_local, :may_local)
-        skeptic.investigator_list(:null)
-        skeptic
-      end
-
-      def http
-        skeptic = self.new
-        skeptic.policy_list(:may_subject, :any) #XXX
-        skeptic.investigator_list(:http, :null)
-        skeptic
-      end
-    end
-
-    def initialize
-      @investigators = []
-      @investigation_limit = 3
-      @credence_policies = []
-    end
-
-    attr_accessor :investigators, :investigation_limit, :credence_policies
-
-    def policy_list(*names)
-      self.credence_policies = names.map do |name|
-        Credence.policy(name)
-      end
-    end
-
-    def investigator_list(*names)
-      self.investigators = names.map do |name|
-        Investigator[name].new
-      end
-    end
-  end
-
   class GraphManager
     include Normalization
 
     #The interface supported by ::RDF::Graph
-      include ::RDF::Countable
-      include ::RDF::Durable
+    include ::RDF::Countable
+    include ::RDF::Durable
     include ::RDF::Enumerable
     include ::RDF::Mutable
     include ::RDF::Queryable
     include ::RDF::Resource
 
-    #nb: methods Graph overrides:
-    #[[:graph?
-    #[RDF::Resource
-    #RDF::Term
-    #RDF::Value]]
-    #
-    #[:empty?
-    #[RDF::Enumerable
-    #RDF::Countable]]
-    #
-    #[:contexts
-    #[RDF::Enumerable]]
-    #
-    #[:delete_statement
-    #[RDF::Mutable]]
-    #
-    #[:count
-    #[RDF::Queryable
-    #
-    #RDF::Enumerable
-    #RDF::Countable
-    #Enumerable]]
-    #
-    #[:each_graph
-    #[RDF::Enumerable]]
-    #
-    #[:insert_statement
-    #[RDF::Mutable
-    #RDF::Writable]]
-    #
-    #[:load!
-    #[RDF::Mutable]]
-    #
-    #[:query_pattern
-    #[RDF::Queryable]]
-    #
-    #[:has_statement?
-    #[RDF::Enumerable]]
-    #
-    #[:durable?
-    #[RDF::Durable]]]
-    #
-    #Notes: currently thinking that the GM should respond to queries of all
-    #kinds with credible responses. Clients that want to prevent network access
-    #should have an interface to get a "no investigation" GM (with same repo)
-    #There's implications for "each" here - since we shouldn't leak less
-    #credible statements... and current design separates query handler
-
-
     attr_reader :repository, :current_impulse, :local_context_node
     attr_accessor :debug_io, :http_client
-    attr_accessor :source_skepticism
+    attr_accessor :source_rigor
 
     def initialize(repo = nil)
       @repository = repo || RDF::Repository.new
       @debug_io = nil
       @local_context_node = RDF::Node.new(:local)
-      @source_skepticism = nil
+      @source_rigor = nil
       next_impulse
       yield self if block_given?
     end
@@ -267,12 +153,13 @@ module RoadForest::RDF
       end
     end
 
+    #XXX Needs removal
     def start(subject)
       step = GraphFocus.new
       step.subject = normalize_resource(subject)
       step.root_url = step.subject
       step.graph_manager = self
-      step.source_skepticism = source_skepticism
+      step.source_rigor = source_rigor
       return step
     end
 
@@ -334,46 +221,9 @@ module RoadForest::RDF
       end
     end
 
-    #Queryable::query can call
-    #  query_execute (as a strange shorthand - avoid)
-    #  query_pattern (if really needed)
-    #  each (if query is blank - needs special handling)
-    #  include? (if query is constant === "is this statement there?")
-
-    #@param pattern(RDF::Query, RDF::Statement, Array(RDF::Term), Hash
-    def infer_context(query)
-      subjects = []
-      objects = []
-      case query
-      when ContextualQuery
-        return query.subject_context
-      when RDF::Query
-        query.patterns.each do |pattern|
-          subjects << pattern.subject
-          objects << pattern.object
-        end
-      when RDF::Statement
-        subjects << query.subject
-        objects << query.object
-      when Array
-        subjects << query[0]
-        object << query[0]
-      when Hash
-        subjects << query[:subject]
-        objects << query[:object]
-      end
-
-      return (subjects + objects).find do |term|
-        normalize_context(term)
-      end
-    end
-
     def unnamed_graph
       ::RDF::Graph.new(nil, :data => @repository)
     end
 
-    def query_unnamed(query)
-      query.execute(unnamed_graph)
-    end
     end
   end

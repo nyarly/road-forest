@@ -2,19 +2,9 @@ require 'road-forest/rdf'
 require 'road-forest/rdf/update-focus'
 require 'road-forest/credence-annealer'
 require 'road-forest/http/graph-transfer'
+require 'road-forest/http/adapters/excon'
 
 module RoadForest
-  class ExconAdapter
-
-  end
-
-  class ContentTranslater
-    def initialize(graph)
-      @graph = graph
-    end
-
-  end
-
   class RemoteHost
     def initialize(well_known_url)
       @url = ::RDF::URI.parse(well_known_url)
@@ -29,7 +19,7 @@ module RoadForest
 
     attr_writer :http_client
     def http_client
-      @http_client ||= ExconAdapter.new
+      @http_client ||= HTTP::ExconAdapter.new
     end
 
     def graph_transfer
@@ -43,7 +33,7 @@ module RoadForest
     end
 
     def anneal(focus)
-      annealer = CredenceAnnealer.new(@graph)
+      annealer = RDF::SourceRigor::CredenceAnnealer.new(@graph)
       annealer.resolve do
         yield focus
       end
@@ -55,7 +45,7 @@ module RoadForest
       updater.source_graph = @graph
       updater.target_graph = target_graph
       updater.subject = @url
-      updater.source_skepticism = @graph.source_skepticism
+      updater.source_rigor = @graph.source_rigor
       updater.graph_transfer = graph_transfer
 
       anneal(updater, &block)
@@ -70,7 +60,7 @@ module RoadForest
       reader = GraphReader.new(@graph)
       reader.source_graph = @graph
       reader.subject = @url
-      reader.source_skepticism = @graph.source_skepticism
+      reader.source_rigor = @graph.source_rigor
       reader.graph_transfer = graph_transfer
 
       anneal(reader, &block)
@@ -80,39 +70,5 @@ module RoadForest
     #def deleting
     #def posting
     #def patching
-  end
-
-  #Things that have to happen:
-  # * a consistent credence regime
-  # * a new local graph and a focus on it
-  #
-  # consistent credence:
-  #   The whole regime has to complete without needing investigation
-  #   Try the whole thing - check if investigated?
-  #     yes: redo
-  #     no: done
-  #
-  # new local graph
-  # * local graph building module
-  # * builder graph references copy into the local graph from the remote
-  #
-  #
-
-  class CredenceFocus < RDF::GraphFocus
-    def reset_promises
-    end
-
-    def fulfill_promises
-    end
-
-    def build_graph
-      graph_builder = RDF::GraphBuilder.new
-
-      credence_block do
-        yield graph_builder
-      end
-
-      return graph_builder.focus
-    end
   end
 end

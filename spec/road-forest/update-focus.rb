@@ -1,3 +1,4 @@
+require 'road-forest/rdf/source-rigor'
 require 'road-forest/rdf/update-focus'
 require 'road-forest/rdf/document'
 require 'rdf/rdfa'
@@ -53,8 +54,8 @@ describe RoadForest::RDF::UpdateFocus do
     ::RDF::Repository.new
   end
 
-  let :source_skepticism do
-    ::RoadForest::RDF::SourceSkepticism.new.tap do |skept|
+  let :source_rigor do
+    ::RoadForest::RDF::SourceRigor.new.tap do |skept|
       skept.policy_list(:may_subject, :any)
       skept.investigator_list(:null)
     end
@@ -65,7 +66,7 @@ describe RoadForest::RDF::UpdateFocus do
       updater.source_graph = source_graph
       updater.target_graph = target_graph
       updater.subject = context_node
-      updater.source_skepticism = source_skepticism
+      updater.source_rigor = source_rigor
     end
   end
 

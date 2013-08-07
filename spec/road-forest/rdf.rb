@@ -1,14 +1,13 @@
 require 'road-forest/rdf'
 require 'road-forest/rdf/document'
 require 'rdf/rdfa'
+require 'road-forest/rdf/graph-manager'
 
-require 'webmachine/application'
-require 'road-forest/resource/rdf-handlers'
 
 describe RoadForest::RDF do
   let :graph_manager do
     RoadForest::RDF::GraphManager.new do |handler|
-      handler.source_skepticism = RoadForest::RDF::SourceSkepticism.new.tap do |skept|
+      handler.source_rigor = RoadForest::RDF::SourceRigor.new.tap do |skept|
         skept.policy_list(:may_subject)
         skept.investigator_list(:null)
       end

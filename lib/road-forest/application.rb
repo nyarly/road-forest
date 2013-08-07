@@ -1,12 +1,17 @@
 require 'webmachine/application'
+module RoadForest
+  class Application < Webmachine::Application; end
+end
+
 require 'road-forest/resource/handlers'
-require 'road-forest/dispatcher'
-require 'road-forest/path-provider'
-require 'road-forest/resource/rdf-handlers'
-require 'road-forest/http/type-handling-engine'
+require 'road-forest/application/dispatcher'
+require 'road-forest/application/path-provider'
+require 'road-forest/application/services-host'
+require 'road-forest/resource/rdf'
+require 'road-forest/content-handling/engine'
 
 module RoadForest
-  class Application < Webmachine::Application
+  class Application
     include Resource::Handlers
 
     def initialize(canonical_host, services, configuration = nil, dispatcher = nil)
@@ -31,7 +36,7 @@ module RoadForest
       @services = service_host
       @services.canonical_host = @canonical_host
       @services.router = PathProvider.new(@dispatcher)
-      @services.type_handling ||= HTTP::TypeHandlingEngine.default
+      @services.type_handling ||= ContentHandling::Engine.default
     end
   end
 end

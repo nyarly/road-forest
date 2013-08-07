@@ -1,8 +1,8 @@
-require 'road-forest/http/media-type'
+require 'road-forest/content-handling/media-type'
 
 module RoadForest
-  module HTTP
-    class TypeHandlingEngine
+  module ContentHandling
+    class Engine
       class TypeHandlerList
         def initialize(prefix)
           @prefix = prefix
@@ -44,7 +44,7 @@ module RoadForest
       end
 
       def self.default
-        require 'road-forest/media-type/handlers/jsonld'
+        require 'road-forest/content-handling/type-handlers/jsonld'
         self.new.tap do |engine|
           engine.add "application/ld+json", RoadForest::MediaType::Handlers::JSONLD
         end

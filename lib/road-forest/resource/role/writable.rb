@@ -1,3 +1,6 @@
+require 'road-forest/resource/role/has-children'
+require 'road-forest/application/results'
+
 module RoadForest
   module Resource
     module Role
@@ -47,7 +50,7 @@ module RoadForest
         end
 
         def update_model(graph)
-          results = Results.new(request.uri, graph)
+          results = Application::Results.new(request.uri, graph)
           @model.update(results)
           results
         end
