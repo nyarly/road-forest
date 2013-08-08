@@ -1,4 +1,3 @@
-GraphStore: remove #start (used currently in specs), remove local context
 GraphStore shouldn't handle GraphFocuses directly. i.e. GM#start should be
 removed.
 

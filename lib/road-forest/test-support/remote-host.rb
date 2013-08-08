@@ -16,10 +16,7 @@ module RoadForest
       end
 
       def build_graph_store
-        store = RDF::GraphStore.new
-        store.source_rigor = RDF::SourceRigor.http
-        store.http_client = http_client
-        store
+        RDF::GraphStore.new
       end
 
       def http_client

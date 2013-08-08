@@ -19,14 +19,12 @@ module RoadForest::RDF
     include ::RDF::Resource
 
     attr_reader :repository, :current_impulse, :local_context_node
-    attr_accessor :debug_io, :http_client
-    attr_accessor :source_rigor
+    attr_accessor :debug_io
 
     def initialize(repo = nil)
       @repository = repo || RDF::Repository.new
-      @debug_io = nil
       @local_context_node = RDF::Node.new(:local)
-      @source_rigor = nil
+      @debug_io = nil
       next_impulse
       yield self if block_given?
     end

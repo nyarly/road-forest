@@ -12,9 +12,7 @@ describe RoadForest::RDF do
   end
 
   let :graph_store do
-    RoadForest::RDF::GraphStore.new do |handler|
-      handler.source_rigor = source_rigor
-    end
+    RoadForest::RDF::GraphStore.new
   end
 
   #merging graphs
