@@ -153,16 +153,6 @@ module RoadForest::RDF
       end
     end
 
-    #XXX Needs removal
-    def start(subject)
-      step = GraphFocus.new
-      step.subject = normalize_resource(subject)
-      step.root_url = step.subject
-      step.graph = self
-      step.source_rigor = source_rigor
-      return step
-    end
-
     def each_statement(context=nil, &block)
       query = {}
       unless context.nil?

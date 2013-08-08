@@ -1,17 +1,16 @@
 GraphStore: remove #start (used currently in specs), remove local context
 GraphStore shouldn't handle GraphFocuses directly. i.e. GM#start should be
 removed.
+
 GraphFocus should either take args to ::new or yield self
+
+GraphStore: remote _:local context
 
 Tests on the server side
 
 Every method in RDF::Normalization
 
-GraphFocus:
-  source
-  root_url
-
 RemoteHost should be the origin of most of config (see API)
 
-Starting at GraphFocus (or before) subject, source_rigor,
-graph_transfer should be bundled into a single object, passed down by GF
+Split GraphFocus class heirarchy into Client and Common - client includes
+GraphStore/SourceRigor stuff, Common is just graph walking and convenience.

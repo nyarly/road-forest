@@ -11,11 +11,14 @@ module RoadForest::RDF
     attr_accessor :graph, :subject, :root_url, :source_rigor
     alias rdf subject
 
-    def initialize
+    def initialize(subject = nil, graph = nil, rigor = nil)
       @graph = nil
       @subject = nil
       @root_url = nil
       @source_rigor = nil
+      self.subject = subject unless subject.nil?
+      self.graph = graph unless graph.nil?
+      self.source_rigor = rigor unless rigor.nil?
     end
 
     def dup

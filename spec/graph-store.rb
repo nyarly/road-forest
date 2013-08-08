@@ -1,16 +1,19 @@
 require 'rdf'
-require 'rdf/rdfa'
+#require 'rdf/rdfa'
 require 'road-forest/rdf/document'
 require 'road-forest/rdf/graph-store'
-require 'road-forest/rdf/source-rigor'
 
 describe RoadForest::RDF do
+  let :source_rigor do
+    RoadForest::RDF::SourceRigor.new.tap do |skept|
+      skept.policy_list(:may_subject)
+      skept.investigator_list(:null)
+    end
+  end
+
   let :graph_store do
     RoadForest::RDF::GraphStore.new do |handler|
-      handler.source_rigor = RoadForest::RDF::SourceRigor.new.tap do |skept|
-        skept.policy_list(:may_subject)
-        skept.investigator_list(:null)
-      end
+      handler.source_rigor = source_rigor
     end
   end
 
@@ -19,7 +22,7 @@ describe RoadForest::RDF do
   describe RoadForest::RDF::GraphStore do
     let :root_body do
       store = RoadForest::RDF::GraphStore.new
-      step = store.start("http://lrdesign.com/test-rdf")
+      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", store, source_rigor)
       step[[:foaf, :givenname]] = "Lester"
       step[[:dc, :date]] = Time.now
       step = step.node_at([:dc, :related], "http://lrdesign.com/test-rdf/sub")
@@ -30,7 +33,7 @@ describe RoadForest::RDF do
 
     let :second_body do
       store = RoadForest::RDF::GraphStore.new
-      step = store.start("http://lrdesign.com/test-rdf")
+      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", store, source_rigor)
       step[[:foaf, :givenname]] = "Foster"
       step[[:dc, :date]] = Time.now
 
@@ -56,7 +59,7 @@ describe RoadForest::RDF do
     end
 
     it "should transmit properties" do
-      step = graph_store.start("http://lrdesign.com/test-rdf")
+      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", graph_store, source_rigor)
       step[:dc, :date].should be_an_instance_of(Time)
     end
 
@@ -64,7 +67,7 @@ describe RoadForest::RDF do
       expect{
         graph_store.insert_document(second_doc)
       }.to change{
-        graph_store.start("http://lrdesign.com/test-rdf")[:foaf, :givenname]
+        RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", graph_store, source_rigor)[:foaf, :givenname]
       }
     end
   end
@@ -91,7 +94,7 @@ describe RoadForest::RDF do
     end
 
     let :step do
-      graph_store.start(main_subject)
+      RoadForest::RDF::GraphFocus.new(main_subject, graph_store, source_rigor)
     end
 
     it "should enumerate forward properties" do
