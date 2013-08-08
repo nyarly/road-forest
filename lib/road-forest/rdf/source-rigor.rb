@@ -1,3 +1,5 @@
+require 'road-forest'
+
 module RoadForest::RDF
   class SourceRigor
     require 'road-forest/rdf/source-rigor/investigator'
@@ -5,17 +7,17 @@ module RoadForest::RDF
 
     class << self
       def simple
-        skeptic = self.new
-        skeptic.policy_list(:must_local, :may_local)
-        skeptic.investigator_list(:null)
-        skeptic
+        rigor = self.new
+        rigor.policy_list(:must_local, :may_local)
+        rigor.investigator_list(:null)
+        rigor
       end
 
       def http
-        skeptic = self.new
-        skeptic.policy_list(:may_subject, :any) #XXX
-        skeptic.investigator_list(:http, :null)
-        skeptic
+        rigor = self.new
+        rigor.policy_list(:may_subject, :any) #XXX
+        rigor.investigator_list(:http, :null)
+        rigor
       end
     end
 

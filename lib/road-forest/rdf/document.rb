@@ -1,4 +1,5 @@
 require 'stringio'
+require 'road-forest'
 
 module RoadForest::RDF
   #Wrapper for text to be parsed into RDF

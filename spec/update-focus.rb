@@ -1,5 +1,6 @@
 require 'road-forest/rdf/source-rigor'
 require 'road-forest/rdf/update-focus'
+require 'road-forest/rdf/graph-store'
 require 'road-forest/rdf/document'
 require 'rdf/rdfa'
 

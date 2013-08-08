@@ -1,4 +1,5 @@
 require 'road-forest/rdf/update-focus'
+require 'road-forest/rdf/source-rigor'
 require 'road-forest/rdf/source-rigor/credence-annealer'
 require 'road-forest/http/graph-transfer'
 require 'road-forest/http/adapters/excon'
