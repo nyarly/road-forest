@@ -5,8 +5,8 @@ module RoadForest::RDF
   class UpdateFocus < GraphFocus
     attr_accessor :target_graph
 
-    alias source_graph= graph_manager=
-    alias source_graph graph_manager
+    alias source_graph= graph_store=
+    alias source_graph graph_store
 
     def dup
       other = super

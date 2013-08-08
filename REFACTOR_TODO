@@ -1,7 +1,8 @@
-SourceSkepticism -> SourceRigor
+✔ SourceSkepticism -> SourceRigor
 
 GraphManager -> ?MetaGraph ?ProvenanceGraph
 
+GraphManager: remove #start (used currently in specs), remove local context
 GraphManager shouldn't handle GraphFocuses directly. i.e. GM#start should be
 removed.
 GraphFocus should either take args to ::new or yield self
@@ -16,28 +17,7 @@ GraphFocus:
 
 RemoteHost should be the origin of most of config (see API)
 
-Starting at GraphFocus (or before) subject, source_skepticism<sub(rigor)>,
+Starting at GraphFocus (or before) subject, source_rigor,
 graph_transfer should be bundled into a single object, passed down by GF
 
-GraphManager: remove #start (used currently in specs), remove local context
-
-Concrete plan for relocation:
-
-road-forest/name.rb reserved for API entry points
-  road-forest/remote-host.rb
-  road-forest/application.rb
-  road-forest/model.rb
-
-road-forest/<dir> for components
-  road-forest/test-support/
-  road-forest/rdf/
-    graph-focus
-    meta-graph.rb
-    source-rigor.rb
-    source-rigor/
-  road-forest/application/
-  road-forest/content-handling/
-    media-type
-    (encoding, charset)
-  road-forest/http/
-    maybe someday: road-forest/wire/http (& .../wire/zmq|ssh|serial)
+✔ Concrete plan for relocation:

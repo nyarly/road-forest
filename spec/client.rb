@@ -1,4 +1,3 @@
-require 'road-forest/client'
 require 'road-forest/server'
 require 'road-forest/test-support'
 

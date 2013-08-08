@@ -34,7 +34,7 @@ module RoadForest::RDF
     attr_accessor :context_roles, :source_rigor, :graph_transfer
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
-      unless queryable.is_a? RoadForest::RDF::GraphManager
+      unless queryable.is_a? RoadForest::RDF::GraphStore
         return super(queryable, bindings || {}, &block)
       end
 

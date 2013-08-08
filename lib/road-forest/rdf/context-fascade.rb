@@ -6,20 +6,20 @@ module RoadForest::RDF
     include ::RDF::Enumerable
     include ::RDF::Queryable
 
-    def initialize(manager, resource, rigor)
-      @manager, @resource, @rigor = manager, resource, rigor
+    def initialize(store, resource, rigor)
+      @store, @resource, @rigor = store, resource, rigor
     end
 
     def query_execute(query, &block)
-      ResourceQuery.from(query, @resource, @rigor).execute(@manager, &block)
+      ResourceQuery.from(query, @resource, @rigor).execute(@store, &block)
     end
 
     def query_pattern(pattern, &block)
-      ResourcePattern.from(pattern, {:context_roles => {:subject => @resource}, :source_rigor => @rigor}).execute(@manager, &block)
+      ResourcePattern.from(pattern, {:context_roles => {:subject => @resource}, :source_rigor => @rigor}).execute(@store, &block)
     end
 
     def each(&block)
-      @manager.each(&block)
+      @store.each(&block)
     end
   end
 end

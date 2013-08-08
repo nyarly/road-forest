@@ -6,7 +6,7 @@ module RoadForest::RDF
       vocab = RDF::Vocabulary.find do |vocab|
         vocab.__prefix__.to_s == k
       end
-      #p k => vocab
+      #p k => vocab #ok
       h[k] = vocab unless vocab.nil?
       vocab
     end

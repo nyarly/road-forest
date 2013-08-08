@@ -7,7 +7,7 @@ require 'road-forest/rdf/resource-query'
 require 'road-forest/rdf/resource-pattern'
 
 module RoadForest::RDF
-  class GraphManager
+  class GraphStore
     include Normalization
 
     #The interface supported by ::RDF::Graph
@@ -158,7 +158,7 @@ module RoadForest::RDF
       step = GraphFocus.new
       step.subject = normalize_resource(subject)
       step.root_url = step.subject
-      step.graph_manager = self
+      step.graph_store = self
       step.source_rigor = source_rigor
       return step
     end
@@ -225,5 +225,5 @@ module RoadForest::RDF
       ::RDF::Graph.new(nil, :data => @repository)
     end
 
-    end
   end
+end

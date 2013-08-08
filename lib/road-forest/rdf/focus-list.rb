@@ -5,7 +5,7 @@ module RoadForest::RDF
     include Normalization
     include FocusWrapping
 
-    alias graph_manager graph
+    alias graph_store graph
 
     attr_accessor :root_url, :base_node, :source_rigor
 

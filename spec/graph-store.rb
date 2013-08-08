@@ -1,12 +1,11 @@
-require 'road-forest/rdf'
+require 'rdf'
+#require 'rdf/rdfa'
 require 'road-forest/rdf/document'
-require 'rdf/rdfa'
-require 'road-forest/rdf/graph-manager'
-
+require 'road-forest/rdf/graph-store'
 
 describe RoadForest::RDF do
-  let :graph_manager do
-    RoadForest::RDF::GraphManager.new do |handler|
+  let :graph_store do
+    RoadForest::RDF::GraphStore.new do |handler|
       handler.source_rigor = RoadForest::RDF::SourceRigor.new.tap do |skept|
         skept.policy_list(:may_subject)
         skept.investigator_list(:null)
@@ -16,25 +15,25 @@ describe RoadForest::RDF do
 
   #merging graphs
 
-  describe RoadForest::RDF::GraphManager do
+  describe RoadForest::RDF::GraphStore do
     let :root_body do
-      manager = RoadForest::RDF::GraphManager.new
-      step = manager.start("http://lrdesign.com/test-rdf")
+      store = RoadForest::RDF::GraphStore.new
+      step = store.start("http://lrdesign.com/test-rdf")
       step[[:foaf, :givenname]] = "Lester"
       step[[:dc, :date]] = Time.now
       step = step.node_at([:dc, :related], "http://lrdesign.com/test-rdf/sub")
       step[[:dc, :date]] = Time.now
 
-      manager.graph_dump(:rdfa)
+      store.graph_dump(:rdfa)
     end
 
     let :second_body do
-      manager = RoadForest::RDF::GraphManager.new
-      step = manager.start("http://lrdesign.com/test-rdf")
+      store = RoadForest::RDF::GraphStore.new
+      step = store.start("http://lrdesign.com/test-rdf")
       step[[:foaf, :givenname]] = "Foster"
       step[[:dc, :date]] = Time.now
 
-      manager.graph_dump(:rdfa)
+      store.graph_dump(:rdfa)
     end
 
     let :first_doc do
@@ -52,19 +51,19 @@ describe RoadForest::RDF do
     end
 
     before :each do
-      graph_manager.insert_document(first_doc)
+      graph_store.insert_document(first_doc)
     end
 
     it "should transmit properties" do
-      step = graph_manager.start("http://lrdesign.com/test-rdf")
+      step = graph_store.start("http://lrdesign.com/test-rdf")
       step[:dc, :date].should be_an_instance_of(Time)
     end
 
     it "should replace previous statements from same URL" do
       expect{
-        graph_manager.insert_document(second_doc)
+        graph_store.insert_document(second_doc)
       }.to change{
-        graph_manager.start("http://lrdesign.com/test-rdf")[:foaf, :givenname]
+        graph_store.start("http://lrdesign.com/test-rdf")[:foaf, :givenname]
       }
     end
   end
@@ -83,15 +82,15 @@ describe RoadForest::RDF do
     end
 
     before :each do
-      graph_manager.add_statement(root, [:dc, :relation], main_subject)
-      graph_manager.add_statement(creator, [:foaf, :familyName], "Lester")
-      graph_manager.add_statement(creator, [:foaf, :givenname], "Judson")
-      graph_manager.add_statement(main_subject, [:dc, :creator], creator)
-      graph_manager.add_statement(main_subject, [:dc, :date], Time.now)
+      graph_store.add_statement(root, [:dc, :relation], main_subject)
+      graph_store.add_statement(creator, [:foaf, :familyName], "Lester")
+      graph_store.add_statement(creator, [:foaf, :givenname], "Judson")
+      graph_store.add_statement(main_subject, [:dc, :creator], creator)
+      graph_store.add_statement(main_subject, [:dc, :date], Time.now)
     end
 
     let :step do
-      graph_manager.start(main_subject)
+      graph_store.start(main_subject)
     end
 
     it "should enumerate forward properties" do
@@ -121,36 +120,21 @@ describe RoadForest::RDF do
       step[:dc,:creator][:foaf,:givenname].should == "Judson"
     end
 
-    it "should be able to add properties with []=", :pending => "Should GraphManagers accept local writes?" do
+    it "should be able to add properties with []=", :pending => "Should GraphStores accept local writes?" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end.execute(graph_manager).should_not be_empty
+      end.execute(graph_store).should_not be_empty
     end
 
-    it "should be able to add properties with set", :pending => "Should GraphManagers accept local writes?" do
+    it "should be able to add properties with set", :pending => "Should GraphStores accept local writes?" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-      end.execute(graph_manager).should_not be_empty
+        store.execute(graph_store).should_not be_empty
+      end
     end
   end
-
-  #self context available?
-
-  #Statement Conflict:
-  #merge blank nodes
-  #missing property
-  #  no auth statements
-  #  old? auth statements
-  #conflicting properties
-  #non-authoritative statements
-  #strategy for gets
-  #
-  #Still undesigned:
-  #  Changes? (Update RDF, and PUT/POST/DELETE?
-  #    or
-  #  use forms directly, update #  based on response)
 end

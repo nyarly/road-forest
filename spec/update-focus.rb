@@ -45,7 +45,7 @@ describe RoadForest::RDF::UpdateFocus do
   end
 
   let :source_graph do
-    RoadForest::RDF::GraphManager.new.tap do |graph|
+    RoadForest::RDF::GraphStore.new.tap do |graph|
       graph.insert_document(document)
     end
   end
@@ -92,7 +92,7 @@ describe RoadForest::RDF::UpdateFocus do
     resource_graph.query([nil, Voc[:c], "jagular", context_node]).should_not be_empty
   end
 
-  it "should trigger (only one) Manager query just by writing" do
+  it "should trigger (only one) Store query just by writing" do
     updater[Voc[:d]] = 14
     updater[Voc[:e]] = "fourteen"
 

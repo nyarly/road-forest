@@ -1,5 +1,5 @@
 require 'road-forest/remote-host'
-require 'road-forest/rdf/graph-manager'
+require 'road-forest/rdf/graph-store'
 require 'road-forest/rdf/document'
 require 'addressable/uri'
 require 'webmachine/headers'
@@ -15,11 +15,11 @@ module RoadForest
         super(app.canonical_host)
       end
 
-      def build_graph_manager
-        manager = RDF::GraphManager.new
-        manager.source_rigor = RDF::SourceRigor.http
-        manager.http_client = http_client
-        manager
+      def build_graph_store
+        store = RDF::GraphStore.new
+        store.source_rigor = RDF::SourceRigor.http
+        store.http_client = http_client
+        store
       end
 
       def http_client

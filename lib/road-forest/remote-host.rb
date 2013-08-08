@@ -1,6 +1,5 @@
-require 'road-forest/rdf'
 require 'road-forest/rdf/update-focus'
-require 'road-forest/credence-annealer'
+require 'road-forest/rdf/source-rigor/credence-annealer'
 require 'road-forest/http/graph-transfer'
 require 'road-forest/http/adapters/excon'
 
@@ -8,13 +7,13 @@ module RoadForest
   class RemoteHost
     def initialize(well_known_url)
       @url = ::RDF::URI.parse(well_known_url)
-      @graph = build_graph_manager
+      @graph = build_graph_store
     end
 
-    def build_graph_manager
-      graph_manager = RDF::GraphManager.new
-      graph_manager.http_client = http_client
-      return graph_manager
+    def build_graph_store
+      graph_store = RDF::GraphStore.new
+      graph_store.http_client = http_client
+      return graph_store
     end
 
     attr_writer :http_client

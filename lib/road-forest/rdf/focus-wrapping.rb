@@ -14,7 +14,7 @@ module RoadForest::RDF
         next_step.root_url = normalize_context(value)
       end
       next_step.subject = value
-      next_step.graph_manager = graph_manager
+      next_step.graph_store = graph_store
       next_step.source_rigor = source_rigor
       next_step
     end

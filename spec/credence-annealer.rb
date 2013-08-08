@@ -1,10 +1,10 @@
 require 'road-forest/rdf/source-rigor/credence-annealer'
-require 'road-forest/rdf/graph-manager'
+require 'road-forest/rdf/graph-store'
 require 'timeout'
 
 describe RoadForest::RDF::SourceRigor::CredenceAnnealer do
   let :graph do
-    RoadForest::RDF::GraphManager.new
+    RoadForest::RDF::GraphStore.new
   end
 
   subject :annealer do
@@ -19,7 +19,7 @@ describe RoadForest::RDF::SourceRigor::CredenceAnnealer do
     tested.should be_true
   end
 
-  it "should re-run it's block until the GraphManager settles" do
+  it "should re-run it's block until the GraphStore settles" do
     graph.stub(:quiet_impulse?).and_return(false, false, true)
 
     times_run = 0
