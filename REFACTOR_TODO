@@ -1,9 +1,5 @@
-✔ SourceSkepticism -> SourceRigor
-
-GraphManager -> ?MetaGraph ?ProvenanceGraph
-
-GraphManager: remove #start (used currently in specs), remove local context
-GraphManager shouldn't handle GraphFocuses directly. i.e. GM#start should be
+GraphStore: remove #start (used currently in specs), remove local context
+GraphStore shouldn't handle GraphFocuses directly. i.e. GM#start should be
 removed.
 GraphFocus should either take args to ::new or yield self
 
@@ -19,5 +15,3 @@ RemoteHost should be the origin of most of config (see API)
 
 Starting at GraphFocus (or before) subject, source_rigor,
 graph_transfer should be bundled into a single object, passed down by GF
-
-✔ Concrete plan for relocation:

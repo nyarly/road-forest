@@ -88,7 +88,7 @@ module RoadForest::RDF
     include GraphWriting
 
     def target_graph
-      graph_store
+      graph
     end
 
     protected
@@ -106,7 +106,7 @@ module RoadForest::RDF
     end
 
     def query_value(query)
-      solutions = query.execute(graph_store)
+      solutions = query.execute(graph)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end

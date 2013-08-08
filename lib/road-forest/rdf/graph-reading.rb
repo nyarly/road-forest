@@ -8,24 +8,22 @@ module RoadForest::RDF
     include Normalization
     include FocusWrapping
 
-    attr_accessor :graph_store, :subject, :root_url, :source_rigor, :graph_transfer
+    attr_accessor :graph, :subject, :root_url, :source_rigor
     alias rdf subject
 
     def initialize
-      @graph_store = nil
+      @graph = nil
       @subject = nil
       @root_url = nil
       @source_rigor = nil
-      @graph_transfer = nil
     end
 
     def dup
       other = self.class.new
-      other.graph_store = graph_store
+      other.graph = graph
       other.subject = subject
       other.root_url = root_url
       other.source_rigor = source_rigor
-      other.graph_transfer = graph_transfer
       other
     end
 
@@ -45,7 +43,6 @@ module RoadForest::RDF
       ResourceQuery.new([], {}) do |query|
         query.subject_context = @root_url
         query.source_rigor = @source_rigor
-        query.graph_transfer = graph_transfer
         yield query
       end
     end
@@ -86,7 +83,7 @@ module RoadForest::RDF
     end
 
     def as_list
-      graph = ContextFascade.new(@graph_store, @root_url, @source_rigor)
+      graph = ContextFascade.new(@graph, @root_url, @source_rigor)
       list = FocusList.new(@subject, graph)
       list.base_node = self
       list.source_rigor = source_rigor
@@ -106,7 +103,7 @@ module RoadForest::RDF
     end
 
     def query_properties(query)
-      query.execute(graph_store).map do |solution|
+      query.execute(graph).map do |solution|
         prop = solution.property
         if qname = prop.qname
           qname

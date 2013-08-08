@@ -15,7 +15,7 @@ module RoadForest
       def start_graph(resource=nil)
         @graph ||= ::RDF::Graph.new
         focus = RDF::GraphFocus.new
-        focus.graph_store = @graph
+        focus.graph = @graph
         focus.subject = resource || @subject_resource
 
         yield focus if block_given?

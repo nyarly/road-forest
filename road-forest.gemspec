@@ -46,6 +46,7 @@ Gem::Specification.new do |spec|
   lib/road-forest/rdf/resource-pattern.rb
   lib/road-forest/rdf/parcel.rb
   lib/road-forest/rdf/resource-query.rb
+  lib/road-forest/rdf/investigation.rb
   lib/road-forest/http/message.rb
   lib/road-forest/http/graph-response.rb
   lib/road-forest/http/adapters/excon.rb

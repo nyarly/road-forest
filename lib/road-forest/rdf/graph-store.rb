@@ -158,7 +158,7 @@ module RoadForest::RDF
       step = GraphFocus.new
       step.subject = normalize_resource(subject)
       step.root_url = step.subject
-      step.graph_store = self
+      step.graph = self
       step.source_rigor = source_rigor
       return step
     end

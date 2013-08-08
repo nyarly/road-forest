@@ -28,6 +28,15 @@ module RoadForest
       end
     end
 
+    def source_rigor
+      @source_rigor ||=
+        begin
+          rigor = RDF::SourceRigor.http
+          rigor.graph_transfer = graph_transfer
+          rigor
+        end
+    end
+
     def render_graph(graph)
       Resource::ContentType::JSONLD.from_graph(graph)
     end
@@ -42,11 +51,10 @@ module RoadForest
     def putting(&block)
       target_graph = ::RDF::Repository.new
       updater = RDF::UpdateFocus.new
+      updater.subject = @url
       updater.source_graph = @graph
       updater.target_graph = target_graph
-      updater.subject = @url
-      updater.source_rigor = @graph.source_rigor
-      updater.graph_transfer = graph_transfer
+      updater.source_rigor = source_rigor
 
       anneal(updater, &block)
 
@@ -60,8 +68,7 @@ module RoadForest
       reader = GraphReader.new(@graph)
       reader.source_graph = @graph
       reader.subject = @url
-      reader.source_rigor = @graph.source_rigor
-      reader.graph_transfer = graph_transfer
+      reader.source_rigor = source_rigor
 
       anneal(reader, &block)
     end

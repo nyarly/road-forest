@@ -27,7 +27,7 @@ module RoadForest::RDF
       @credence_policies = []
     end
 
-    attr_accessor :investigators, :investigation_limit, :credence_policies
+    attr_accessor :graph_transfer, :investigators, :investigation_limit, :credence_policies
 
     def policy_list(*names)
       self.credence_policies = names.map do |name|

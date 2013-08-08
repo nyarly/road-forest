@@ -14,7 +14,7 @@ module RoadForest::RDF
       end
     end
 
-    attr_accessor :subject_context, :source_rigor, :graph_transfer
+    attr_accessor :subject_context, :source_rigor
     attr_accessor :patterns, :variables, :solutions, :options
 
     def <<(pattern)
@@ -24,7 +24,6 @@ module RoadForest::RDF
     def pattern(pattern, options = nil)
       options = {
         :context_roles => {:subject => subject_context},
-        :graph_transfer => graph_transfer,
         :source_rigor => source_rigor
       }.merge(options || {})
 

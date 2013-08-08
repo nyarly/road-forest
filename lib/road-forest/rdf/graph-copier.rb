@@ -6,10 +6,10 @@ module RoadForest
     class GraphCopier < GraphFocus
       attr_accessor :source_graph, :subject
 
-      alias target_graph graph_store
+      alias target_graph graph
 
       def initialize
-        @graph_store = ::RDF::Graph.new
+        @graph = ::RDF::Graph.new
       end
     end
   end
