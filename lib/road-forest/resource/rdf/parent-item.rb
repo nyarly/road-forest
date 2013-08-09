@@ -15,7 +15,9 @@ module RoadForest
       include Role::HasChildren
 
       def allowed_methods
-        (super + [Role::Writable, Role::HasChildren].map(&:allowed_methods)).uniq
+        (super + [Role::Writable, Role::HasChildren].inject([]) do |list, mod|
+          list + mod.allowed_methods
+        end).uniq
       end
     end
 

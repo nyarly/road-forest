@@ -24,16 +24,27 @@ describe RoadForest::RemoteHost do
   describe "posting data to server" do
 
     before :each do
-      server.posting do |graph|
-        items = graph.all(:nav, "item")
+      begin
+        server.posting do |graph|
+          items = graph.all(:nav, "item")
 
-        unresolved = items.find do |nav_item|
-          nav_item[:nav, "label"] == "Unresolved"
-        end
+          unresolved = items.find do |nav_item|
+            nav_item[:nav, "label"] == "Unresolved"
+          end
 
-        unresolved.post_to do |new_need|
-          new_need[[:lc, "path"]] = "lawyers/guns/money"
+          target = unresolved.first(:nav, "target")
+
+          target.post_to do |new_need|
+            new_need[[:lc, "path"]] = "lawyers/guns/money"
+          end
         end
+      rescue
+        if tracing
+          Webmachine::Trace.traces.each do |trace|
+            pp [trace, Webmachine::Trace.fetch(trace)]
+          end
+        end
+        raise
       end
     end
 
@@ -118,7 +129,7 @@ module RFTest
   class Application < RoadForest::Application
     def setup
       router.add  :root,              [],                    :read_only,     Models::Navigation
-      router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
+      router.add_traced  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
       router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
     end
 
@@ -148,7 +159,12 @@ module RFTest
         end
 
         def update(graph)
+        end
 
+        def add_child(results)
+          graph = results.start_graph
+          new_file = FileRecord.new(graph.first(:lc, "path"), false)
+          services.file_records << new_file
         end
 
         def fill_graph(graph)

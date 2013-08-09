@@ -62,7 +62,7 @@ module RoadForest
       new_results
     end
 
-    def add_child(graph)
+    def add_child(results)
       new_results
     end
 

@@ -21,6 +21,7 @@ module RoadForest::RDF
     def post_to
       graph = ::RDF::Graph.new
       focus = GraphFocus.new(subject, graph, source_rigor) #XXX non-client version
+      graphs[subject] = graph
       yield focus if block_given?
       return focus
     end

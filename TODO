@@ -10,6 +10,9 @@ Yourself - file transfer endpoint
   process_post: default (unused)
   content_types_accepted: @model.update(params, blob) - update vs. create?
 
+Client error exceptions
+  40x -> per code exception classes, include Response content
+
 Other concerns:
 Content type handling (iow: RDF<->text format)
 Authentication

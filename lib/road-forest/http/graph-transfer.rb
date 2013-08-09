@@ -24,6 +24,10 @@ module RoadForest
         make_request("GET", url)
       end
 
+      def post(url, graph)
+        make_request("POST", url, graph)
+      end
+
       def make_request(method, url, graph=nil)
         method = method.to_s.upcase
 
