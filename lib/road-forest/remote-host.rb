@@ -1,4 +1,3 @@
-require 'road-forest/rdf/update-focus'
 require 'road-forest/rdf/source-rigor'
 require 'road-forest/rdf/source-rigor/credence-annealer'
 require 'road-forest/http/graph-transfer'
@@ -49,12 +48,10 @@ module RoadForest
     end
 
     def putting(&block)
+      require 'road-forest/rdf/update-focus'
       target_graph = ::RDF::Repository.new
-      updater = RDF::UpdateFocus.new
-      updater.subject = @url
-      updater.source_graph = @graph
+      updater = RDF::UpdateFocus.new(@url, @graph, source_rigor)
       updater.target_graph = target_graph
-      updater.source_rigor = source_rigor
 
       anneal(updater, &block)
 
@@ -64,11 +61,17 @@ module RoadForest
       end
     end
 
+    def posting(&block)
+      require 'road-forest/rdf/post-focus'
+      poster = RDF::PostFocus.new(@url, @graph, source_rigor)
+
+      anneal(poster, &block)
+
+      poster.send_graphs
+    end
+
     def getting(&block)
-      reader = GraphReader.new(@graph)
-      reader.source_graph = @graph
-      reader.subject = @url
-      reader.source_rigor = source_rigor
+      reader = GraphReader.new(@url, @graph, source_rigor)
 
       anneal(reader, &block)
     end

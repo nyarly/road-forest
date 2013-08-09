@@ -16,33 +16,60 @@ describe RoadForest::RemoteHost do
     RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new("http://road-forest.test-domain.com/", services))
   end
 
-  describe "putting data to server" do
+  let :tracing do
+    true
+    false
+  end
+
+  describe "posting data to server" do
 
     before :each do
-      begin
-        server.putting do |graph|
-          items = graph.all(:nav, "item")
+      server.posting do |graph|
+        items = graph.all(:nav, "item")
 
-          unresolved = items.find do |nav_item|
-            nav_item[:nav, "label"] == "Unresolved"
-          end
-
-          target = unresolved.first(:nav, "target")
-
-          needs = target.first(:lc, "needs").as_list
-
-          needs.each do |need|
-            need[[:lc, "resolved"]] = true
-          end
+        unresolved = items.find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
         end
-      rescue
-        raise
+
+        unresolved.post_to do |new_need|
+          new_need[[:lc, "path"]] = "lawyers/guns/money"
+        end
       end
     end
 
     it "should change the server state" do
-      tracing = true
-      tracing = false
+      if tracing
+        Webmachine::Trace.traces.each do |trace|
+          pp [trace, Webmachine::Trace.fetch(trace)]
+        end
+      end
+
+      services.file_records.find do |record|
+        record.name == "lawyers/guns/money"
+      end.should be_an_instance_of RFTest::FileRecord
+    end
+  end
+
+  describe "putting data to server" do
+    before :each do
+      server.putting do |graph|
+        items = graph.all(:nav, "item")
+
+        unresolved = items.find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
+        end
+
+        target = unresolved.first(:nav, "target")
+
+        needs = target.first(:lc, "needs").as_list
+
+        needs.each do |need|
+          need[[:lc, "resolved"]] = true
+        end
+      end
+    end
+
+    it "should change the server state" do
       if tracing
         Webmachine::Trace.traces.each do |trace|
           pp [trace, Webmachine::Trace.fetch(trace)]
