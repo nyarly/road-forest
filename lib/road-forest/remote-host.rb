@@ -71,14 +71,20 @@ module RoadForest
     end
 
     def getting(&block)
-      reader = GraphReader.new(@url, @graph, source_rigor)
+      reader = RDF::GraphReading.new(@url, @graph, source_rigor)
 
       anneal(reader, &block)
     end
 
+    def put_file(destination, type, io)
+      request = HTTP::Request.new("PUT", destination)
+      request.body = io
+      request.headers["Content-Type"] = type
+      response = http_client.do_request request
+    end
+
     #TODO:
     #def deleting
-    #def posting
     #def patching
   end
 end

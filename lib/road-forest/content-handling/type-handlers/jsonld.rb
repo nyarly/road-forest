@@ -5,43 +5,61 @@ require 'json/ld'
 module RoadForest
   module MediaType
     module Handlers
-      module JSONLD
-        def self.content_types
-          ["application/ld+json"]
-        end
-
+      module Wrap
         class Render
-          def from_graph(rdf)
-            JSON::LD::Writer.buffer do |writer|
-              rdf.each_statement do |statement|
-                writer << statement
-              end
-            end
+          def initialize(handler)
+            @handler = handler
           end
 
+          def local_to_network(network)
+            @handler.local_to_network(network)
+          end
+          alias from_graph local_to_network
+
           def call(resource)
-            #puts; puts "#{__FILE__}:#{__LINE__} =>
-            ##{(rdf.graph_dump(:ntriples)).inspect}"
-            from_graph(resource.retreive_model)
+            local_to_network(resource.retreive_model)
           end
         end
 
         class Parse
-          def to_graph(source)
-            graph = ::RDF::Graph.new
-            reader = JSON::LD::Reader.new(source)
-            reader.each_statement do |statement|
-              graph.insert(statement)
-            end
-            graph
+          def initialize(handler)
+            @handler = handler
           end
+
+          def network_to_local(source)
+            @handler.network_to_local(source)
+          end
+          alias to_graph network_to_local
 
           def call(resource)
             source = resource.request_body
-            graph = to_graph(source)
+            graph = network_to_local(source)
             result_graph = resource.accept_graph(graph)
             resource.render_to_body(result_graph)
           end
+        end
+      end
+
+      class JSONLD
+        def content_types
+          ["application/ld+json"]
+        end
+
+        def local_to_network(rdf)
+          JSON::LD::Writer.buffer do |writer|
+            rdf.each_statement do |statement|
+              writer << statement
+            end
+          end
+        end
+
+        def network_to_local(source)
+          graph = ::RDF::Graph.new
+          reader = JSON::LD::Reader.new(source)
+          reader.each_statement do |statement|
+            graph.insert(statement)
+          end
+          graph
         end
       end
     end

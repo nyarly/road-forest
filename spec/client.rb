@@ -21,8 +21,55 @@ describe RoadForest::RemoteHost do
     false
   end
 
-  describe "posting data to server" do
+  let :destination_dir do
+    "spec_support/destination"
+  end
 
+  let :source_path do
+    "spec_support/test-file.txt"
+  end
+
+  before :each do
+    require 'fileutils'
+    FileUtils.rm_f(destination_dir)
+    FileUtils.mkdir_p(destination_dir)
+  end
+
+  describe "raw put of file data" do
+    before :each do
+      @destination = nil
+      server.getting do |graph|
+        items = graph.all(:nav, "item")
+
+        unresolved = items.find do |nav_item|
+          nav_item[:nav, "label"] == "Unresolved"
+        end
+
+        target = unresolved.first(:nav, "target")
+
+        needs = target.first(:lc, "needs").as_list
+
+        @destination = needs.first
+      end
+
+      unless @destination.nil?
+        File::open(source_path) do |file|
+          pp server.put_file(@destination, "text/plain", file)
+        end
+      end
+    end
+
+    it "should set destination" do
+      @destination.should.to_s == "http://road-forest.test-domain.com/needs/one"
+    end
+
+    it "should deliver file to destination path" do
+      File::read(File::join(destination_dir, "needs/one")).should ==
+        File::read(source_path)
+    end
+  end
+
+  describe "posting data to server" do
     before :each do
       begin
         server.posting do |graph|
@@ -131,6 +178,8 @@ module RFTest
       router.add  :root,              [],                    :read_only,     Models::Navigation
       router.add_traced  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
       router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
+      #router.add  :file_content,      ["files", "*"],        :blob,
+      #Models::NeedContent
     end
 
     module Models
@@ -178,6 +227,10 @@ module RFTest
         end
       end
 
+      class NeedContent < RoadForest::FileModel
+
+      end
+
       class Need < RoadForest::Model
         def data
           @data ||= services.file_records.find do |record|
@@ -192,6 +245,7 @@ module RFTest
 
         def fill_graph(graph)
           graph[[:lc, "resolved"]] = data.resolved
+          graph[[:lc, "name"]] = data.name
         end
       end
     end

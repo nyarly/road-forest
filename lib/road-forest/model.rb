@@ -75,4 +75,7 @@ module RoadForest
       false
     end
   end
+
+  class FileModel < Model
+  end
 end

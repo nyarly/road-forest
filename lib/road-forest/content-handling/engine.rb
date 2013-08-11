@@ -46,7 +46,7 @@ module RoadForest
       def self.default
         require 'road-forest/content-handling/type-handlers/jsonld'
         self.new.tap do |engine|
-          engine.add "application/ld+json", RoadForest::MediaType::Handlers::JSONLD
+          engine.add "application/ld+json", RoadForest::MediaType::Handlers::JSONLD.new
         end
       end
 
@@ -57,20 +57,21 @@ module RoadForest
       end
       attr_reader :renderers, :parsers
 
-      def add_type(*args)
-        type, mod, *rest = *args
-        add_parser(type, mod.const_get("Parse").new(*rest))
-        add_renderer(type, mod.const_get("Render").new(*rest))
+      def add_type(type, handler)
+        add_parser(type, handler)
+        add_renderer(type, handler)
       end
       alias add add_type
 
       def add_parser(type, object)
-        parsers.add(type, object)
+        wrapper = RoadForest::MediaType::Handlers::Wrap::Parse.new(object)
+        parsers.add(type, wrapper)
       end
       alias accept add_parser
 
       def add_renderer(type, object)
-        renderers.add(type, object)
+        wrapper = RoadForest::MediaType::Handlers::Wrap::Render.new(object)
+        renderers.add(type, wrapper)
       end
       alias provide add_renderer
 
