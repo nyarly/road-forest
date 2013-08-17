@@ -10,27 +10,12 @@ module RoadForest
           false
         end
 
-        def build_graph
-          type, parser = services.type_handling.choose_parser(request.content_type || 'application/octet-stream')
-          parser.to_graph(request.body)
-        end
-
         def process_post
-          result = add_child_graph(params, build_graph)
+          parser = model.type_handling.choose_parser(request.content_type || 'application/octet-stream')
 
-          if result.go_to_resource
-            @response.location = result.go_to_resource
-          end
-
+          parser.add_child(self)
           return true
         end
-
-        def add_child_graph(params, graph)
-          results = Application::Results.new(request.uri, graph)
-          @model.add_child(results)
-          results
-        end
-
       end
     end
   end

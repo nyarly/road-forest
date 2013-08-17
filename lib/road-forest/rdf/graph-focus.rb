@@ -40,7 +40,7 @@ module RoadForest::RDF
         property = [property, value]
         value = extra
       end
-      return normalize_property(property), value
+      return normalize_property(property), normalize_term(value)
     end
 
     def set(property, value, extra=nil)
@@ -91,25 +91,5 @@ module RoadForest::RDF
       graph
     end
 
-    protected
-
-    def reverse_query_value(prefix, property=nil)
-      query_value(build_query{|q|
-        q.pattern([ :value, normalize_property(prefix, property), normalize_resource(subject)])
-      })
-    end
-
-    def forward_query_value(prefix, property=nil)
-      query_value(build_query{|q|
-        q.pattern([ normalize_resource(subject), normalize_property(prefix, property), :value])
-      })
-    end
-
-    def query_value(query)
-      solutions = query.execute(graph)
-      solutions.map do |solution|
-        unwrap_value(solution.value)
-      end
-    end
   end
 end

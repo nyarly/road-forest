@@ -12,8 +12,7 @@ module RoadForest
 
         register :read_only
 
-        attr_accessor :model, :services
-        attr_accessor :trace
+        attr_accessor :model, :trace
 
         ### RoadForest interface
 
@@ -25,16 +24,20 @@ module RoadForest
           end
         end
 
-        def render_to_body(result_graph)
-          type, renderer = services.type_handling.choose_renderer(request["Accept"])
-          response.headers["Content-Type"] = type.content_type_header
-          response.body = renderer.from_graph(result_graph)
+        def request_accept_header
+          request.headers["Accept"]
+        end
+
+        def response_content_type=(type)
+          response.headers["Content-Type"] = type
+        end
+
+        def response_body=(body)
+          response.body = body
         end
 
         def retrieve_model
-          results = @model.retrieve
-          results.absolutize(@model.canonical_host)
-          results.graph
+          absolutize(@model.canonical_host, @model.retrieve)
         end
         alias retreive_model retrieve_model
 
@@ -53,8 +56,8 @@ module RoadForest
 
         #Overridden rather than metaprogram content type methods
         def send(*args)
-          if args.length == 1 and not services.nil?
-            services.type_handling.fetch(args.first).call(self)
+          if args.length == 1 and not model.nil?
+            model.type_handling.fetch(args.first).call(self)
           else
             super
           end
@@ -63,17 +66,17 @@ module RoadForest
         end
 
         def method(name)
-          if services.nil?
+          if model.nil?
             super
           else
-            services.type_handling.fetch(name).method(:call)
+            model.type_handling.fetch(name).method(:call)
           end
         rescue KeyError
           super
         end
 
         def content_types_provided
-          services.type_handling.renderers.type_map
+          model.type_handling.renderers.type_map
         end
 
         def resource_exists?

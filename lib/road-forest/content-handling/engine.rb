@@ -13,8 +13,8 @@ module RoadForest
         end
         attr_reader :handlers, :types, :type_map
 
-        def add(type, handler)
-          type = MediaType.parse(type)
+        def add(handler)
+          type = handler.type
           @types.add(type)
           @handlers[type] = handler
           symbol = handler_symbol(type)
@@ -58,20 +58,23 @@ module RoadForest
       attr_reader :renderers, :parsers
 
       def add_type(type, handler)
+        type = MediaType.parse(type)
         add_parser(type, handler)
         add_renderer(type, handler)
       end
       alias add add_type
 
       def add_parser(type, object)
-        wrapper = RoadForest::MediaType::Handlers::Wrap::Parse.new(object)
-        parsers.add(type, wrapper)
+        type = MediaType.parse(type)
+        wrapper = RoadForest::MediaType::Handlers::Wrap::Parse.new(type, object)
+        parsers.add(wrapper)
       end
       alias accept add_parser
 
       def add_renderer(type, object)
-        wrapper = RoadForest::MediaType::Handlers::Wrap::Render.new(object)
-        renderers.add(type, wrapper)
+        type = MediaType.parse(type)
+        wrapper = RoadForest::MediaType::Handlers::Wrap::Render.new(type, object)
+        renderers.add(wrapper)
       end
       alias provide add_renderer
 
@@ -81,7 +84,7 @@ module RoadForest
 
       def choose_renderer(header)
         content_type = choose_media_type(renderers.types, header)
-        return content_type, renderers.handler_for(content_type)
+        return renderers.handler_for(content_type)
       end
 
       def each_renderer(&block)
@@ -91,7 +94,7 @@ module RoadForest
 
       def choose_parser(header)
         content_type = choose_media_type(parsers.types, header)
-        return content_type, parsers.handler_for(content_type)
+        return parsers.handler_for(content_type)
       end
 
       def each_parser(&block)

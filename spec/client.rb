@@ -9,6 +9,7 @@ describe RoadForest::RemoteHost do
         RFTest::FileRecord.new("two", false),
         RFTest::FileRecord.new("three", false)
       ]
+      host.destination_dir = destination_dir
     end
   end
 
@@ -29,6 +30,18 @@ describe RoadForest::RemoteHost do
     "spec_support/test-file.txt"
   end
 
+  def trace_on
+    RoadForest::TestSupport::FSM.trace_on
+  end
+
+  def dump_trace
+    RoadForest::TestSupport::FSM.dump_trace
+  end
+
+  before :each do
+    trace_on
+  end
+
   before :each do
     require 'fileutils'
     FileUtils.rm_f(destination_dir)
@@ -47,24 +60,29 @@ describe RoadForest::RemoteHost do
 
         target = unresolved.first(:nav, "target")
 
-        needs = target.first(:lc, "needs").as_list
-
-        @destination = needs.first
+        target.first(:lc, "needs").as_list.each do |need|
+          @destination = need[:lc, "contents"]
+          break
+        end
       end
 
       unless @destination.nil?
         File::open(source_path) do |file|
-          pp server.put_file(@destination, "text/plain", file)
+          begin
+            server.put_file(@destination, "text/plain", file)
+          ensure
+            #dump_trace
+          end
         end
       end
     end
 
     it "should set destination" do
-      @destination.should.to_s == "http://road-forest.test-domain.com/needs/one"
+      @destination.to_context.to_s.should == "http://road-forest.test-domain.com/files/one"
     end
 
     it "should deliver file to destination path" do
-      File::read(File::join(destination_dir, "needs/one")).should ==
+      File::read(File::join(destination_dir, "one")).should ==
         File::read(source_path)
     end
   end
@@ -85,23 +103,12 @@ describe RoadForest::RemoteHost do
             new_need[[:lc, "path"]] = "lawyers/guns/money"
           end
         end
-      rescue
-        if tracing
-          Webmachine::Trace.traces.each do |trace|
-            pp [trace, Webmachine::Trace.fetch(trace)]
-          end
-        end
-        raise
+      ensure
+        dump_trace if tracing
       end
     end
 
     it "should change the server state" do
-      if tracing
-        Webmachine::Trace.traces.each do |trace|
-          pp [trace, Webmachine::Trace.fetch(trace)]
-        end
-      end
-
       services.file_records.find do |record|
         record.name == "lawyers/guns/money"
       end.should be_an_instance_of RFTest::FileRecord
@@ -128,12 +135,6 @@ describe RoadForest::RemoteHost do
     end
 
     it "should change the server state" do
-      if tracing
-        Webmachine::Trace.traces.each do |trace|
-          pp [trace, Webmachine::Trace.fetch(trace)]
-        end
-      end
-
       services.file_records.each do |record|
         record.resolved.should == true
       end
@@ -163,7 +164,7 @@ module RFTest
   end
 
   class ServicesHost < ::RoadForest::Application::ServicesHost
-    attr_accessor :file_records
+    attr_accessor :file_records, :destination_dir
 
     def initialize
       @file_records = []
@@ -176,14 +177,13 @@ module RFTest
   class Application < RoadForest::Application
     def setup
       router.add  :root,              [],                    :read_only,     Models::Navigation
-      router.add_traced  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
-      router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
-      #router.add  :file_content,      ["files", "*"],        :blob,
-      #Models::NeedContent
+      router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
+      router.add  :need,              ["needs",'*'],         :leaf,          Models::Need
+      router.add  :file_content,      ["files", "*"],        :leaf,          Models::NeedContent
     end
 
     module Models
-      class Navigation < RoadForest::Model
+      class Navigation < RoadForest::RDFModel
         def exists?
           true
         end
@@ -202,7 +202,7 @@ module RFTest
         end
       end
 
-      class UnresolvedNeedsList < RoadForest::Model
+      class UnresolvedNeedsList < RoadForest::RDFModel
         def exists?
           true
         end
@@ -210,8 +210,7 @@ module RFTest
         def update(graph)
         end
 
-        def add_child(results)
-          graph = results.start_graph
+        def add_child(graph)
           new_file = FileRecord.new(graph.first(:lc, "path"), false)
           services.file_records << new_file
         end
@@ -227,25 +226,26 @@ module RFTest
         end
       end
 
-      class NeedContent < RoadForest::FileModel
-
+      class NeedContent < RoadForest::BlobModel
+        add_type "text/plain", TypeHandlers::Handler.new
       end
 
-      class Need < RoadForest::Model
+      class Need < RoadForest::RDFModel
         def data
-          @data ||= services.file_records.find do |record|
+          @data = services.file_records.find do |record|
             record.name == params.remainder
           end
         end
 
-        def update(results)
-          graph = results.start_graph
+        def graph_update(graph)
           data.resolved = graph[[:lc, "resolved"]]
+          new_graph
         end
 
         def fill_graph(graph)
           graph[[:lc, "resolved"]] = data.resolved
           graph[[:lc, "name"]] = data.name
+          graph[[:lc, "contents"]] = path_for(:file_content)
         end
       end
     end

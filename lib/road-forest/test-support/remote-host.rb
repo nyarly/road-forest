@@ -1,6 +1,7 @@
 require 'road-forest/remote-host'
 require 'road-forest/rdf/graph-store'
 require 'road-forest/rdf/document'
+require 'road-forest/test-support/trace-formatter'
 require 'addressable/uri'
 require 'webmachine/headers'
 require 'webmachine/request'
@@ -28,12 +29,31 @@ module RoadForest
       end
     end
 
+
     class FSM < ::Webmachine::Decision::FSM
+      def self.trace_on
+        unless ancestors.include? Webmachine::Trace::FSM
+          include Webmachine::Trace::FSM
+        end
+        Webmachine::Trace.trace_store = :memory
+      end
+
+      def self.dump_trace
+        Webmachine::Trace.traces.each do |trace|
+          puts TraceFormatter.new(Webmachine::Trace.fetch(trace))
+        end
+      end
+
       #Um, actually *don't* handle exceptions
       def handle_exceptions
         yield.tap do |result|
           #p result #ok
         end
+      end
+
+      def initialize_tracing
+        return if self.class.ancestors.include? Webmachine::Trace::FSM
+        super
       end
 
       def run
@@ -84,6 +104,10 @@ module RoadForest
       end
       attr_reader :exchanges
 
+      def inspect
+        "#<#{self.class.name}:#{"%0xd" % object_id} #{exchanges.length} exchanges>"
+      end
+
       def do_request(request)
         uri = request.url
 
@@ -107,6 +131,8 @@ module RoadForest
 
         yield exchange if block_given?
 
+        #puts; puts "#{__FILE__}:#{__LINE__} => #{(request).inspect}"
+
         exchange.do_request
 
         response = HTTP::Response.new
@@ -114,6 +140,7 @@ module RoadForest
         response.status = exchange.response.code
         response.body_string = exchange.response.body
 
+        #puts; puts "#{__FILE__}:#{__LINE__} => #{(response).inspect}"
         return response
       end
 
@@ -193,13 +220,47 @@ module RoadForest
           uri.query_values = (uri.query_values || {}).merge(query_params)
 
 
-          @req = Webmachine::Request.new(method, uri, headers, body)
+          @req = Webmachine::Request.new(method, uri, headers, RequestBody.new(body))
           @res = Webmachine::Response.new
 
           dispatcher.dispatch(@req, @res)
 
           return @res
         end
+
+        class RequestBody
+          # @return the request from Mongrel
+
+          # @param request the request from Mongrel
+          def initialize(body)
+            @raw_body = body
+          end
+
+          def body
+            @body =
+              case @raw_body
+              when IO, StringIO
+                @raw_body.rewind
+                @raw_body.read
+              when String
+                @raw_body
+              else
+                raise "Can't handle body type: #{@raw_body.class}"
+              end
+
+          end
+
+          # @return [String] the request body as a string
+          def to_s
+            body
+          end
+
+          # @yield [chunk]
+          # @yieldparam [String] chunk a chunk of the request body
+          def each(&block)
+            yield(body)
+          end
+        end # class RequestBody
 
         private
         def webmachine_test_error(msg)

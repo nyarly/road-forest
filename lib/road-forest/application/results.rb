@@ -5,39 +5,29 @@ module RoadForest
     #The results of processing an RDF update - could include a new graph, or a
     #different resource (url) to look at
     class Results
-      attr_accessor :graph, :subject_resource, :go_to_resource
+      attr_accessor :graph, :go_to_resource
+      attr_reader :resource, :type, :body
 
-      def initialize(subject=nil, graph=nil)
-        @graph, @subject_resource = graph, subject
-        yield self if block_given?
+      def initialize(resource)
+        @resource = resource
       end
 
-      def start_graph(resource=nil)
-        @graph ||= ::RDF::Graph.new
-        focus = RDF::GraphFocus.new
-        focus.graph = @graph
-        focus.subject = resource || @subject_resource
-
-        yield focus if block_given?
-        return focus
+      def model
+        resource.model
       end
 
-      def absolutize(root_uri)
-        @graph.each_statement do |statement|
-          original = statement.dup
-          if ::RDF::URI === statement.subject and statement.subject.relative?
-            statement.subject = root_uri.join(statement.subject)
-          end
+      def render_data(data)
+        renderer = model.type_handling.choose_renderer(resource.request_accept_header)
+        @type = renderer.type
+        @body = renderer.local_to_network(result.graph)
+      end
 
-          if ::RDF::URI === statement.object and statement.object.relative?
-            statement.object = root_uri.join(statement.object)
-          end
-
-          if statement != original
-            @graph.delete(original)
-            @graph.insert(statement)
-          end
+      def update_resource(resource)
+        if go_to_resource
+          resource.redirect_to(go_to_resource)
         end
+        resource.response_content_type = type.content_type_header
+        resource.response_body = body
       end
     end
   end

@@ -27,7 +27,6 @@ module RoadForest
       def bundle_typed_resource(resource_type, model_class, route_name)
         resource_class = Resource::Handlers.registry.fetch(resource_type)
         bundle(resource_class) do |resource, request, response|
-          resource.services = services
           resource.model = model_class.new(route_name, resource.params, services)
         end
       end
@@ -35,7 +34,6 @@ module RoadForest
       def bundle_traced_resource(resource_type, model_class, route_name)
         resource_class = Resource::Handlers.registry.fetch(resource_type)
         bundle(resource_class) do |resource, request, response|
-          resource.services = services
           resource.model = model_class.new(route_name, resource.params, services)
           resource.trace = true
         end

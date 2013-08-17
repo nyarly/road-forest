@@ -14,3 +14,4 @@ gh-pages/
 .sass-cache/
 errors.err
 .cadre/
+spec_support/destination/

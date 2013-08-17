@@ -77,6 +77,11 @@ module RoadForest
     end
 
     def put_file(destination, type, io)
+      if destination.respond_to?(:to_context)
+        destination = destination.to_context
+      elsif destination.respond_to?(:to_s)
+        destination = destination.to_s
+      end
       request = HTTP::Request.new("PUT", destination)
       request.body = io
       request.headers["Content-Type"] = type

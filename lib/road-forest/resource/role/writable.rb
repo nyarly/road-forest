@@ -23,36 +23,16 @@ module RoadForest
         end
 
         def content_types_accepted
-          services.type_handling.parsers.type_map
+          model.type_handling.parsers.type_map
         end
 
         def request_body
           @request.body
         end
 
-        def accept_graph(graph)
-          #PUT or POST as Create
-          #Conflict? -> "resource.is_conflict?"
-          #Location header
-          #response body
-          result = update_model(graph)
-
-          if result.go_to_resource
-            @response.location = result.go_to_resource
-          end
-
-          return result.graph
-        end
-
         def known_content_type(content_type)
           content_type = Webmachine::MediaType.parse(content_type)
           content_types_accepted.any?{|ct, _| content_type.match?(ct)}
-        end
-
-        def update_model(graph)
-          results = Application::Results.new(request.uri, graph)
-          @model.update(results)
-          results
         end
 
         def delete_resource

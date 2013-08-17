@@ -30,6 +30,10 @@ module RoadForest::RDF
       other
     end
 
+    def to_context
+      normalize_context(subject)
+    end
+
     def root_url=(*value) #XXX curies?
       @root_url = normalize_resource(value)
     end

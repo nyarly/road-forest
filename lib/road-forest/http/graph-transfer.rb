@@ -75,8 +75,8 @@ module RoadForest
         return unless request.needs_body?
 
         content_type = best_type_for(request.url)
-        content_type, renderer = type_handling.choose_renderer(content_type)
-        request.headers["Content-Type"] = content_type.content_type_header
+        renderer = type_handling.choose_renderer(content_type)
+        request.headers["Content-Type"] = renderer.content_type_header
         request.body_string = renderer.from_graph(graph)
       end
 
@@ -99,8 +99,8 @@ module RoadForest
       end
 
       def parse_response(response)
-        _type, parser = type_handling.choose_parser(response.headers["Content-Type"])
-        parser.to_graph(response.body)
+        parser = type_handling.choose_parser(response.headers["Content-Type"])
+        parser.to_graph(response.body_string)
       end
 
       def build_response(request, response)
