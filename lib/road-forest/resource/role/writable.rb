@@ -1,5 +1,4 @@
 require 'road-forest/resource/role/has-children'
-require 'road-forest/application/results'
 
 module RoadForest
   module Resource

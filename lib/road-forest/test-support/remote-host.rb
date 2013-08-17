@@ -39,9 +39,13 @@ module RoadForest
       end
 
       def self.dump_trace
-        Webmachine::Trace.traces.each do |trace|
-          puts TraceFormatter.new(Webmachine::Trace.fetch(trace))
-        end
+        puts trace_dump
+      end
+
+      def self.trace_dump
+        Webmachine::Trace.traces.map do |trace|
+          TraceFormatter.new(Webmachine::Trace.fetch(trace))
+        end.join("\n")
       end
 
       #Um, actually *don't* handle exceptions

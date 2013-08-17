@@ -1,15 +1,3 @@
-Also: "blob" resource
-Not yourself - simple file service
-  allowed_methods - GET, HEAD
-  post_is_create: default
-  process_post: default
-  content_types_accepted: defaults
-Yourself - file transfer endpoint
-  allowed_methods - GET, HEAD, POST, PUT, DELETE
-  post_is_create: true
-  process_post: default (unused)
-  content_types_accepted: @model.update(params, blob) - update vs. create?
-
 Client error exceptions
   40x -> per code exception classes, include Response content
 
@@ -26,16 +14,9 @@ HTML related:
   Method coercion (POST that means DELETE/PUT)
   Params -> graph
   Form rendering
+  Limited fan-out of received data - e.g. file uploads to forms
 
 Cacheing - last_modified, expires, etag(+ W/)
-
-Blending concern-focused modules e.g. content_types_accepted - quality metrics,
-accept variants...  variance, conflict, options are related to the above (i.e.
-blended concerns)
-
-test build_graph
-
-test credence generations
 
 property delete
 
@@ -63,10 +44,6 @@ Handling status codes -
 Client behavior should get packed up in a tidy bunch of chains and blocks, but
 if there's an error, Ruby's default exceptions aren't helpful.  NullObjects of
 some kind?
-
-The GraphManager ought not to have defaults for SourceSkepticism - keep that in
-the RemoteHost or other client code. Likewise, GM doesn't start GraphFoci. Both
-of those are the result of scope creep on GM.
 
 Remove the _:local context - it doesn't make sense on the GM. Writes to a GM
 should come from 3 places:
@@ -113,17 +90,11 @@ displayed / correct POSTs made.
 
 
 Single Graph Update
-client should be able to alter the graph as needed, build
-a single sub-graph that contains all their modifications, and PUT the graph to
-a single resource. With parcelling, it's reasonable to break the graph up and
-distribute to Resource models, but the challenge is at the If-Modified-Since
-step: the graph has to be broken up, and we have to check the Modified time of
-all concerned resources.  (Although existing Parcel.resources_for() works...)
-
-There also doesn't seem to be a way to manage Etag If-Mod behavior...
-</->
-We'd have to collect error messages and decide which status takes precedence
-
+ -- reflection indicates this should be removed. It's not really RESTful, and
+ the use case (the converse of front loading) actually doesn't seem to make
+ sense. "Batch" or "transaction" updates really should be collected into a new
+ resource, if it makes sense. If it doesn't you probably don't really want that
+ kind of update anyway
 
 
 Statistical Front Loading

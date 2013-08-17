@@ -68,13 +68,13 @@ describe RoadForest::RemoteHost do
 
       unless @destination.nil?
         File::open(source_path) do |file|
-          begin
-            server.put_file(@destination, "text/plain", file)
-          ensure
-            #dump_trace
-          end
+          server.put_file(@destination, "text/plain", file)
         end
       end
+    end
+
+    it "should be able to format traces correctly" do
+      RoadForest::TestSupport::FSM.trace_dump.should =~ /Decision/
     end
 
     it "should set destination" do
@@ -178,7 +178,7 @@ module RFTest
     def setup
       router.add  :root,              [],                    :read_only,     Models::Navigation
       router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
-      router.add  :need,              ["needs",'*'],         :leaf,          Models::Need
+      router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
       router.add  :file_content,      ["files", "*"],        :leaf,          Models::NeedContent
     end
 

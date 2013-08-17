@@ -1,5 +1,3 @@
-require 'road-forest/application/results'
-
 module RoadForest
   class ProcessingSequenceError < StandardError
   end
