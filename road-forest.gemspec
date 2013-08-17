@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   lib/road-forest/rdf/context-fascade.rb
   lib/road-forest/rdf/source-rigor.rb
   lib/road-forest/rdf/graph-focus.rb
+  lib/road-forest/rdf/post-focus.rb
   lib/road-forest/rdf/source-rigor/null-investigator.rb
   lib/road-forest/rdf/source-rigor/credence.rb
   lib/road-forest/rdf/source-rigor/credence/any.rb
@@ -62,14 +63,16 @@ Gem::Specification.new do |spec|
   lib/road-forest/resource/rdf.rb
   lib/road-forest/test-support/matchers.rb
   lib/road-forest/test-support/remote-host.rb
+  lib/road-forest/test-support/trace-formatter.rb
   lib/road-forest/server.rb
   lib/road-forest/application/services-host.rb
   lib/road-forest/application/path-provider.rb
   lib/road-forest/application/parameters.rb
   lib/road-forest/application/dispatcher.rb
-  lib/road-forest/application/results.rb
   lib/road-forest/application/route-adapter.rb
+  lib/road-forest/models.rb
   lib/road-forest/model.rb
+  lib/road-forest/blob-model.rb
   lib/road-forest/test-support.rb
   lib/road-forest/rdf.rb
   lib/road-forest/utility/class-registry.rb
@@ -78,6 +81,7 @@ Gem::Specification.new do |spec|
   lib/road-forest/content-handling/engine.rb
   lib/road-forest/application.rb
   lib/road-forest/remote-host.rb
+  lib/road-forest.rb
   spec/graph-store.rb
   spec/graph-copier.rb
   spec/rdf-parcel.rb
