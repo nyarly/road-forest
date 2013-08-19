@@ -1,5 +1,5 @@
-require 'road-forest/test-support/matchers'
-require 'road-forest/rdf/graph-copier'
+require 'roadforest/test-support/matchers'
+require 'roadforest/rdf/graph-copier'
 
 #Leaving notes since being interrupted
 #

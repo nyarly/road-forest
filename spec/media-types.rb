@@ -1,4 +1,4 @@
-require 'road-forest/content-handling/media-type'
+require 'roadforest/content-handling/media-type'
 describe RoadForest::ContentHandling::MediaType do
   let :accepted_list do
     RoadForest::ContentHandling::MediaTypeList.build("text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;level=2;q=0.4, */*;q=0.5")

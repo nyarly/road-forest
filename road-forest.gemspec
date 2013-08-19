@@ -1,5 +1,5 @@
 Gem::Specification.new do |spec|
-  spec.name		= "road-forest"
+  spec.name		= "roadforest"
   spec.version		= "0.0.1"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com'
@@ -23,65 +23,65 @@ Gem::Specification.new do |spec|
   # Do this: y$@"
   # !!find lib bin doc spec spec_help -not -regex '.*\.sw.' -type f 2>/dev/null
   spec.files		= %w[
-  lib/road-forest/rdf/graph-store.rb
-  lib/road-forest/rdf/normalization.rb
-  lib/road-forest/rdf/focus-list.rb
-  lib/road-forest/rdf/graph-reading.rb
-  lib/road-forest/rdf/graph-copier.rb
-  lib/road-forest/rdf/context-fascade.rb
-  lib/road-forest/rdf/source-rigor.rb
-  lib/road-forest/rdf/graph-focus.rb
-  lib/road-forest/rdf/post-focus.rb
-  lib/road-forest/rdf/source-rigor/null-investigator.rb
-  lib/road-forest/rdf/source-rigor/credence.rb
-  lib/road-forest/rdf/source-rigor/credence/any.rb
-  lib/road-forest/rdf/source-rigor/credence/role-if-available.rb
-  lib/road-forest/rdf/source-rigor/credence/none-if-role-absent.rb
-  lib/road-forest/rdf/source-rigor/http-investigator.rb
-  lib/road-forest/rdf/source-rigor/investigator.rb
-  lib/road-forest/rdf/source-rigor/credence-annealer.rb
-  lib/road-forest/rdf/update-focus.rb
-  lib/road-forest/rdf/vocabulary.rb
-  lib/road-forest/rdf/document.rb
-  lib/road-forest/rdf/focus-wrapping.rb
-  lib/road-forest/rdf/resource-pattern.rb
-  lib/road-forest/rdf/parcel.rb
-  lib/road-forest/rdf/resource-query.rb
-  lib/road-forest/rdf/investigation.rb
-  lib/road-forest/http/message.rb
-  lib/road-forest/http/graph-response.rb
-  lib/road-forest/http/adapters/excon.rb
-  lib/road-forest/http/graph-transfer.rb
-  lib/road-forest/resource/rdf/list.rb
-  lib/road-forest/resource/rdf/parent-item.rb
-  lib/road-forest/resource/rdf/read-only.rb
-  lib/road-forest/resource/rdf/leaf-item.rb
-  lib/road-forest/resource/http/form-parsing.rb
-  lib/road-forest/resource/role/writable.rb
-  lib/road-forest/resource/role/has-children.rb
-  lib/road-forest/resource/handlers.rb
-  lib/road-forest/resource/rdf.rb
-  lib/road-forest/test-support/matchers.rb
-  lib/road-forest/test-support/remote-host.rb
-  lib/road-forest/test-support/trace-formatter.rb
-  lib/road-forest/server.rb
-  lib/road-forest/application/services-host.rb
-  lib/road-forest/application/path-provider.rb
-  lib/road-forest/application/parameters.rb
-  lib/road-forest/application/dispatcher.rb
-  lib/road-forest/application/route-adapter.rb
-  lib/road-forest/models.rb
-  lib/road-forest/model.rb
-  lib/road-forest/blob-model.rb
-  lib/road-forest/test-support.rb
-  lib/road-forest/rdf.rb
-  lib/road-forest/utility/class-registry.rb
-  lib/road-forest/content-handling/type-handlers/jsonld.rb
-  lib/road-forest/content-handling/media-type.rb
-  lib/road-forest/content-handling/engine.rb
-  lib/road-forest/application.rb
-  lib/road-forest/remote-host.rb
-  lib/road-forest.rb
+  lib/roadforest/rdf/graph-store.rb
+  lib/roadforest/rdf/normalization.rb
+  lib/roadforest/rdf/focus-list.rb
+  lib/roadforest/rdf/graph-reading.rb
+  lib/roadforest/rdf/graph-copier.rb
+  lib/roadforest/rdf/context-fascade.rb
+  lib/roadforest/rdf/source-rigor.rb
+  lib/roadforest/rdf/graph-focus.rb
+  lib/roadforest/rdf/post-focus.rb
+  lib/roadforest/rdf/source-rigor/null-investigator.rb
+  lib/roadforest/rdf/source-rigor/credence.rb
+  lib/roadforest/rdf/source-rigor/credence/any.rb
+  lib/roadforest/rdf/source-rigor/credence/role-if-available.rb
+  lib/roadforest/rdf/source-rigor/credence/none-if-role-absent.rb
+  lib/roadforest/rdf/source-rigor/http-investigator.rb
+  lib/roadforest/rdf/source-rigor/investigator.rb
+  lib/roadforest/rdf/source-rigor/credence-annealer.rb
+  lib/roadforest/rdf/update-focus.rb
+  lib/roadforest/rdf/vocabulary.rb
+  lib/roadforest/rdf/document.rb
+  lib/roadforest/rdf/focus-wrapping.rb
+  lib/roadforest/rdf/resource-pattern.rb
+  lib/roadforest/rdf/parcel.rb
+  lib/roadforest/rdf/resource-query.rb
+  lib/roadforest/rdf/investigation.rb
+  lib/roadforest/http/message.rb
+  lib/roadforest/http/graph-response.rb
+  lib/roadforest/http/adapters/excon.rb
+  lib/roadforest/http/graph-transfer.rb
+  lib/roadforest/resource/rdf/list.rb
+  lib/roadforest/resource/rdf/parent-item.rb
+  lib/roadforest/resource/rdf/read-only.rb
+  lib/roadforest/resource/rdf/leaf-item.rb
+  lib/roadforest/resource/http/form-parsing.rb
+  lib/roadforest/resource/role/writable.rb
+  lib/roadforest/resource/role/has-children.rb
+  lib/roadforest/resource/handlers.rb
+  lib/roadforest/resource/rdf.rb
+  lib/roadforest/test-support/matchers.rb
+  lib/roadforest/test-support/remote-host.rb
+  lib/roadforest/test-support/trace-formatter.rb
+  lib/roadforest/server.rb
+  lib/roadforest/application/services-host.rb
+  lib/roadforest/application/path-provider.rb
+  lib/roadforest/application/parameters.rb
+  lib/roadforest/application/dispatcher.rb
+  lib/roadforest/application/route-adapter.rb
+  lib/roadforest/models.rb
+  lib/roadforest/model.rb
+  lib/roadforest/blob-model.rb
+  lib/roadforest/test-support.rb
+  lib/roadforest/rdf.rb
+  lib/roadforest/utility/class-registry.rb
+  lib/roadforest/content-handling/type-handlers/jsonld.rb
+  lib/roadforest/content-handling/media-type.rb
+  lib/roadforest/content-handling/engine.rb
+  lib/roadforest/application.rb
+  lib/roadforest/remote-host.rb
+  lib/roadforest.rb
   spec/graph-store.rb
   spec/graph-copier.rb
   spec/rdf-parcel.rb

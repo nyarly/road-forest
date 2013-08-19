@@ -1,7 +1,7 @@
 require 'rdf'
 #require 'rdf/rdfa'
-require 'road-forest/rdf/document'
-require 'road-forest/rdf/graph-store'
+require 'roadforest/rdf/document'
+require 'roadforest/rdf/graph-store'
 
 describe RoadForest::RDF do
   let :source_rigor do

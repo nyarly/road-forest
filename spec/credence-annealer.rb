@@ -1,5 +1,5 @@
-require 'road-forest/rdf/source-rigor/credence-annealer'
-require 'road-forest/rdf/graph-store'
+require 'roadforest/rdf/source-rigor/credence-annealer'
+require 'roadforest/rdf/graph-store'
 require 'timeout'
 
 describe RoadForest::RDF::SourceRigor::CredenceAnnealer do

@@ -1,5 +1,5 @@
-require 'road-forest/server'
-require 'road-forest/test-support'
+require 'roadforest/server'
+require 'roadforest/test-support'
 
 describe RoadForest::RemoteHost do
   let :services do
@@ -14,7 +14,7 @@ describe RoadForest::RemoteHost do
   end
 
   let :server do
-    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new("http://road-forest.test-domain.com/", services))
+    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new("http://roadforest.test-domain.com/", services))
   end
 
   let :tracing do
@@ -78,7 +78,7 @@ describe RoadForest::RemoteHost do
     end
 
     it "should set destination" do
-      @destination.to_context.to_s.should == "http://road-forest.test-domain.com/files/one"
+      @destination.to_context.to_s.should == "http://roadforest.test-domain.com/files/one"
     end
 
     it "should deliver file to destination path" do

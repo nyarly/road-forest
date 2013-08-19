@@ -1,7 +1,7 @@
-require 'road-forest/rdf/source-rigor'
-require 'road-forest/rdf/update-focus'
-require 'road-forest/rdf/graph-store'
-require 'road-forest/rdf/document'
+require 'roadforest/rdf/source-rigor'
+require 'roadforest/rdf/update-focus'
+require 'roadforest/rdf/graph-store'
+require 'roadforest/rdf/document'
 require 'rdf/rdfa'
 
 describe RoadForest::RDF::UpdateFocus do
