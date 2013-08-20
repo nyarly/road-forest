@@ -1,27 +1,9 @@
 require 'roadforest/server'
 require 'roadforest/test-support'
 
+require 'examples/file-management'
+
 describe RoadForest::RemoteHost do
-  let :services do
-    RFTest::ServicesHost.new.tap do |host|
-      host.file_records = [
-        RFTest::FileRecord.new("one", false),
-        RFTest::FileRecord.new("two", false),
-        RFTest::FileRecord.new("three", false)
-      ]
-      host.destination_dir = destination_dir
-    end
-  end
-
-  let :server do
-    RoadForest::TestSupport::RemoteHost.new(RFTest::Application.new("http://roadforest.test-domain.com/", services))
-  end
-
-  let :tracing do
-    true
-    false
-  end
-
   let :destination_dir do
     "spec_support/destination"
   end
@@ -30,16 +12,31 @@ describe RoadForest::RemoteHost do
     "spec_support/test-file.txt"
   end
 
-  def trace_on
-    RoadForest::TestSupport::FSM.trace_on
+  let :services do
+    FileManagementExample::ServicesHost.new.tap do |host|
+      host.file_records = [
+        FileManagementExample::FileRecord.new("one", false),
+        FileManagementExample::FileRecord.new("two", false),
+        FileManagementExample::FileRecord.new("three", false)
+      ]
+      host.destination_dir = destination_dir
+    end
+  end
+
+  let :server do
+    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://roadforest.test-domain.com/", services))
   end
 
   def dump_trace
-    RoadForest::TestSupport::FSM.dump_trace
+    tracing = true
+    tracing = false
+    if tracing
+      RoadForest::TestSupport::FSM.dump_trace
+    end
   end
 
   before :each do
-    trace_on
+    RoadForest::TestSupport::FSM.trace_on
   end
 
   before :each do
@@ -52,13 +49,13 @@ describe RoadForest::RemoteHost do
     before :each do
       @destination = nil
       server.getting do |graph|
-        items = graph.all(:nav, "item")
+        items = graph.all(:skos, "hasTopConcept")
 
         unresolved = items.find do |nav_item|
-          nav_item[:nav, "label"] == "Unresolved"
+          nav_item[:skos, "label"] == "Unresolved"
         end
 
-        target = unresolved.first(:nav, "target")
+        target = unresolved.first(:foaf, "page")
 
         target.first(:lc, "needs").as_list.each do |need|
           @destination = need[:lc, "contents"]
@@ -91,40 +88,40 @@ describe RoadForest::RemoteHost do
     before :each do
       begin
         server.posting do |graph|
-          items = graph.all(:nav, "item")
+          items = graph.all(:skos, "hasTopConcept")
 
           unresolved = items.find do |nav_item|
-            nav_item[:nav, "label"] == "Unresolved"
+            nav_item[:skos, "label"] == "Unresolved"
           end
 
-          target = unresolved.first(:nav, "target")
+          target = unresolved.first(:foaf, "page")
 
           target.post_to do |new_need|
             new_need[[:lc, "path"]] = "lawyers/guns/money"
           end
         end
       ensure
-        dump_trace if tracing
+        dump_trace
       end
     end
 
     it "should change the server state" do
       services.file_records.find do |record|
         record.name == "lawyers/guns/money"
-      end.should be_an_instance_of RFTest::FileRecord
+      end.should be_an_instance_of FileManagementExample::FileRecord
     end
   end
 
   describe "putting data to server" do
     before :each do
       server.putting do |graph|
-        items = graph.all(:nav, "item")
+        items = graph.all(:skos, "hasTopConcept")
 
         unresolved = items.find do |nav_item|
-          nav_item[:nav, "label"] == "Unresolved"
+          nav_item[:skos, "label"] == "Unresolved"
         end
 
-        target = unresolved.first(:nav, "target")
+        target = unresolved.first(:foaf, "page")
 
         needs = target.first(:lc, "needs").as_list
 
@@ -152,101 +149,6 @@ describe RoadForest::RemoteHost do
       server.http_exchanges.should_not be_empty
       server.http_exchanges.each do |exchange|
         exchange.response.headers["Content-Type"].should == "application/ld+json"
-      end
-    end
-  end
-end
-
-module RFTest
-  module Vocabulary
-    class LC < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/logical-construct#"); end
-    class Nav < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/site-navigation#"); end
-  end
-
-  class ServicesHost < ::RoadForest::Application::ServicesHost
-    attr_accessor :file_records, :destination_dir
-
-    def initialize
-      @file_records = []
-    end
-  end
-
-  FileRecord = Struct.new(:name, :resolved)
-
-
-  class Application < RoadForest::Application
-    def setup
-      router.add  :root,              [],                    :read_only,     Models::Navigation
-      router.add  :unresolved_needs,  ["unresolved_needs"],  :parent,        Models::UnresolvedNeedsList
-      router.add_traced  :need,              ["needs",'*'],         :leaf,          Models::Need
-      router.add  :file_content,      ["files", "*"],        :leaf,          Models::NeedContent
-    end
-
-    module Models
-      class Navigation < RoadForest::RDFModel
-        def exists?
-          true
-        end
-
-        def update(graph)
-          return false
-        end
-
-        def fill_graph(graph)
-          graph[:rdfs, "Class"] = [:nav, "Menu"]
-          graph.add_node([:nav, :item], "#unresolved") do |unresolved|
-            unresolved[:rdfs, "Class"] = [:nav, "Entry"]
-            unresolved[:nav, "label"] = "Unresolved"
-            unresolved[:nav, "target"] = path_for(:unresolved_needs)
-          end
-        end
-      end
-
-      class UnresolvedNeedsList < RoadForest::RDFModel
-        def exists?
-          true
-        end
-
-        def update(graph)
-        end
-
-        def add_child(graph)
-          new_file = FileRecord.new(graph.first(:lc, "path"), false)
-          services.file_records << new_file
-        end
-
-        def fill_graph(graph)
-          graph.add_list(:lc, "needs") do |list|
-            services.file_records.each do |record|
-              if !record.resolved
-                list << path_for(:need, '*' => record.name)
-              end
-            end
-          end
-        end
-      end
-
-      class NeedContent < RoadForest::BlobModel
-        add_type "text/plain", TypeHandlers::Handler.new
-      end
-
-      class Need < RoadForest::RDFModel
-        def data
-          @data = services.file_records.find do |record|
-            record.name == params.remainder
-          end
-        end
-
-        def graph_update(graph)
-          data.resolved = graph[[:lc, "resolved"]]
-          new_graph
-        end
-
-        def fill_graph(graph)
-          graph[[:lc, "resolved"]] = data.resolved
-          graph[[:lc, "name"]] = data.name
-          graph[[:lc, "contents"]] = path_for(:file_content)
-        end
       end
     end
   end

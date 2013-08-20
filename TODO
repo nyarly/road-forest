@@ -28,7 +28,8 @@ collect vocabs used to generate a graph - build curies for representations that 
 
 BGP queries should be solveable *across* resources - currently all patterns get
 a :context variable applied that all have to match, but it seems reasonable
-that multiple resources might participate in a solution.
+that multiple resources might participate in a solution. - might now work:
+needs tests
 
 HTTP behaviors:
 Handling status codes -
@@ -37,6 +38,9 @@ Handling status codes -
   4xx - sometimes correctable, otherwise...
   5xx
 
+Strict Vocabularies: use the Vocab URL to pull the RDFS (or OWL?) description
+of the vocab and define properties in the vocab that way. Also, use human
+descriptions for fields in RDFa, for instance.
 
 
 *** API challenges ***

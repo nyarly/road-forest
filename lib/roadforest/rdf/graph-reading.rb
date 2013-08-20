@@ -21,6 +21,10 @@ module RoadForest::RDF
       self.source_rigor = rigor unless rigor.nil?
     end
 
+    def inspect
+      "#<#{self.class.name}:0x#{"%x" % object_id} (#{subject.to_s}) #{forward_properties.inspect}>"
+    end
+
     def dup
       other = self.class.new
       other.graph = graph
@@ -129,14 +133,13 @@ module RoadForest::RDF
     end
 
     def query_properties(query)
-      query.execute(graph).map do |solution|
+      Hash[query.execute(graph).map do |solution|
         prop = solution.property
         if qname = prop.qname
-          qname
-        else
-          prop
+          prop = qname
         end
-      end
+        [prop, solution.value]
+      end]
     end
   end
 end

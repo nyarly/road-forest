@@ -11,6 +11,8 @@ module RoadForest::RDF
       vocab
     end
 
+    Vocabs["rdf"] = RDF
+
     def normalize_statement(subject, predicate, object, context)
       subject = normalize_resource(subject) || RDF::Node.new
       predicate = normalize_uri(predicate)

@@ -1,3 +1,4 @@
+-I .
 --require simplecov
 --colour
 --require fuubar
