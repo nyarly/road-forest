@@ -25,7 +25,7 @@ module RoadForest
         end
 
         def request_accept_header
-          request.headers["Accept"]
+          request.headers["Accept"] || "*/*"
         end
 
         def response_content_type=(type)

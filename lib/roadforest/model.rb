@@ -1,3 +1,4 @@
+require 'roadforest/rdf/graph-store'
 module RoadForest
   class ProcessingSequenceError < StandardError
   end

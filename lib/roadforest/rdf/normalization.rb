@@ -2,15 +2,7 @@ require 'rdf'
 
 module RoadForest::RDF
   module Normalization
-    Vocabs = Hash.new do |h,k|
-      vocab = RDF::Vocabulary.find do |vocab|
-        vocab.__prefix__.to_s == k
-      end
-      #p k => vocab #ok
-      h[k] = vocab unless vocab.nil?
-      vocab
-    end
-
+    Vocabs = {}
     Vocabs["rdf"] = RDF
 
     def normalize_statement(subject, predicate, object, context)
@@ -80,13 +72,28 @@ module RoadForest::RDF
       RDF::Literal.new(object)
     end
 
+    def expand_curie_pair(prefix, property)
+      vocab = Vocabs.fetch(prefix) do
+        vocab = RDF::Vocabulary.find do |vocab|
+          vocab.__prefix__.to_s == prefix
+        end
+        #p k => vocab #ok
+        if vocab.nil?
+          raise "Don't know a vocabulary for prefix #{prefix.inspect} in CURIE #{prefix}:#{property}"
+        end
+        Vocabs[prefix] = vocab
+        vocab
+      end
+      vocab[property]
+    end
+
     def expand_curie(from)
       case from
       when Array
         case from.length
         when 2
           prefix, property = *from
-          return interned_uri(Vocabs[prefix.to_s][property])
+          return interned_uri(expand_curie_pair(prefix.to_s, property.to_s))
         when 1
           return expand_curie(from.first)
         else

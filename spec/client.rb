@@ -57,10 +57,7 @@ describe RoadForest::RemoteHost do
 
         target = unresolved.first(:foaf, "page")
 
-        target.first(:lc, "needs").as_list.each do |need|
-          @destination = need[:lc, "contents"]
-          break
-        end
+        @destination = target.first(:lc, "needs").as_list.first[:lc, "contents"]
       end
 
       unless @destination.nil?
@@ -97,7 +94,7 @@ describe RoadForest::RemoteHost do
           target = unresolved.first(:foaf, "page")
 
           target.post_to do |new_need|
-            new_need[[:lc, "path"]] = "lawyers/guns/money"
+            new_need[[:lc, "name"]] = "lawyers/guns/money"
           end
         end
       ensure

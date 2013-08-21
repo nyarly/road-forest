@@ -34,7 +34,7 @@ module RoadForest::RDF
       #mark ended?
       #chain impulses?
       @current_impulse = RDF::Node.new
-      repository.insert(normalize_statement(@current_impulse, [:dc, 'type'], [:rf, 'Impulse'], nil))
+      repository.insert(normalize_statement(@current_impulse, [:rdf, 'type'], [:rf, 'Impulse'], nil))
       repository.insert(normalize_statement(@current_impulse, [:rf, 'begunAt'], Time.now, nil))
     end
 

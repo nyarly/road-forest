@@ -32,7 +32,11 @@ module RoadForest
         )
 
         response = HTTP::Response.new
-        response.body = excon_response.body
+        if excon_response.body.is_a? String
+          response.body_string = excon_response.body
+        else
+          response.body = excon_response.body
+        end
         response.headers = excon_response.headers
         response.status = excon_response.status
 

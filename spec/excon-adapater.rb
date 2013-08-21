@@ -25,6 +25,6 @@ describe RoadForest::HTTP::ExconAdapter do
     end
 
     its(:status){ should == 200 }
-    its(:body){ should == "Hello!" }
+    its(:body_string){ should == "Hello!" }
   end
 end

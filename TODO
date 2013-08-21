@@ -42,6 +42,17 @@ Strict Vocabularies: use the Vocab URL to pull the RDFS (or OWL?) description
 of the vocab and define properties in the vocab that way. Also, use human
 descriptions for fields in RDFa, for instance.
 
+Error Handling
+  Specifically, when the server returns 500, a RemoteHost#<act>ing starts
+  returning nils - which is super confusing. On the other hand, it's not
+  completely clear how to handle server errors yet (or any HTTP error...) Maybe
+  collect them, and in the course of anything annealed, enrich exceptions with
+  a notice that "There are 3 500 errors - access them with
+  RemoteHost#current_errors" or something.
+
+  When a representation doesn't contain statements about the requested
+  resource, that's an error that should be reported. (Excon adds a / to empty
+  paths...)
 
 *** API challenges ***
 

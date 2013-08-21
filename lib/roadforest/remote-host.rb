@@ -2,23 +2,24 @@ require 'roadforest/rdf/source-rigor'
 require 'roadforest/rdf/source-rigor/credence-annealer'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
+require 'roadforest/rdf/graph-store'
 
 module RoadForest
   class RemoteHost
+    include RDF::Normalization
+
     def initialize(well_known_url)
-      @url = ::RDF::URI.parse(well_known_url)
+      @url = normalize_resource(well_known_url)
       @graph = build_graph_store
     end
 
     def build_graph_store
-      graph_store = RDF::GraphStore.new
-      graph_store.http_client = http_client
-      return graph_store
+      RDF::GraphStore.new
     end
 
     attr_writer :http_client
     def http_client
-      @http_client ||= HTTP::ExconAdapter.new
+      @http_client ||= HTTP::ExconAdapter.new(@url)
     end
 
     def graph_transfer

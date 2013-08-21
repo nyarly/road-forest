@@ -56,7 +56,7 @@ module FileManagementExample
         end
 
         def add_child(graph)
-          new_file = FileRecord.new(graph.first(:lc, "path"), false)
+          new_file = FileRecord.new(graph.first(:lc, "name"), false)
           services.file_records << new_file
         end
 
