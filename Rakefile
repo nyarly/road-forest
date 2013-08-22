@@ -4,7 +4,9 @@ require 'corundum/tasklibs'
 module Corundum
   Corundum::register_project(__FILE__)
 
-  core = Core.new
+  core = Core.new do |core|
+    core.file_patterns.code << %r{^examples/}
+  end
 
   core.in_namespace do
     sanity = GemspecSanity.new(core)

@@ -126,10 +126,6 @@ describe "RoadForest integration" do
       end
     end
 
-    it "should be a collosal nuisance" do
-      1.should == 2
-    end
-
     it "should respond with 204" do
       @response.status.should == 204
     end

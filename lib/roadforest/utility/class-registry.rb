@@ -17,8 +17,10 @@ module RoadForest
         def self.extended(mod)
           (
             class << mod; self; end
-          ).define_method :registrar do
-            mod
+          ).instance_exec(mod) do |mod|
+            define_method :registrar do
+              mod
+            end
           end
         end
       end

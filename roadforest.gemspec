@@ -64,6 +64,8 @@ Gem::Specification.new do |spec|
   lib/roadforest/test-support/matchers.rb
   lib/roadforest/test-support/remote-host.rb
   lib/roadforest/test-support/trace-formatter.rb
+  lib/roadforest/test-support/dispatcher-facade.rb
+  lib/roadforest/test-support/http-client.rb
   lib/roadforest/server.rb
   lib/roadforest/application/services-host.rb
   lib/roadforest/application/path-provider.rb
@@ -89,6 +91,7 @@ Gem::Specification.new do |spec|
   spec/update-focus.rb
   spec/client.rb
   spec/credence-annealer.rb
+  examples/file-management.rb
   ]
 
   spec.test_file        = "spec_support/gem_test_suite.rb"
