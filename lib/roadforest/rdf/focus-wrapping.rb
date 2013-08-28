@@ -1,4 +1,5 @@
 require 'rdf/model/node'
+require 'roadforest/rdf'
 
 module RoadForest::RDF
   module FocusWrapping

@@ -15,5 +15,12 @@ module RoadForest::RDF
         yield base_node.unwrap_value(value)
       end
     end
+
+    def append_node(subject=nil)
+      base_node.create_node(subject) do |node|
+        self << node.subject
+        yield node if block_given?
+      end
+    end
   end
 end

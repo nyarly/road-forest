@@ -64,14 +64,23 @@ module RoadForest::RDF
     end
 
     def set_node(property, url=nil)
-      node = wrap_node(set(property, normalize_resource(url) || RDF::Node.new))
-      yield node if block_given?
-      node
+      create_node(url) do |node|
+        set(property, node.subject)
+        yield node if block_given?
+      end
     end
     alias node_at set_node
 
     def add_node(property, url=nil)
-      node = wrap_node(add(property, normalize_resource(url) || RDF::Node.new))
+      create_node(url) do |node|
+        add(property, node.subject)
+        yield node if block_given?
+      end
+    end
+
+    #Create a subject node without relationship to the rest of the graph
+    def create_node(url=nil)
+      node = wrap_node(normalize_resource(url))
       yield node if block_given?
       node
     end

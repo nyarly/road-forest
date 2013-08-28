@@ -1,5 +1,6 @@
 require 'rdf/query/pattern'
 require 'roadforest/rdf'
+require 'roadforest/rdf/graph-store'
 require 'roadforest/rdf/investigation'
 
 module RoadForest::RDF

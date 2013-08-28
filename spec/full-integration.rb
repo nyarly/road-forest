@@ -1,7 +1,7 @@
 require 'socket'
 require 'rdf'
 
-describe "RoadForest integration" do
+describe "RoadForest integration", :integration => true do
   class LC < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/logical-construct#"); end
   def kill_server(pid)
     return if pid.nil?

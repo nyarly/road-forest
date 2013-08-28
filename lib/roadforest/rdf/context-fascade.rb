@@ -1,4 +1,6 @@
 require 'rdf'
+require 'roadforest/rdf/resource-query'
+require 'roadforest/rdf/resource-pattern'
 
 module RoadForest::RDF
   class ContextFascade
@@ -20,6 +22,14 @@ module RoadForest::RDF
 
     def each(&block)
       @store.each(&block)
+    end
+
+    def insert(statement)
+      @store.insert(statement)
+    end
+
+    def delete(statement)
+      @store.delete(statement)
     end
   end
 end

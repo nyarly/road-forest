@@ -9,7 +9,9 @@ module RoadForest::RDF
       subject = normalize_resource(subject) || RDF::Node.new
       predicate = normalize_uri(predicate)
       object = normalize_term(object) || RDF::Node.new
-      context = normalize_resource(context)
+      unless context.nil?
+        context = normalize_resource(context)
+      end
 
       RDF::Statement.new(subject, predicate, object, :context => context)
     end
@@ -23,6 +25,7 @@ module RoadForest::RDF
       from = expand_curie(from)
       case from
       when nil
+        from = RDF::Node.new
       when RDF::Resource
       when /^_:/
         from = RDF::Resource.new(from)
