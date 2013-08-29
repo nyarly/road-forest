@@ -105,7 +105,7 @@ Gem::Specification.new do |spec|
   spec.rdoc_options	+= %w{--main doc/README }
   spec.rdoc_options	+= ["--title", "#{spec.name}-#{spec.version} Documentation"]
 
-  spec.add_dependency("rdf", ">= 1.0.4")
+  spec.add_dependency("rdf", "= 1.0.6")
   spec.add_dependency("json-ld", "~> 1.0.0")
 
   spec.add_dependency("webmachine", ">= 1.1.0")

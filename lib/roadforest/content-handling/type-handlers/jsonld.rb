@@ -13,13 +13,13 @@ module RoadForest
           end
           attr_reader :type, :handler
 
-          def local_to_network(network)
-            @handler.local_to_network(network)
+          def local_to_network(base_uri, network)
+            @handler.local_to_network(base_uri, network)
           end
           alias from_graph local_to_network
 
-          def network_to_local(source)
-            @handler.network_to_local(source)
+          def network_to_local(base_uri, source)
+            @handler.network_to_local(base_uri, source)
           end
           alias to_graph network_to_local
         end
@@ -46,23 +46,23 @@ module RoadForest
       end
 
       class Handler
-        def network_to_local(network)
+        def network_to_local(base_uri, network)
           return network
         end
 
-        def local_to_network(local)
+        def local_to_network(base_uri, local)
           return local
         end
 
         def parse_for(resource)
           source = resource.request_body
-          input_data = network_to_local(source)
+          input_data = network_to_local(resource.request_uri, source)
           model = resource.model
 
           update_model(model, input_data)
 
           renderer = model.type_handling.choose_renderer(resource.request_accept_header)
-          body = renderer.local_to_network(model.response_data)
+          body = renderer.local_to_network(resource.request_uri, model.response_data)
 
           build_response(resource)
         end
@@ -70,13 +70,13 @@ module RoadForest
         def render_for(resource)
           model = resource.model
           output_data = get_output(model)
-          local_to_network(output_data)
+          local_to_network(resource.request_uri, output_data)
         end
 
         def add_child_to(resource)
           model = resource.model
           source = resource.request_body
-          input_data = network_to_local(source)
+          input_data = network_to_local(resource.request_uri, source)
 
           child_for_model(resource.model, input_data)
 
@@ -87,7 +87,7 @@ module RoadForest
           model = resource.model
 
           renderer = model.type_handling.choose_renderer(resource.request_accept_header)
-          body = renderer.local_to_network(model.response_data)
+          body = renderer.local_to_network(resource.request_uri, model.response_data)
 
           resource.response_content_type = renderer.content_type_header
           resource.response_body = body
@@ -150,17 +150,26 @@ require 'roadforest/rdf/normalization'
 
       #application/ld+json
       class JSONLD < RDFHandler
-        def local_to_network(rdf)
-          JSON::LD::Writer.buffer do |writer|
+        include RDF::Normalization
+
+        def local_to_network(base_uri, rdf)
+          raise "Invalid base uri: #{base_uri}" if base_uri.nil?
+          prefixes = relevant_prefixes_for_graph(rdf)
+          prefixes.keys.each do |prefix|
+            prefixes[prefix.to_sym] = prefixes[prefix]
+          end
+          JSON::LD::Writer.buffer(:base_uri => base_uri.to_s,
+                                  :prefixes => prefixes) do |writer|
             rdf.each_statement do |statement|
               writer << statement
             end
           end
         end
 
-        def network_to_local(source)
+        def network_to_local(base_uri, source)
+          raise "Invalid base uri: #{base_uri.inspect}" if base_uri.nil?
           graph = ::RDF::Graph.new
-          reader = JSON::LD::Reader.new(source.to_s)
+          reader = JSON::LD::Reader.new(source.to_s, :base_uri => base_uri.to_s)
           reader.each_statement do |statement|
             graph.insert(statement)
           end

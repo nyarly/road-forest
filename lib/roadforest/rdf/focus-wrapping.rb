@@ -21,6 +21,7 @@ module RoadForest::RDF
     end
 
     def unwrap_value(value)
+      return nil if value.nil?
       if value.respond_to? :object
         value.object
       else

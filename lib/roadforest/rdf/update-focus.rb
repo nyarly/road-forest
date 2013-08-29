@@ -32,6 +32,10 @@ module RoadForest::RDF
       end
     end
 
+    def relevant_prefixes
+      super.merge(relevant_prefixes_for_graph(target_graph))
+    end
+
     def add(property, value, extra=nil)
       copy_context
       property, value = normalize_triple(property, value, extra)

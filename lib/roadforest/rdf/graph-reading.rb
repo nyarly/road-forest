@@ -24,6 +24,7 @@ module RoadForest::RDF
     def inspect
       "#<#{self.class.name}:0x#{"%x" % object_id} (#{subject.to_s}) #{forward_properties.inspect}>"
     end
+    alias to_s inspect
 
     def dup
       other = self.class.new
@@ -56,6 +57,10 @@ module RoadForest::RDF
         query.source_rigor = @source_rigor
         yield query
       end
+    end
+
+    def relevant_prefixes
+      relevant_prefixes_for_graph(graph)
     end
 
     def forward_properties

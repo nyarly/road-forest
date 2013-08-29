@@ -71,6 +71,13 @@ describe RoadForest::RDF::UpdateFocus do
     end
   end
 
+  it "should make relevant prefixes available" do
+    updater[[:rdf, :type]] = [:voc, :Thing]
+    updater[[:voc, :a]] = 15
+
+    updater.relevant_prefixes.keys.sort.should == ["rdf", "voc"]
+  end
+
   it "should copy entire context when resource is written" do
     updater[Voc[:a]] = 17
 

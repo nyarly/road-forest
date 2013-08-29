@@ -75,16 +75,47 @@ module RoadForest::RDF
       RDF::Literal.new(object)
     end
 
+    def relevant_prefixes_for_graph(graph)
+      Hash[ vocabularies_in_graph(graph).map do |prefix|
+        vocab = Vocabs[prefix]
+        [prefix, vocab.to_uri]
+      end]
+    end
+
+    def vocabularies_in_graph(graph)
+      patterns = Vocabs.map do |prefix, vocab|
+        [%r{^#{vocab.to_uri}}, prefix]
+      end
+
+      vocabs = {}
+
+      graph.each_statement do |statement|
+        statement.to_a.each do |field|
+          next unless RDF::URI === field
+          field = field.to_s
+          patterns.each do |pattern, vocab|
+            if pattern =~ field
+              vocabs[vocab] = true
+            end
+          end
+        end
+      end
+
+      vocabs.keys
+    end
+
     def expand_curie_pair(prefix, property)
       vocab = Vocabs.fetch(prefix) do
         vocab = RDF::Vocabulary.find do |vocab|
+          unless vocab.__prefix__.is_a? RDF::URI
+            Vocabs[vocab.__prefix__.to_s] = vocab
+          end
           vocab.__prefix__.to_s == prefix
         end
         #p k => vocab #ok
         if vocab.nil?
           raise "Don't know a vocabulary for prefix #{prefix.inspect} in CURIE #{prefix}:#{property}"
         end
-        Vocabs[prefix] = vocab
         vocab
       end
       vocab[property]

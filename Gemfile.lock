@@ -5,7 +5,7 @@ PATH
       addressable (~> 2.2.8)
       excon (~> 0.25)
       json-ld (~> 1.0.0)
-      rdf (>= 1.0.4)
+      rdf (= 1.0.6)
       tilt (>= 1.3.6)
       valise (>= 0.9.1)
       webmachine (>= 1.1.0)

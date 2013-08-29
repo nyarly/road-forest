@@ -158,6 +158,7 @@ module RoadForest::RDF
       end
 
       @repository.query(query) do |statement|
+        next if statement.context.nil?
         yield statement
       end
     end

@@ -24,6 +24,10 @@ module RoadForest
           end
         end
 
+        def request_uri
+          request.uri.to_s.sub(/[?]\Z/, '')
+        end
+
         def request_accept_header
           request.headers["Accept"] || "*/*"
         end

@@ -77,7 +77,7 @@ module RoadForest
         content_type = best_type_for(request.url)
         renderer = type_handling.choose_renderer(content_type)
         request.headers["Content-Type"] = renderer.content_type_header
-        request.body_string = renderer.from_graph(graph)
+        request.body_string = renderer.from_graph(request.url, graph)
       end
 
       class Retryable < StandardError; end
@@ -86,7 +86,9 @@ module RoadForest
         retry_limit ||= 5
         render_graph(graph, request)
 
+        #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(request).inspect}"
         response = http_client.do_request(request)
+        #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(response).inspect}"
         case response.status
         when 415 #Type not accepted
           record_accept_header(request.url, response.headers["Accept"])
@@ -98,13 +100,13 @@ module RoadForest
         retry
       end
 
-      def parse_response(response)
+      def parse_response(base_uri, response)
         parser = type_handling.choose_parser(response.headers["Content-Type"])
-        parser.to_graph(response.body_string)
+        parser.to_graph(base_uri, response.body_string)
       end
 
       def build_response(request, response)
-        graph = parse_response(response)
+        graph = parse_response(request.url, response)
         return GraphResponse.new(request, response, graph)
       end
     end

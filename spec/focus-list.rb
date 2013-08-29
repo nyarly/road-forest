@@ -15,11 +15,20 @@ describe RoadForest::RDF::FocusList do
     focus.as_list
   end
 
-  it "should add items to graph" do
+  it "should add an item to graph" do
     list.append_node("#test")
 
     graph.should match_query do |query|
       query.pattern(:subject => "urn:root#test")
     end
+  end
+
+  it "should add several items to the graph" do
+    list.append_node("#1")
+    list.append_node("#2")
+    list.append_node("#3")
+
+    focus.as_list.to_a.should have(3).nodes
+
   end
 end

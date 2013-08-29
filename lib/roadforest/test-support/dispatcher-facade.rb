@@ -18,7 +18,7 @@ module RoadForest
         if resource = @dispatcher.find_resource(request, response)
           FSM.new(resource, request, response).run
         else
-          Webmachine.render_error(404, request, response)
+          ::Webmachine.render_error(404, request, response)
         end
       end
     end
