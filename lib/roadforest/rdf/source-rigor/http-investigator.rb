@@ -9,12 +9,12 @@ class RoadForest::RDF::SourceRigor
       when (200..299)
         investigation.insert_graph(response.url, response.graph)
       when (300..399)
-        #client should follow redirects
+        #client be should following redirects
       when (400..499)
+        #explicit "empty result" ?
       when (500..599)
         raise NotCredible #hrm
       end
-    rescue NotCredible
     end
   end
 end

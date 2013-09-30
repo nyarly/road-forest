@@ -71,6 +71,10 @@ module RoadForest
         @method, @url = method, url
       end
 
+      def inspect
+        "\n" + super
+      end
+
       def needs_body?
         %w{POST PATCH PUT}.include?(@method)
       end

@@ -28,7 +28,6 @@ module RoadForest::RDF
       source_rigor.graph_transfer.make_request(method, url, graph)
     end
 
-
     def insert_graph(context, graph)
       queryable.insert_graph(context, graph)
     end

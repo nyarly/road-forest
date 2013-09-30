@@ -1,6 +1,5 @@
 require 'rdf'
 require 'roadforest/rdf/context-fascade'
-require 'roadforest/rdf/focus-wrapping'
 require 'roadforest/rdf/graph-reading'
 
 module RoadForest::RDF
@@ -34,7 +33,7 @@ module RoadForest::RDF
     end
   end
 
-  module GraphWriting
+  class GraphWriting < GraphReading
     def normalize_triple(property, value, extra=nil)
       if not extra.nil?
         property = [property, value]
@@ -55,12 +54,22 @@ module RoadForest::RDF
     def add(property, value, extra=nil)
       property, value = normalize_triple(property, value, extra)
 
-      target_graph.insert([subject, property, value])
+      access_manager.insert([subject, property, value])
       return value
     end
 
     def delete(property, extra=nil)
-      target_graph.delete([subject, normalize_property(property, extra), :value])
+      access_manager.delete(:subject => subject, :predicate => normalize_property(property, extra))
+    end
+
+    def find_or_add(property, url=nil, &block)
+      value = first(property)
+      if value.nil?
+        value = add_node(property, url, &block)
+      else
+        yield value if block_given?
+      end
+      value
     end
 
     def set_node(property, url=nil)
@@ -86,19 +95,25 @@ module RoadForest::RDF
     end
 
     def add_list(property, extra=nil)
-      list = ::RDF::List.new(nil, target_graph)
-      target_graph.insert([subject, normalize_property(property, extra), list.subject])
+      list = FocusList.new(nil, access_manager)
+      access_manager.insert([subject, normalize_property(property, extra), list.subject])
       yield list if block_given?
       return list
     end
   end
 
-  class GraphFocus < GraphReading
-    include GraphWriting
-
+  class GraphFocus < GraphWriting
     def target_graph
-      graph
+      @access_manager.target_graph
     end
 
+    def source_graph=(graph)
+      @access_manager.source_graph = graph
+      @access_manager.target_graph = graph
+    end
+    alias target_graph= source_graph=
+
+    alias graph source_graph
+    alias graph= source_graph=
   end
 end

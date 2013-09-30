@@ -1,8 +1,17 @@
-require 'roadforest/rdf/focus-wrapping'
+require 'rdf'
+
+require 'roadforest/rdf/resource-query'
+require 'roadforest/rdf/resource-pattern'
+
 module RoadForest::RDF
   class FocusList < ::RDF::List
 
-    attr_accessor :root_url, :base_node, :source_rigor
+    attr_accessor :root_url, :base_node
+
+    #XXX Can delete?
+    def source_rigor
+      graph.rigor
+    end
 
     alias car first
     alias cdr rest

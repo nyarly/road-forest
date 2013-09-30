@@ -160,7 +160,6 @@ module RoadForest::RDF
     end
 
     def interned_uri(value)
-
       RDF::URI.intern(uri(value))
     end
 
@@ -174,8 +173,8 @@ module RoadForest::RDF
       if !value.query.nil? and value.query.empty?
         value.query = nil
       end
-      value.validate!
       value.canonicalize!
+      value.validate!
 
       value
     end

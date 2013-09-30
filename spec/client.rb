@@ -48,6 +48,7 @@ describe RoadForest::RemoteHost do
   describe "raw put of file data" do
     before :each do
       @destination = nil
+      #server.graph_transfer.trace = true
       server.getting do |graph|
         items = graph.all(:skos, "hasTopConcept")
 

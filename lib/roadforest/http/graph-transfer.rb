@@ -5,10 +5,13 @@ require 'roadforest/content-handling/engine'
 module RoadForest
   module HTTP
     class GraphTransfer
-      attr_accessor :http_client
+      class Retryable < StandardError; end
+
+      attr_accessor :http_client, :trace
       attr_writer :type_handling
 
       def initialize
+        @trace = nil
         @type_preferences = Hash.new{|h,k| k.nil? ? "*/*" : h[nil]}
       end
 
@@ -80,15 +83,19 @@ module RoadForest
         request.body_string = renderer.from_graph(request.url, graph)
       end
 
-      class Retryable < StandardError; end
+      def trace_message(message)
+        return unless @trace
+        @trace = $stdout unless IO === @trace
+        @trace.puts message.inspect
+      end
 
       def send_request(request, graph)
         retry_limit ||= 5
         render_graph(graph, request)
 
-        #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(request).inspect}"
+        trace_message(request)
         response = http_client.do_request(request)
-        #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(response).inspect}"
+        trace_message(response)
         case response.status
         when 415 #Type not accepted
           record_accept_header(request.url, response.headers["Accept"])

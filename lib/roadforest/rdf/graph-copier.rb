@@ -3,13 +3,12 @@ require 'roadforest/rdf/graph-focus'
 
 module RoadForest
   module RDF
-    class GraphCopier < GraphFocus
-      attr_accessor :source_graph, :subject
-
-      alias target_graph graph
+    class GraphCopier < GraphWriting
+      attr_accessor :target_graph
 
       def initialize
-        @graph = ::RDF::Graph.new
+        super
+        @target_graph = ::RDF::Graph.new
       end
     end
   end

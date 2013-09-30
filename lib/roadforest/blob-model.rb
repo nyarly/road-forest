@@ -44,12 +44,18 @@ module RoadForest
       File::open(path)
     end
 
+    def incomplete_path
+      [path,"incomplete"].join(".")
+    end
+
     def update(incoming)
-      File::open(path, "w") do |file|
+      File::open(incomplete_path, "w") do |file|
         incoming.each do |chunk|
           file.write(chunk)
         end
       end
+      Pathname.new(incomplete_path).rename(path)
+
       return nil
     end
   end
