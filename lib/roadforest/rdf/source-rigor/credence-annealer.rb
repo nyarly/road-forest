@@ -12,6 +12,8 @@ class RoadForest::RDF::SourceRigor
     def resolve(&block)
       attempts = @attempts
 
+      @graph.force_impulse
+
       begin
         raise "Annealing failed after #@attempts attempts" if (attempts -= 1) < 0
         @graph.next_impulse

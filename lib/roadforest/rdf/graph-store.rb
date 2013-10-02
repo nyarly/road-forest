@@ -25,26 +25,27 @@ module RoadForest::RDF
       @repository = repo || RDF::Repository.new
       @local_context_node = RDF::Node.new(:local)
       @debug_io = nil
-      next_impulse
+      force_impulse
       yield self if block_given?
     end
 
-    def next_impulse
-      return if !@current_impulse.nil? and raw_quiet_impulse?
-      #mark ended?
-      #chain impulses?
+    def force_impulse
       @current_impulse = RDF::Node.new
       repository.insert(normalize_statement(@current_impulse, [:rdf, 'type'], [:rf, 'Impulse'], nil))
       repository.insert(normalize_statement(@current_impulse, [:rf, 'begunAt'], Time.now, nil))
     end
 
-    def quiet_impulse?
-      raw_quiet_impulse?
+    def next_impulse
+      return if quiet_impulse?
+      force_impulse
+      #mark ended?
+      #chain impulses?
     end
 
-    def raw_quiet_impulse?
+    def quiet_impulse?
       repository.query([nil, nil, @current_impulse, false]).to_a.empty?
     end
+    alias raw_quiet_impulse? quiet_impulse?
 
     #repo cleanup - expired graphs
 

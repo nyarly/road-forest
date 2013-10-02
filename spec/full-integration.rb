@@ -40,6 +40,8 @@ describe "RoadForest integration", :integration => true do
       end
 
       logfile = File::open(@server_logs,"a")
+      logfile.sync = true
+      logfile.puts "New test run: #{Time.now.to_s}"
 
       application = FileManagementExample::Application.new("http://localhost:#{@server_port}", services)
       application.configure do |config|
@@ -161,6 +163,19 @@ describe "RoadForest integration", :integration => true do
     end
   end
 
+  describe "getting data from the server" do
+    it "should get a correct count" do
+      server.getting do |graph|
+        @correct = 0
+        unresolved_list(graph).first(:lc, "needs").as_list.each do |need|
+          @correct += 1 unless need[:lc, "resolved"]
+        end
+      end
+
+      @correct.should == 3
+    end
+  end
+
   describe "putting data to server" do
     before :each do
       server.putting do |graph|
@@ -176,11 +191,11 @@ describe "RoadForest integration", :integration => true do
       server.getting do |graph|
         @correct = 0
         unresolved_list(graph).first(:lc, "needs").as_list.each do |need|
-          @correct += 1 if need[:lc, "resolved"]
+          @correct += 1
         end
       end
 
-      @correct.should == 3
+      @correct.should == 0
     end
   end
 end

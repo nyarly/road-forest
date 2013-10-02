@@ -124,18 +124,31 @@ describe RoadForest::RDF::UpdateFocus do
 
   it "should add a list to the target graph" do
     list_focus = updater.add_node(Voc[:list])
-    first_node = nil
+    nodes = []
     list_focus.as_list.append_node do |node|
-      first_node = node
+      nodes << node
       node[Voc[:d]] = 107
     end
 
-    query = [first_node.subject, Voc[:d], 107]
+    list_focus.as_list.append_node do |node|
+      nodes << node
+      node[Voc[:d]] = 109
+    end
+
+    list_focus.as_list.append_node do |node|
+      nodes << node
+      node[Voc[:d]] = 113
+    end
+
     resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
 
     list = ::RDF::List.new(list_focus.subject, target_graph)
 
-    list[0].should == first_node.subject
-    resource_graph.query(query).should_not be_empty
+    list[0].should == nodes[0].subject
+    list[1].should == nodes[1].subject
+    list[2].should == nodes[2].subject
+    resource_graph.query([nodes[0].subject, Voc[:d], 107]).should_not be_empty
+    resource_graph.query([nodes[1].subject, Voc[:d], 109]).should_not be_empty
+    resource_graph.query([nodes[2].subject, Voc[:d], 113]).should_not be_empty
   end
 end

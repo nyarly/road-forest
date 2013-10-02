@@ -9,10 +9,14 @@ module RoadForest
 
       attr_accessor :http_client, :trace
       attr_writer :type_handling
+      attr_reader :graph_cache
 
       def initialize
         @trace = nil
         @type_preferences = Hash.new{|h,k| k.nil? ? "*/*" : h[nil]}
+        @graph_cache = Hash.new do |cache, url|
+          cache[url] = {}
+        end
       end
 
       def type_handling
@@ -40,7 +44,18 @@ module RoadForest
 
         response = send_request(request, graph)
 
-        return build_response(request, response)
+        case response
+        when HTTP::Response
+          response = build_response(request, response)
+          cache_response(response)
+          return response
+        when GraphResponse
+          return response
+        end
+      end
+
+      def cache_response(response)
+        graph_cache[response.url][response.etag] = response
       end
 
       def validate(method, url, graph)
@@ -62,7 +77,14 @@ module RoadForest
       def setup_request(method, url)
         request = Request.new(method, url)
         request.headers["Accept"] = type_handling.parsers.types.accept_header
+        add_cache_headers(request)
         request
+      end
+
+      def add_cache_headers(request)
+        return unless request.method == "GET"
+        return unless graph_cache.has_key?(request.url)
+        request.headers["If-None-Match"] = graph_cache[request.url].keys.join(", ")
       end
 
       def select_renderer(url)
@@ -91,12 +113,17 @@ module RoadForest
 
       def send_request(request, graph)
         retry_limit ||= 5
+        #Check expires headers on received
         render_graph(graph, request)
 
         trace_message(request)
         response = http_client.do_request(request)
         trace_message(response)
         case response.status
+        when 304 #Not Modified
+          response = graph_cache.fetch(request.url).fetch(response.etag)
+          trace_message(response)
+          return response
         when 415 #Type not accepted
           record_accept_header(request.url, response.headers["Accept"])
           raise Retryable
@@ -114,7 +141,11 @@ module RoadForest
 
       def build_response(request, response)
         graph = parse_response(request.url, response)
-        return GraphResponse.new(request, response, graph)
+        response = GraphResponse.new(request, response)
+        response.graph = graph
+        return response
+      rescue ContentHandling::UnrecognizedType
+        return UnparseableResponse.new(request, response)
       end
     end
   end

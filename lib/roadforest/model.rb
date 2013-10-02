@@ -12,6 +12,7 @@ module RoadForest
       @response_values = {}
     end
     attr_reader :route_name, :params, :services, :data
+    attr_reader :response_values
 
     def path_for(route_name = nil, params = nil)
       services.router.path_for(route_name, (params || self.params).to_hash)
@@ -103,7 +104,10 @@ module RoadForest
 
   end
 
+  require 'roadforest/rdf/etagging'
   class RDFModel < Model
+    include RDF::Etagging
+
     def update(graph)
       graph_update(start_focus(graph))
     end
@@ -137,13 +141,22 @@ module RoadForest
       return focus
     end
 
-    def start_graph(resource_url=nil, &block)
-      graph = ::RDF::Graph.new
-      start_focus(graph, resource_url, &block)
+    def etag
+      @etag ||= etag_from(etag_graph)
+    end
+
+    def etag_graph
+      current_graph
+    end
+
+    def current_graph
+      return response_data if response_values.has_key?(:data)
+      new_graph
     end
 
     def new_graph
-      focus = start_graph(my_url)
+      graph = ::RDF::Graph.new
+      focus = start_focus(graph, my_url)
       fill_graph(focus)
       self.response_data = focus.graph
     end

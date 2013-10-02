@@ -1,17 +1,23 @@
 require 'rdf'
 require 'roadforest/rdf/resource-query'
 require 'roadforest/rdf/resource-pattern'
+require 'roadforest/rdf/normalization'
 
 module RoadForest::RDF
   class ContextFascade
     include ::RDF::Countable
     include ::RDF::Enumerable
     include ::RDF::Queryable
+    include Normalization
 
     attr_accessor :resource, :rigor, :source_graph, :target_graph, :copied_contexts
 
     def initialize
       @copied_contexts = {}
+    end
+
+    def resource=(resource)
+      @resource = normalize_context(resource)
     end
 
     def dup
@@ -86,6 +92,7 @@ module RoadForest::RDF
 
     def delete(statement)
       statement = RDF::Query::Pattern.from(statement)
+      statement.context = resource
       copy_context
       target_graph.delete(statement)
     end

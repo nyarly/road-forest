@@ -73,6 +73,7 @@ GEM
     rake (10.1.0)
     rake-rubygems (0.2.0)
       rake (>= 0.8.7)
+    rbench (0.2.3)
     rdf (1.0.6)
       addressable (>= 2.2)
     rdf-rdfa (1.0.0)
@@ -118,6 +119,7 @@ DEPENDENCIES
   cadre!
   corundum
   fuubar
+  rbench
   rdf-rdfa
   rdf-turtle
   roadforest!

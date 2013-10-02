@@ -1,5 +1,6 @@
 source :rubygems
 
+gem 'rbench'
 gem 'corundum'
 gem 'fuubar'
 gem 'rdf-rdfa'

@@ -87,6 +87,10 @@ module RoadForest
     class Response < Message
       attr_accessor :status
 
+      def etag
+        headers["ETag"]
+      end
+
       def inspection_payload
         [status] + super
       end

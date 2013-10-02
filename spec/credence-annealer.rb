@@ -20,7 +20,7 @@ describe RoadForest::RDF::SourceRigor::CredenceAnnealer do
   end
 
   it "should re-run it's block until the GraphStore settles" do
-    graph.stub(:quiet_impulse?).and_return(false, false, true)
+    graph.stub(:quiet_impulse?).and_return(false, false, false, false, true) #called twice per resolution loop
 
     times_run = 0
     annealer.resolve do

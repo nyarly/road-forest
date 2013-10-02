@@ -2,6 +2,8 @@ require 'roadforest/content-handling/media-type'
 
 module RoadForest
   module ContentHandling
+    class UnrecognizedType < ::StandardError; end
+
     class Engine
       class TypeHandlerList
         def initialize(prefix)
@@ -39,7 +41,7 @@ module RoadForest
           type = MediaType.parse(type)
           @handlers.fetch(type)
         rescue KeyError
-          raise "No Content-Type handler for #{content_type}"
+          raise UnrecognizedType, "No Content-Type handler for #{type}"
         end
       end
 
@@ -105,6 +107,7 @@ module RoadForest
       # Given the 'Accept' header and provided types, chooses an
       # appropriate media type.
       def choose_media_type(provided, header)
+        return "*/*" if header.nil?
         requested = MediaTypeList.build(header.split(/\s*,\s*/))
         requested.best_match_from(provided)
       end
