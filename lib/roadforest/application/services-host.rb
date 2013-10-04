@@ -5,6 +5,6 @@ class RoadForest::Application
     def initialize
     end
 
-    attr_accessor :router, :canonical_host, :type_handling
+    attr_accessor :router, :canonical_host, :type_handling, :logger
   end
 end

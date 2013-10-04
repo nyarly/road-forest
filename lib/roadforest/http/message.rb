@@ -69,6 +69,7 @@ module RoadForest
       def initialize(method, url)
         super()
         @method, @url = method, url
+        headers["Host"] = Addressable::URI.parse(url).host
       end
 
       def inspect
@@ -80,7 +81,7 @@ module RoadForest
       end
 
       def inspection_payload
-        ["#{method} #{url}"] + super
+        [url, "#{method} #{url.path}"] + super
       end
     end
 

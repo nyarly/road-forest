@@ -55,6 +55,8 @@ module RoadForest
       end
 
       def cache_response(response)
+        return if response.etag.nil?
+        return if response.etag.empty?
         graph_cache[response.url][response.etag] = response
       end
 
@@ -84,7 +86,9 @@ module RoadForest
       def add_cache_headers(request)
         return unless request.method == "GET"
         return unless graph_cache.has_key?(request.url)
-        request.headers["If-None-Match"] = graph_cache[request.url].keys.join(", ")
+        cached = graph_cache[request.url]
+        return if cached.empty?
+        request.headers["If-None-Match"] = cached.keys.join(", ")
       end
 
       def select_renderer(url)

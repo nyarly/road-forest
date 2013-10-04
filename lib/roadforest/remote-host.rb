@@ -9,7 +9,12 @@ module RoadForest
     include RDF::Normalization
 
     def initialize(well_known_url)
-      @url = normalize_resource(well_known_url)
+      self.url = well_known_url
+    end
+    attr_reader :url
+
+    def url=(string)
+      @url = normalize_resource(string)
     end
 
     def build_graph_store
@@ -18,7 +23,7 @@ module RoadForest
 
     attr_writer :http_client
     def http_client
-      @http_client ||= HTTP::ExconAdapter.new(@url)
+      @http_client ||= HTTP::ExconAdapter.new(url)
     end
 
     def graph_transfer
@@ -51,7 +56,7 @@ module RoadForest
     def putting(&block)
       require 'roadforest/rdf/update-focus'
       graph = build_graph_store
-      updater = RDF::UpdateFocus.new(@url, graph, source_rigor)
+      updater = RDF::UpdateFocus.new(url, graph, source_rigor)
       annealer = RDF::SourceRigor::CredenceAnnealer.new(graph)
 
       annealer.resolve do
@@ -69,7 +74,7 @@ module RoadForest
     def posting(&block)
       require 'roadforest/rdf/post-focus'
       graph = build_graph_store
-      poster = RDF::PostFocus.new(@url, graph, source_rigor)
+      poster = RDF::PostFocus.new(url, graph, source_rigor)
 
       anneal(poster, &block)
 
@@ -78,7 +83,7 @@ module RoadForest
 
     def getting(&block)
       graph = build_graph_store
-      reader = RDF::GraphReading.new(@url, graph, source_rigor)
+      reader = RDF::GraphReading.new(url, graph, source_rigor)
 
       anneal(reader, &block)
     end

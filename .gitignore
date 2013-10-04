@@ -16,3 +16,4 @@ errors.err
 .cadre/
 spec_support/destination/
 integration-tests.log
+integration-test.log

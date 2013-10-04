@@ -27,7 +27,7 @@ module RoadForest
         excon_response = connection.request(
           :method => request.method,
           :path => uri.path,
-          :headers => request.headers,
+          :headers => {"Host" => uri.host}.merge(request.headers),
           :body => request.body
         )
 

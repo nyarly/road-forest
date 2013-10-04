@@ -47,8 +47,16 @@ module RoadForest
         response.status = exchange.response.code
         response.body_string = exchange.response.body
 
+        enrich_with_server_stuff(response)
+
         #puts; puts "#{__FILE__}:#{__LINE__} => #{(response).inspect}"
         return response
+      end
+
+      def enrich_with_server_stuff(response)
+        response.headers["Server"]="RoadForest Test Server"
+        response.headers["Date"]=Time.now.httpdate
+        response.headers["Connection"] = "Keep-Alive"
       end
 
       class Exchange

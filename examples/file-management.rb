@@ -56,6 +56,7 @@ module FileManagementExample
         end
 
         def add_child(graph)
+          services.logger.debug(graph.source_graph.dump(:nquads))
           new_file = FileRecord.new(graph.first(:lc, "name"), false)
           services.file_records << new_file
         end
@@ -83,7 +84,7 @@ module FileManagementExample
         end
 
         def graph_update(graph)
-          data.resolved = graph[[:lc, "resolved"]]
+          data.resolved = graph[:lc, "resolved"]
           new_graph
         end
 

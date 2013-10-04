@@ -56,13 +56,13 @@ module RoadForest
 
         def parse_for(resource)
           source = resource.request_body
-          input_data = network_to_local(resource.request_uri, source)
           model = resource.model
+          input_data = network_to_local(model.my_url, source)
 
           update_model(model, input_data)
 
           renderer = model.type_handling.choose_renderer(resource.request_accept_header)
-          body = renderer.local_to_network(resource.request_uri, model.response_data)
+          body = renderer.local_to_network(model.my_url, model.response_data)
 
           build_response(resource)
         end
@@ -70,13 +70,13 @@ module RoadForest
         def render_for(resource)
           model = resource.model
           output_data = get_output(model)
-          local_to_network(resource.request_uri, output_data)
+          local_to_network(model.my_url,  output_data)
         end
 
         def add_child_to(resource)
           model = resource.model
           source = resource.request_body
-          input_data = network_to_local(resource.request_uri, source)
+          input_data = network_to_local(model.my_url, source)
 
           child_for_model(resource.model, input_data)
 
@@ -87,7 +87,7 @@ module RoadForest
           model = resource.model
 
           renderer = model.type_handling.choose_renderer(resource.request_accept_header)
-          body = renderer.local_to_network(resource.request_uri, model.response_data)
+          body = renderer.local_to_network(model.my_url, model.response_data)
 
           resource.response_content_type = renderer.content_type_header
           resource.response_body = body

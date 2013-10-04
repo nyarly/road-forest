@@ -13,6 +13,7 @@ describe RoadForest::RemoteHost do
   end
 
   let :services do
+    require 'logger'
     FileManagementExample::ServicesHost.new.tap do |host|
       host.file_records = [
         FileManagementExample::FileRecord.new("one", false),
@@ -20,11 +21,13 @@ describe RoadForest::RemoteHost do
         FileManagementExample::FileRecord.new("three", false)
       ]
       host.destination_dir = destination_dir
+      host.logger = Logger.new($stdout)
+      host.logger.level = Logger::DEBUG
     end
   end
 
   let :server do
-    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://roadforest.test-domain.com/", services))
+    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services))
   end
 
   def dump_trace
@@ -48,7 +51,6 @@ describe RoadForest::RemoteHost do
   describe "raw put of file data" do
     before :each do
       @destination = nil
-      #server.graph_transfer.trace = true
       server.getting do |graph|
         items = graph.all(:skos, "hasTopConcept")
 
@@ -73,7 +75,7 @@ describe RoadForest::RemoteHost do
     end
 
     it "should set destination" do
-      @destination.to_context.to_s.should == "http://roadforest.test-domain.com/files/one"
+      @destination.to_context.to_s.should == "http://localhost:8778/files/one"
     end
 
     it "should deliver file to destination path" do
@@ -113,6 +115,8 @@ describe RoadForest::RemoteHost do
   describe "putting data to server" do
     before :each do
       server.putting do |graph|
+        puts "\n#{__FILE__}:#{__LINE__} => #{graph.inspect}"
+        puts "\n#{__FILE__}:#{__LINE__} => \n#{graph.source_graph.dump(:nquads)}"
         items = graph.all(:skos, "hasTopConcept")
 
         unresolved = items.find do |nav_item|
@@ -133,6 +137,23 @@ describe RoadForest::RemoteHost do
       services.file_records.each do |record|
         record.resolved.should == true
       end
+    end
+
+    it "should change the server's responses" do
+      server.getting do |graph|
+        @correct = 0
+        items = graph.all(:skos, "hasTopConcept")
+
+        unresolved = items.find do |nav_item|
+          nav_item[:skos, "label"] == "Unresolved"
+        end
+
+        unresolved.first(:foaf, "page").first(:lc, "needs").as_list.each do |need|
+          @correct += 1
+        end
+      end
+
+      @correct.should == 0
     end
 
     it "should extract data from server responses" do

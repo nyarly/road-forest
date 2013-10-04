@@ -29,32 +29,22 @@ describe "RoadForest integration", :integration => true do
     @server_pid = fork do
       require 'roadforest/server'
       require 'examples/file-management'
-      require 'webrick/accesslog'
-      services = FileManagementExample::ServicesHost.new.tap do |host|
-        host.file_records = [
-          FileManagementExample::FileRecord.new("one", false),
-          FileManagementExample::FileRecord.new("two", false),
-          FileManagementExample::FileRecord.new("three", false)
-        ]
-        host.destination_dir = @destination_dir
-      end
-
-      logfile = File::open(@server_logs,"a")
-      logfile.sync = true
-      logfile.puts "New test run: #{Time.now.to_s}"
-
-      application = FileManagementExample::Application.new("http://localhost:#{@server_port}", services)
-      application.configure do |config|
+      require 'logger'
+      RoadForest.serve(
+        FileManagementExample::Application.new("http://localhost:#{@server_port}"),
+        FileManagementExample::ServicesHost.new.tap do |host|
+          host.file_records = [
+            FileManagementExample::FileRecord.new("one", false),
+            FileManagementExample::FileRecord.new("two", false),
+            FileManagementExample::FileRecord.new("three", false)
+          ]
+          host.destination_dir = @destination_dir
+          host.logger = Logger.new("integration-test.log")
+          host.logger.level = Logger::DEBUG
+        end
+      ) do |config|
         config.port = @server_port
-        config.adapter_options = {
-          :Logger => WEBrick::Log.new(logfile),
-          :AccessLog => [
-            [logfile, WEBrick::AccessLog::COMMON_LOG_FORMAT ],
-            [logfile, WEBrick::AccessLog::REFERER_LOG_FORMAT ]
-        ]
-        }
       end
-      application.run
     end
 
     require 'roadforest/remote-host'
@@ -76,7 +66,7 @@ describe "RoadForest integration", :integration => true do
         retry
       end
     ensure
-      test_conn.close
+      test_conn.close rescue nil
     end
   end
 
@@ -93,7 +83,9 @@ describe "RoadForest integration", :integration => true do
   end
 
   let :server do
-    RoadForest::RemoteHost.new(server_url)
+    server = RoadForest::RemoteHost.new(server_url)
+    server.graph_transfer.trace = true
+    server
   end
 
   before :each do

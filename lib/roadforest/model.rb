@@ -136,6 +136,7 @@ module RoadForest
       focus = RDF::GraphFocus.new
       focus.graph = graph
       focus.subject = resource_url || my_url
+      services.logger.debug({:resource_url => resource_url, :my_url => my_url, :subject_url => focus.subject}.inspect)
 
       yield focus if block_given?
       return focus
