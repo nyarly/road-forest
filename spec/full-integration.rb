@@ -84,7 +84,7 @@ describe "RoadForest integration", :integration => true do
 
   let :server do
     server = RoadForest::RemoteHost.new(server_url)
-    server.graph_transfer.trace = true
+    #server.graph_transfer.trace = true
     server
   end
 

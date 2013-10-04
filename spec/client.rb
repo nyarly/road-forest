@@ -21,8 +21,7 @@ describe RoadForest::RemoteHost do
         FileManagementExample::FileRecord.new("three", false)
       ]
       host.destination_dir = destination_dir
-      host.logger = Logger.new($stdout)
-      host.logger.level = Logger::DEBUG
+      host.logger = nil
     end
   end
 
@@ -115,8 +114,6 @@ describe RoadForest::RemoteHost do
   describe "putting data to server" do
     before :each do
       server.putting do |graph|
-        puts "\n#{__FILE__}:#{__LINE__} => #{graph.inspect}"
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{graph.source_graph.dump(:nquads)}"
         items = graph.all(:skos, "hasTopConcept")
 
         unresolved = items.find do |nav_item|
