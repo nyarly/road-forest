@@ -21,7 +21,6 @@ describe RoadForest::RemoteHost do
         FileManagementExample::FileRecord.new("three", false)
       ]
       host.destination_dir = destination_dir
-      host.logger = nil
     end
   end
 
