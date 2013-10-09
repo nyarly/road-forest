@@ -1,6 +1,7 @@
 #@require 'rdf/rdfa' #XXX Otherwise json-ld grabs RDFa documents. Awaiting fix
 #upstream
 require 'json/ld'
+require 'roadforest/rdf/normalization'
 
 module RoadForest
   module MediaType
@@ -115,8 +116,6 @@ module RoadForest
           result
         end
       end
-
-require 'roadforest/rdf/normalization'
       class RDFHandler < Handler
         include RDF::Normalization
 

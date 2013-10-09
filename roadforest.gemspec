@@ -78,13 +78,13 @@ Gem::Specification.new do |spec|
     lib/roadforest/rdf.rb
     lib/roadforest/blob-model.rb
     lib/roadforest/utility/class-registry.rb
-    lib/roadforest/content-handling/type-handlers/file-storage.rb
     lib/roadforest/content-handling/type-handlers/jsonld.rb
     lib/roadforest/content-handling/media-type.rb
     lib/roadforest/content-handling/engine.rb
     lib/roadforest/application.rb
     lib/roadforest/remote-host.rb
     lib/roadforest.rb
+    examples/file-management.rb
     spec/graph-store.rb
     spec/focus-list.rb
     spec/graph-copier.rb
