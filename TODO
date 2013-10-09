@@ -1,3 +1,8 @@
+NullFocus
+  Empty results from GraphFoci should result in a special focus that is "null"
+  should be empty? nil? blank? ...
+  Other methods should raise an error that "pattern/query" on "graph/focus" resulted in an empty result
+
 Cross model interactions:
   Get the graph for a particular model (see Front-loading)
   PUT/POST to create by generating ids and back-ending request to the other
@@ -15,6 +20,7 @@ RDFa + HTML support:
   Implement the POST RDF representation per http://www.lsrn.org/semweb/rdfpost.html
   Review the existing RDF::RDFa gem - how the hash of HAML templates works especially
   Consider RDFa helpers for HAML.
+  Valise based template searching
 
 "Strict" vocabularies:
   Vocab classes that have an RDFS document (in addition to their prefix and
@@ -36,8 +42,16 @@ Pagination:
 Client error exceptions
   40x -> per code exception classes, include Response content
 
+Cached Rigor
+  A "stale records" investigator
+  Rigor that relies on it - useful for initial state before we hit the n/w
+
+Inference investigator
+  Look for statements that could be used to infer a response to current pattern
+  Insert inferred statements
+  Relies on RDFS/OWL
+
 Other concerns:
-Content type handling (iow: RDF<->text format)
 Authentication
 Authorization
 Content encoding (gzip, compress)
@@ -50,16 +64,16 @@ HTML related:
   Params -> graph
   Form rendering
   Limited fan-out of received data - e.g. file uploads to forms
+  rdfpost reader + RDFa helpers
 
-Cacheing - last_modified, expires, etag(+ W/)
+Cacheing - last_modified, expires
+  Cache-control headers (WM PR)
 
 property delete
 
 property replace
 
 repo autovacuum
-
-collect vocabs used to generate a graph - build curies for representations that work that way
 
 BGP queries should be solveable *across* resources - currently all patterns get
 a :context variable applied that all have to match, but it seems reasonable

@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name		= "roadforest"
-  spec.version		= "0.0.1"
+  spec.version		= "0.0.2"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com'
   }
@@ -20,78 +20,83 @@ Gem::Specification.new do |spec|
   spec.homepage        = "http://nyarly.github.com/#{spec.name.downcase}"
   spec.required_rubygems_version = Gem::Requirement.new(">= 0") if spec.respond_to? :required_rubygems_version=
 
-  # Do this: y$@"
+  # Do this: y$jj@"
   # !!find lib bin doc spec spec_help -not -regex '.*\.sw.' -type f 2>/dev/null
-  spec.files		= %w[
-  lib/roadforest/rdf/graph-store.rb
-  lib/roadforest/rdf/normalization.rb
-  lib/roadforest/rdf/focus-list.rb
-  lib/roadforest/rdf/graph-reading.rb
-  lib/roadforest/rdf/graph-copier.rb
-  lib/roadforest/rdf/context-fascade.rb
-  lib/roadforest/rdf/source-rigor.rb
-  lib/roadforest/rdf/graph-focus.rb
-  lib/roadforest/rdf/post-focus.rb
-  lib/roadforest/rdf/source-rigor/null-investigator.rb
-  lib/roadforest/rdf/source-rigor/credence.rb
-  lib/roadforest/rdf/source-rigor/credence/any.rb
-  lib/roadforest/rdf/source-rigor/credence/role-if-available.rb
-  lib/roadforest/rdf/source-rigor/credence/none-if-role-absent.rb
-  lib/roadforest/rdf/source-rigor/http-investigator.rb
-  lib/roadforest/rdf/source-rigor/investigator.rb
-  lib/roadforest/rdf/source-rigor/credence-annealer.rb
-  lib/roadforest/rdf/update-focus.rb
-  lib/roadforest/rdf/vocabulary.rb
-  lib/roadforest/rdf/document.rb
-  lib/roadforest/rdf/focus-wrapping.rb
-  lib/roadforest/rdf/resource-pattern.rb
-  lib/roadforest/rdf/parcel.rb
-  lib/roadforest/rdf/resource-query.rb
-  lib/roadforest/rdf/investigation.rb
-  lib/roadforest/http/message.rb
-  lib/roadforest/http/graph-response.rb
-  lib/roadforest/http/adapters/excon.rb
-  lib/roadforest/http/graph-transfer.rb
-  lib/roadforest/resource/rdf/list.rb
-  lib/roadforest/resource/rdf/parent-item.rb
-  lib/roadforest/resource/rdf/read-only.rb
-  lib/roadforest/resource/rdf/leaf-item.rb
-  lib/roadforest/resource/http/form-parsing.rb
-  lib/roadforest/resource/role/writable.rb
-  lib/roadforest/resource/role/has-children.rb
-  lib/roadforest/resource/handlers.rb
-  lib/roadforest/resource/rdf.rb
-  lib/roadforest/test-support/matchers.rb
-  lib/roadforest/test-support/remote-host.rb
-  lib/roadforest/test-support/trace-formatter.rb
-  lib/roadforest/test-support/dispatcher-facade.rb
-  lib/roadforest/test-support/http-client.rb
-  lib/roadforest/server.rb
-  lib/roadforest/application/services-host.rb
-  lib/roadforest/application/path-provider.rb
-  lib/roadforest/application/parameters.rb
-  lib/roadforest/application/dispatcher.rb
-  lib/roadforest/application/route-adapter.rb
-  lib/roadforest/models.rb
-  lib/roadforest/model.rb
-  lib/roadforest/blob-model.rb
-  lib/roadforest/test-support.rb
-  lib/roadforest/rdf.rb
-  lib/roadforest/utility/class-registry.rb
-  lib/roadforest/content-handling/type-handlers/jsonld.rb
-  lib/roadforest/content-handling/media-type.rb
-  lib/roadforest/content-handling/engine.rb
-  lib/roadforest/application.rb
-  lib/roadforest/remote-host.rb
-  lib/roadforest.rb
-  spec/graph-store.rb
-  spec/graph-copier.rb
-  spec/rdf-parcel.rb
-  spec/media-types.rb
-  spec/update-focus.rb
-  spec/client.rb
-  spec/credence-annealer.rb
-  examples/file-management.rb
+  spec.files    = %w[
+    lib/roadforest/rdf/graph-store.rb
+    lib/roadforest/rdf/normalization.rb
+    lib/roadforest/rdf/focus-list.rb
+    lib/roadforest/rdf/graph-reading.rb
+    lib/roadforest/rdf/graph-copier.rb
+    lib/roadforest/rdf/context-fascade.rb
+    lib/roadforest/rdf/source-rigor.rb
+    lib/roadforest/rdf/graph-focus.rb
+    lib/roadforest/rdf/etagging.rb
+    lib/roadforest/rdf/source-rigor/null-investigator.rb
+    lib/roadforest/rdf/source-rigor/credence.rb
+    lib/roadforest/rdf/source-rigor/credence/any.rb
+    lib/roadforest/rdf/source-rigor/credence/role-if-available.rb
+    lib/roadforest/rdf/source-rigor/credence/none-if-role-absent.rb
+    lib/roadforest/rdf/source-rigor/http-investigator.rb
+    lib/roadforest/rdf/source-rigor/investigator.rb
+    lib/roadforest/rdf/source-rigor/credence-annealer.rb
+    lib/roadforest/rdf/post-focus.rb
+    lib/roadforest/rdf/investigation.rb
+    lib/roadforest/rdf/update-focus.rb
+    lib/roadforest/rdf/vocabulary.rb
+    lib/roadforest/rdf/document.rb
+    lib/roadforest/rdf/resource-pattern.rb
+    lib/roadforest/rdf/parcel.rb
+    lib/roadforest/rdf/resource-query.rb
+    lib/roadforest/http/message.rb
+    lib/roadforest/http/graph-response.rb
+    lib/roadforest/http/adapters/excon.rb
+    lib/roadforest/http/graph-transfer.rb
+    lib/roadforest/resource/rdf/list.rb
+    lib/roadforest/resource/rdf/parent-item.rb
+    lib/roadforest/resource/rdf/read-only.rb
+    lib/roadforest/resource/rdf/leaf-item.rb
+    lib/roadforest/resource/http/form-parsing.rb
+    lib/roadforest/resource/role/writable.rb
+    lib/roadforest/resource/role/has-children.rb
+    lib/roadforest/resource/handlers.rb
+    lib/roadforest/resource/rdf.rb
+    lib/roadforest/test-support/http-client.rb
+    lib/roadforest/test-support/trace-formatter.rb
+    lib/roadforest/test-support/matchers.rb
+    lib/roadforest/test-support/dispatcher-facade.rb
+    lib/roadforest/test-support/remote-host.rb
+    lib/roadforest/server.rb
+    lib/roadforest/application/services-host.rb
+    lib/roadforest/application/path-provider.rb
+    lib/roadforest/application/parameters.rb
+    lib/roadforest/application/dispatcher.rb
+    lib/roadforest/application/route-adapter.rb
+    lib/roadforest/model.rb
+    lib/roadforest/models.rb
+    lib/roadforest/test-support.rb
+    lib/roadforest/rdf.rb
+    lib/roadforest/blob-model.rb
+    lib/roadforest/utility/class-registry.rb
+    lib/roadforest/content-handling/type-handlers/file-storage.rb
+    lib/roadforest/content-handling/type-handlers/jsonld.rb
+    lib/roadforest/content-handling/media-type.rb
+    lib/roadforest/content-handling/engine.rb
+    lib/roadforest/application.rb
+    lib/roadforest/remote-host.rb
+    lib/roadforest.rb
+    spec/graph-store.rb
+    spec/focus-list.rb
+    spec/graph-copier.rb
+    spec/rdf-parcel.rb
+    spec/media-types.rb
+    spec/rdf-normalization.rb
+    spec/excon-adapater.rb
+    spec/update-focus.rb
+    spec/client.rb
+    spec/form-parsing.rb
+    spec/credence-annealer.rb
+    spec/full-integration.rb
   ]
 
   spec.test_file        = "spec_support/gem_test_suite.rb"
