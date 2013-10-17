@@ -1,8 +1,8 @@
 require 'webmachine'
+require 'roadforest/application/route-adapter'
 
 module RoadForest
   class Dispatcher < Webmachine::Dispatcher
-    include Resource::Handlers
     def initialize(services)
       super(method(:create_resource))
       @services = services
@@ -10,6 +10,25 @@ module RoadForest
       @trace_by_default = false
     end
     attr_accessor :services, :trace_by_default
+
+    def bundle(resource_class, &block)
+      Application::RouteAdapter.new(resource_class, &block)
+    end
+
+    def bundle_typed_resource(resource_type, model_class, route_name)
+      resource_class = Resource.get(resource_type)
+      bundle(resource_class) do |resource, request, response|
+        resource.model = model_class.new(route_name, resource.params, services)
+      end
+    end
+
+    def bundle_traced_resource(resource_type, model_class, route_name)
+      resource_class = Resource.get(resource_type)
+      bundle(resource_class) do |resource, request, response|
+        resource.model = model_class.new(route_name, resource.params, services)
+        resource.trace = true
+      end
+    end
 
     def resource_route(resource, name, path_spec, bindings)
       route = Route.new(path_spec, resource, bindings || {})

@@ -1,6 +1,6 @@
 NullFocus
   Empty results from GraphFoci should result in a special focus that is "null"
-  should be empty? nil? blank? ...
+  should respond true to: empty? nil? blank? ...
   Other methods should raise an error that "pattern/query" on "graph/focus" resulted in an empty result
 
 Cross model interactions:
@@ -16,10 +16,18 @@ Front-loading:
   Deerpath for front-loading: get graph from other resources, pull statements
   by pattern and include them into this graph.
 
+Cached Rigor
+  A "stale records" investigator
+  Rigor that relies on it - useful for initial state before we hit the n/w
+
+Focus Rigor switching:
+  API for a GraphFocus to change the rigor it's using
+
 RDFa + HTML support:
   Implement the POST RDF representation per http://www.lsrn.org/semweb/rdfpost.html
   Review the existing RDF::RDFa gem - how the hash of HAML templates works especially
-  Consider RDFa helpers for HAML.
+  Consider RDFa helpers for HAML - provided by RDF::RDFa gem already
+  Test helpers: this graph is represented in this RDFa response
   Valise based template searching
 
 "Strict" vocabularies:
@@ -41,10 +49,6 @@ Pagination:
 
 Client error exceptions
   40x -> per code exception classes, include Response content
-
-Cached Rigor
-  A "stale records" investigator
-  Rigor that relies on it - useful for initial state before we hit the n/w
 
 Inference investigator
   Look for statements that could be used to infer a response to current pattern

@@ -14,7 +14,6 @@ require 'roadforest/rdf/normalization'
 module RoadForest
   class Application
     include RDF::Normalization
-    include Resource::Handlers
 
     def initialize(canonical_host, services = nil, configuration = nil, dispatcher = nil)
       @canonical_host = normalize_resource(canonical_host)
