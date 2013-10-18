@@ -47,8 +47,6 @@ module RoadForest::RDF
     end
     alias raw_quiet_impulse? quiet_impulse?
 
-    #repo cleanup - expired graphs
-
     def reader_for(content_type, repository)
       RDF::Reader.for(content_type)
     end
@@ -100,15 +98,7 @@ module RoadForest::RDF
       end
       #puts; puts "#{__FILE__}:#{__LINE__} => \n#{(graph_dump(:nquads))}"
     end
-
-    def insert_graph(context, graph)
-      context = normalize_context(context)
-      delete_statements(:context => context)
-      graph.each_statement do |statement|
-        statement.context = context
-        record_statement(statement)
-      end
-    end
+    alias insert_graph insert_reader
 
     def add_statement(*args)
       case args.length

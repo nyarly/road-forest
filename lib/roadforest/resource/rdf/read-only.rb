@@ -1,12 +1,9 @@
-require 'roadforest/resource/handlers'
 require 'roadforest/application/parameters'
 require 'roadforest/utility/class-registry'
 
 module RoadForest
   module Resource
-    def registry_purpose
-      "resource type"
-    end
+    def self.registry_purpose; "resource type"; end
     extend Utility::ClassRegistry::Registrar
 
     module RDF

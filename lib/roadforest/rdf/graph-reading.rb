@@ -6,6 +6,34 @@ require 'roadforest/rdf'
 
 
 module RoadForest::RDF
+  class NullFocus < ::BasicObject
+    def initialize(focus, pattern)
+      @focus, @pattern = focus, pattern
+    end
+
+    def nil?
+      true
+    end
+
+    def blank?
+      true
+    end
+
+    def empty?
+      true
+    end
+
+    def length
+      0
+    end
+    alias count length
+    alias size length
+
+    def method_missing(method, *args, &block)
+      raise NoMethodError, "No method #{method} on NullFocus. No results from #{focus.subject} for #{pattern.inspect}"
+    end
+  end
+
   class GraphReading
     #XXX Any changes to this class heirarchy or to ContextFascade should start
     #with a refactor like:
@@ -111,30 +139,42 @@ module RoadForest::RDF
     end
 
     def get(prefix, property = nil)
-      return single_or_enum(forward_query_value( prefix, property))
+      return maybe_null( prefix, property,
+        single_or_enum(forward_query_value( prefix, property))
+      )
     end
     alias_method :[], :get
 
     def first(prefix, property = nil)
-      return forward_query_value( prefix, property ).first
+      return maybe_null( prefix, property,
+        forward_query_value( prefix, property ).first
+      )
     end
 
     def all(prefix, property = nil)
-      return forward_query_value( prefix, property )
+      return  maybe_null( prefix, property,
+        forward_query_value( prefix, property )
+      )
     end
 
     #XXX Maybe rev should return a decorator, so it looks like:
     #focus.rev.get(...) or focus.rev.all(...)
     def rev(prefix, property = nil)
-      return single_or_enum(reverse_query_value( prefix, property))
+      return maybe_null( prefix, property,
+        single_or_enum(reverse_query_value( prefix, property))
+      )
     end
 
     def rev_first(prefix, property = nil)
-      return reverse_query_value(prefix, property).first
+      return maybe_null( prefix, property,
+        reverse_query_value(prefix, property).first
+      )
     end
 
     def rev_all(prefix, property = nil)
-      return reverse_query_value(prefix, property)
+      return maybe_null( prefix, property,
+        reverse_query_value(prefix, property)
+      )
     end
 
     def as_list
@@ -152,6 +192,17 @@ module RoadForest::RDF
     end
 
     protected
+
+    def maybe_null(prefix, property, result)
+      if not result.nil?
+        if result.respond_to? :empty?
+          return result unless result.empty?
+        else
+          return result
+        end
+      end
+      return NullFocus.new(self, normalize_property(prefix, property))
+    end
 
     def single_or_enum(values)
       case values.length

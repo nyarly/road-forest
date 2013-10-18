@@ -1,24 +1,18 @@
-NullFocus
-  Empty results from GraphFoci should result in a special focus that is "null"
-  should respond true to: empty? nil? blank? ...
-  Other methods should raise an error that "pattern/query" on "graph/focus" resulted in an empty result
-
 Cross model interactions:
   Get the graph for a particular model (see Front-loading)
+  Deerpath for front-loading: get graph from other resources, pull statements
+  by pattern and include them into this graph.
   PUT/POST to create by generating ids and back-ending request to the other
   model - requires Param manipulation
 
-Front-loading:
-  Credence chain that supports non-authoritative statements
-    if authority is absent
-    if old authority agrees with non-authoritative
 
-  Deerpath for front-loading: get graph from other resources, pull statements
-  by pattern and include them into this graph.
-
-Cached Rigor
-  A "stale records" investigator
-  Rigor that relies on it - useful for initial state before we hit the n/w
+Ruby HTTP client that respects cache
+  Options:
+    Extend existing Excon adapter with home-brewed cacheing
+    Switch to: (?)
+      wrest
+      typhoeus
+      rufus-verbs
 
 Focus Rigor switching:
   API for a GraphFocus to change the rigor it's using
@@ -144,17 +138,35 @@ That said, these resources might then form the basis of a credence review
 
 Omniscient test server.
 
-Basically: RemoteHost collects the requests that get made and records them.
-Play against server, and then "flatten" resulting meta-graph. TestServer simply
-replies to everything with flattened graph - possibly changing state (graph) on
-PUT/POST/DELETE.
+  Basically: RemoteHost collects the requests that get made and records them.
+  Play against server, and then "flatten" resulting meta-graph. TestServer simply
+  replies to everything with flattened graph - possibly changing state (graph) on
+  PUT/POST/DELETE.
 
-Two sets of test files:
+  Two sets of test files:
 
-client -> server requests, the responses of which can be tested and recorded
+  client -> server requests, the responses of which can be tested and recorded
 
-server -> client responses, used as fixtures for client tests - right things
-displayed / correct POSTs made.
+  server -> client responses, used as fixtures for client tests - right things
+  displayed / correct POSTs made.
+
+  Some things that happen: the client patterns are recorded along with something
+  about their results - maybe as little as "empty?"
+
+  The server responses are built into "states" related on an FSM. Transitions are
+  a subset of the Requests - against every state, all the requests are replayed
+  to see what changes - state transition "occurs" ... hm. Because what we get
+  from a single request is always a subset... bears thinking on.
+
+  Goal of the test tool is to split the testing of clients and servers. For
+  servers to be able to evolve against a set of actual client expectations, and
+  for clients to be able to test against real server replies without needing to
+  start a server.
+
+Wire Transfer
+  This amounts to "replace HTTP" - REST and HTTP aren't identical. Considering
+  Protobufs (or similar), but also "in process" - where the transfer is a null
+  operation: here's the graph I made for you.
 
 
 Single Graph Update

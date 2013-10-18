@@ -3,7 +3,6 @@ module RoadForest
   class Application < Webmachine::Application; end
 end
 
-require 'roadforest/resource/handlers'
 require 'roadforest/application/dispatcher'
 require 'roadforest/application/path-provider'
 require 'roadforest/application/services-host'

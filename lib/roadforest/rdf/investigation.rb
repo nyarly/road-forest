@@ -74,7 +74,9 @@ module RoadForest::RDF
     end
 
     def results_for_context(context)
-      results.find_all{|item| item.context == context}
+      results.find_all do |item|
+        item.context == context
+      end
     end
 
     #XXX Do we need the nil result if context_metadata is empty?
