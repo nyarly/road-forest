@@ -2,6 +2,7 @@ require 'rdf'
 require 'roadforest/rdf/resource-query'
 require 'roadforest/rdf/resource-pattern'
 require 'roadforest/rdf/normalization'
+require 'roadforest/rdf/parcel'
 
 module RoadForest::RDF
   class ContextFascade

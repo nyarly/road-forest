@@ -231,15 +231,19 @@ module RoadForest::RDF
       access_manager.build_query(&block)
     end
 
+    def execute_query(query)
+      query.execute(access_manager)
+    end
+
     def query_value(query)
-      solutions = query.execute(access_manager)
+      solutions = execute_query(query)
       solutions.map do |solution|
         unwrap_value(solution.value)
       end
     end
 
     def query_properties(query)
-      Hash[query.execute(access_manager).map do |solution|
+      Hash[execute_query(query).map do |solution|
         prop = solution.property
         if qname = prop.qname
           prop = qname

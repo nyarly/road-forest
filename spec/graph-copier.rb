@@ -1,19 +1,7 @@
 require 'roadforest/test-support/matchers'
 require 'roadforest/rdf/graph-copier'
 
-#Leaving notes since being interrupted
-#
-#GC needs to tessellate the graph in the same way that Parceller should -
-#probably should make sure that works first. Basically same resource should ==
-#same subgraph copied, since otherwise client omission of a property isn't
-#distinguishable from the intent to delete it. Only copy once so that you don't
-#overwrite client changes.
-#
-#Also: "single put" involves a whole extra level of server code to accept the
-#put, parcel it out, confirm IMS headers across everyone... so that's a v2
-#feature
-
-describe RoadForest::RDF::GraphCopier, :pending => "review of API" do
+describe RoadForest::RDF::GraphCopier, :pending => "refactor of ContextFascade" do
   class TestVoc < ::RDF::Vocabulary("http://test.com/");end
 
   let :start_subject do
@@ -27,12 +15,7 @@ describe RoadForest::RDF::GraphCopier, :pending => "review of API" do
   let :starting_statements do
     [
       [start_subject, TestVoc[:a], 7],
-      [start_subject, TestVoc[:other], other_subject]
-    ]
-  end
-
-  let :other_statements do
-    [
+      [start_subject, TestVoc[:other], other_subject],
       [other_subject, TestVoc[:a], 13]
     ]
   end
@@ -42,46 +25,44 @@ describe RoadForest::RDF::GraphCopier, :pending => "review of API" do
       starting_statements.each do |stmt|
         graph << stmt
       end
-
-      other_statements.each do |stmt|
-        graph << stmt
-      end
     end
   end
 
-  let :document do
-    RoadForest::RDF::Document.new.tap do |doc|
-      doc.source =
-      doc.body_string = source_graph.dump(:rdfa)
-    end
+  let :target_graph do
+    ::RDF::Graph.new
   end
 
   let :copier do
     RoadForest::RDF::GraphCopier.new.tap do |copier|
       copier.source_graph = source_graph
+      copier.target_graph = target_graph
       copier.subject = start_subject
     end
   end
 
-  it "reads the notes above, unless it wants the hose again" do
-    fail "shoulda read the notes"
+  #copier needs URL accessor
+
+
+
+  it "should not copy statements without action" do
+    target_graph.should_not match_query(:subject => start_subject)
   end
 
-  it "should have a target graph" do
-    copier.target_graph.should be_an_instance_of(::RDF::Graph)
-  end
-
-  it "should have statements about starting subject" do
-    statements_from_graph(copier.target_graph).that_match_query(:subject => start_subject).should be_equivalent_to(starting_statements)
-  end
-
-  it "should not have statements about other subject" do
-    copier.target_graph.query(:subject => other_subject).to_a.should be_empty
-  end
-
-  it "should get statements about other subject" do
+  it "should copy statements that are queried" do
     copier[[:testvoc, :other]]
 
-    statements_from_graph(copier.target_graph).that_match_query(:subject => other_subject).should be_equivalent_to(other_statements)
+    statements_from_graph(target_graph).that_match_query(:predicate => TestVoc[:other]).should(
+      be_equivalent_to(statements_from_graph(source_graph).that_match_query(:predicate => TestVoc[:other]))
+    )
+    target_graph.should_not match_query(:predicate => TestVoc[:a])
+  end
+
+  it "should not double copy statements that are queried twice" do
+    copier[[:testvoc, :other]]
+    copier[[:testvoc, :other]]
+
+    statements_from_graph(target_graph).that_match_query(:predicate => TestVoc[:other]).should(
+      be_equivalent_to(statements_from_graph(source_graph).that_match_query(:predicate => TestVoc[:other]))
+    )
   end
 end

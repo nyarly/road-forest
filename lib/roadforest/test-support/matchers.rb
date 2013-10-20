@@ -1,8 +1,15 @@
 module RoadForest
   module Testing
     class MatchesQuery
-      def initialize(&block)
-        @query = ::RDF::Query.new(&block)
+      def initialize(pattern = nil, &block)
+        pattern ||= []
+        if Hash === pattern
+          pattern = [pattern]
+        end
+        pattern = pattern.map do |item|
+          ::RDF::Query::Pattern.from(item).tap{|value| puts "#{__FILE__}:#{__LINE__} => #{value.inspect}"}
+        end
+        @query = ::RDF::Query.new(pattern, &block)
       end
 
       def matches?(actual)
@@ -12,7 +19,11 @@ module RoadForest
       end
 
       def failure_message_for_should
-        "expected #{@query.inspect} to return solutions on #{@actual.inspect}, but didn't"
+        "expected #{@query.patterns.inspect} to return solutions on \n#{@actual.dump(:nquads)}\n but didn't"
+      end
+
+      def failure_message_for_should_not
+        "expected #{@query.patterns.inspect} not to return solutions on \n#{@actual.dump(:nquads)}\n but does"
       end
     end
 
@@ -21,15 +32,32 @@ module RoadForest
         @expected = expected
       end
 
+      def subtract(one, other)
+        one.find_all do |expected_stmt|
+          not other.any? do |actual_stmt|
+            actual_stmt.eql? expected_stmt
+          end
+        end
+      end
+
+      def missing
+        @missing ||= subtract(@expected, @actual)
+      end
+
+      def surplus
+        @surplus ||= subtract(@actual, @expected)
+      end
+
       def matches?(actual)
         @actual = actual
-        @actual_extra = @actual - @expected
-        @expected_extra = @expected - @actual
-        @actual_extra.empty? and @expected_extra.empty?
+        missing.empty? and surplus.empty?
       end
 
       def failure_message_for_should
-        "expected #{@actual.inspect} to have the same elements as #{@expected.inspect}"
+        "expected [\n  #{@actual.map(&:to_s).join("\n  ")}\n] " +
+          "to have the same elements as [\n  #{@expected.map(&:to_s).join("\n  ")}\n]\n\n" +
+          "missing: [\n  #{missing.map(&:to_s).join("\n  ")}\n]\n" +
+          "surplus: [\n  #{surplus.map(&:to_s).join("\n  ")}]"
       end
     end
 
@@ -41,6 +69,8 @@ module RoadForest
       def that_match_query(query)
         @graph.query(query).to_a
       end
+      alias that_match that_match_query
+      alias that_match_pattern that_match_query
     end
 
     module HelperMethods
@@ -50,8 +80,8 @@ module RoadForest
     end
 
     module MatcherMethods
-      def match_query(&block)
-        MatchesQuery.new(&block)
+      def match_query(pattern = nil, &block)
+        MatchesQuery.new(pattern, &block)
       end
 
       def be_equivalent_to(list)
