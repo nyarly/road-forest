@@ -1,9 +1,9 @@
 require 'rdf'
-require 'roadforest/rdf/graph-focus'
+require 'roadforest/rdf/graph-reading'
 
 module RoadForest
   module RDF
-    class GraphCopier < GraphReading
+    class GraphCopier < GraphFocus
       def query_value(query)
         #This isn't the most efficient way to do this (the query essentially
         #happens twice) but the intended use of GC is to copy small numbers of

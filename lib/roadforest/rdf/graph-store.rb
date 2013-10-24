@@ -1,5 +1,4 @@
 require 'rdf'
-require 'roadforest/rdf/graph-focus'
 require 'roadforest/rdf/vocabulary'
 require 'roadforest/rdf/normalization'
 

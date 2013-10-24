@@ -1,4 +1,4 @@
-require 'roadforest/rdf/graph-focus'
+require 'roadforest/rdf/graph-reading'
 
 module RoadForest::RDF
   class PostFocus < GraphFocus

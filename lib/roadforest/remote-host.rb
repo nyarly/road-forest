@@ -95,7 +95,7 @@ module RoadForest
       access = RDF::ReadOnlyManager.new
       access.rigor = source_rigor
       access.source_graph = graph
-      reader = RDF::GraphReading.new(access, url)
+      reader = RDF::GraphFocus.new(access, url)
 
       anneal(reader, &block)
     end
