@@ -7,8 +7,14 @@ describe RoadForest::RDF::FocusList do
     RDF::Graph.new
   end
 
+  let :access do
+    RoadForest::RDF::WriteManager.new.tap do |access|
+      access.source_graph = graph
+    end
+  end
+
   let :focus do
-    RoadForest::RDF::GraphFocus.new("urn:root", graph)
+    RoadForest::RDF::GraphFocus.new(access, "urn:root")
   end
 
   let :list do

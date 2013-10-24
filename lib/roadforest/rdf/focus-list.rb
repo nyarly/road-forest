@@ -37,7 +37,7 @@ module RoadForest::RDF
 
       if empty?
         new_subject = subject
-        graph.insert([new_subject, RDF.type, RDF.List])
+        #graph.insert([new_subject, RDF.type, RDF.List])
       else
         old_subject, new_subject = last_subject, RDF::Node.new
         graph.delete([old_subject, RDF.rest, RDF.nil])

@@ -133,9 +133,9 @@ module RoadForest
     end
 
     def start_focus(graph, resource_url=nil)
-      focus = RDF::GraphFocus.new
-      focus.graph = graph
-      focus.subject = resource_url || my_url
+      access = RDF::WriteManager.new
+      access.source_graph = graph
+      focus = RDF::GraphFocus.new(access, resource_url || my_url)
 
       yield focus if block_given?
       return focus
@@ -158,7 +158,7 @@ module RoadForest
       graph = ::RDF::Graph.new
       focus = start_focus(graph, my_url)
       fill_graph(focus)
-      self.response_data = focus.graph
+      self.response_data = graph
     end
   end
 end

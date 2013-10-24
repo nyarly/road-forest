@@ -1,10 +1,9 @@
 require 'roadforest/rdf/source-rigor'
-require 'roadforest/rdf/update-focus'
 require 'roadforest/rdf/graph-store'
 require 'roadforest/rdf/document'
 require 'rdf/rdfa'
 
-describe RoadForest::RDF::UpdateFocus do
+describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
   class Voc < ::RDF::Vocabulary("http:/pred.org/"); end
 
   let :context_node do
@@ -62,13 +61,16 @@ describe RoadForest::RDF::UpdateFocus do
     end
   end
 
-  subject :updater do
-    RoadForest::RDF::UpdateFocus.new.tap do |updater|
-      updater.source_graph = source_graph
-      updater.target_graph = target_graph
-      updater.subject = context_node
-      updater.source_rigor = source_rigor
+  let :access do
+    RoadForest::RDF::UpdateManager.new.tap do |access|
+      access.source_graph = source_graph
+      access.target_graph = target_graph
+      access.rigor = source_rigor
     end
+  end
+
+  subject :updater do
+    RoadForest::RDF::GraphFocus.new(access, context_node)
   end
 
   it "should make relevant prefixes available" do

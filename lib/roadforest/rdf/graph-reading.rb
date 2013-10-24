@@ -7,8 +7,16 @@ require 'roadforest/rdf'
 
 module RoadForest::RDF
   class NullFocus < ::BasicObject
-    def initialize(focus, pattern)
-      @focus, @pattern = focus, pattern
+    def initialize(focus, pattern, callsite)
+      @focus, @pattern, @callsite = focus, pattern, callsite
+    end
+
+    def __callsite__
+      @callsite
+    end
+
+    def subject
+      @focus.subject
     end
 
     def nil?
@@ -30,7 +38,9 @@ module RoadForest::RDF
     alias size length
 
     def method_missing(method, *args, &block)
-      raise NoMethodError, "No method #{method} on NullFocus. No results from #{focus.subject} for #{pattern.inspect}"
+      ::Kernel.raise ::NoMethodError, "No method '#{method}' on NullFocus. " +
+        "NullFocus returned because there were no results at \n#{@focus.subject}\n  for \n#{@pattern.inspect}\n" +
+        "Search was attempted at #{@callsite[0]}"
     end
   end
 
@@ -48,37 +58,9 @@ module RoadForest::RDF
 
     alias rdf subject
 
-    def initialize(subject = nil, graph = nil, rigor = nil)
-      @access_manager = ContextFascade.new
-      @access_manager.rigor = rigor
-      self.target_graph = graph
-      self.source_graph = graph
-
+    def initialize(access_manager, subject = nil)
+      @access_manager = access_manager
       self.subject = subject unless subject.nil?
-    end
-
-    def source_graph
-      @access_manager.source_graph
-    end
-
-    def source_graph=(graph)
-      @access_manager.source_graph = graph
-    end
-
-    def target_graph
-      nil
-    end
-
-    def target_graph=(graph)
-      @access_manager.target_graph = nil
-    end
-
-    def source_rigor
-      @access_manager.rigor
-    end
-
-    def source_rigor=(rigor)
-      @access_manager.rigor = rigor
     end
 
     def root_url
@@ -99,8 +81,7 @@ module RoadForest::RDF
     alias to_s inspect
 
     def dup
-      other = self.class.new
-      other.access_manager = access_manager.dup
+      other = self.class.new(access_manager.dup)
       other.subject = subject
       other
     end
@@ -135,7 +116,7 @@ module RoadForest::RDF
 
     #XXX This probably wants to be handled completely in the MediaType handler
     def relevant_prefixes
-      relevant_prefixes_for_graph(source_graph)
+      access_manager.relevant_prefixes
     end
 
     def get(prefix, property = nil)
@@ -193,6 +174,7 @@ module RoadForest::RDF
 
     protected
 
+    STRIP_TRACE = %r{\A#{File::expand_path("../../..", __FILE__)}}
     def maybe_null(prefix, property, result)
       if not result.nil?
         if result.respond_to? :empty?
@@ -201,7 +183,7 @@ module RoadForest::RDF
           return result
         end
       end
-      return NullFocus.new(self, normalize_property(prefix, property))
+      return NullFocus.new(self, normalize_property(prefix, property), caller(0).drop_while{|line| line =~ STRIP_TRACE})
     end
 
     def single_or_enum(values)

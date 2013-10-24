@@ -54,17 +54,19 @@ module RoadForest
     end
 
     def putting(&block)
-      require 'roadforest/rdf/update-focus'
       graph = build_graph_store
-      updater = RDF::UpdateFocus.new(url, graph, source_rigor)
+      access = RDF::UpdateManager.new
+      access.rigor = source_rigor
+      access.source_graph = graph
+      updater = RDF::GraphFocus.new(access, url)
       annealer = RDF::SourceRigor::CredenceAnnealer.new(graph)
 
       annealer.resolve do
-        updater.target_graph = ::RDF::Repository.new
+        access.target_graph = ::RDF::Repository.new
         yield updater
       end
 
-      target_graph = updater.target_graph
+      target_graph = access.target_graph
       target_graph.each_context do |context|
         graph = ::RDF::Graph.new(context, :data => target_graph)
         graph_transfer.put(context, graph)
@@ -74,16 +76,26 @@ module RoadForest
     def posting(&block)
       require 'roadforest/rdf/post-focus'
       graph = build_graph_store
-      poster = RDF::PostFocus.new(url, graph, source_rigor)
+      access = RDF::PostManager.new
+      access.rigor = source_rigor
+      access.source_graph = graph
+      poster = RDF::PostFocus.new(access, url)
+      graphs = {}
+      poster.graphs = graphs
 
       anneal(poster, &block)
 
-      poster.send_graphs
+      graphs.each_pair do |url, graph|
+        graph_transfer.post(url, graph)
+      end
     end
 
     def getting(&block)
       graph = build_graph_store
-      reader = RDF::GraphReading.new(url, graph, source_rigor)
+      access = RDF::ReadOnlyManager.new
+      access.rigor = source_rigor
+      access.source_graph = graph
+      reader = RDF::GraphReading.new(access, url)
 
       anneal(reader, &block)
     end

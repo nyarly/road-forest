@@ -3,37 +3,7 @@ require 'roadforest/rdf/context-fascade'
 require 'roadforest/rdf/graph-reading'
 
 module RoadForest::RDF
-  class GraphCollection
-    include Enumerable
-  end
-
-  class MultivaluedProperty < GraphCollection
-    attr_reader :graph, :subject, :property
-    def initialize(graph, subject, property)
-      @graph, @subject, @propery = graph, subject, property
-    end
-
-    def values
-      query_value(graph, subject, property)
-    end
-
-    def each
-      if block_given?
-        other
-        values.each do |value|
-          yield unwrap_value(value)
-        end
-      else
-        values.each
-      end
-    end
-
-    def add(value)
-      add_statement(subject, property, value)
-    end
-  end
-
-  class GraphWriting < GraphReading
+  class GraphFocus < GraphReading
     def normalize_triple(property, value, extra=nil)
       if not extra.nil?
         property = [property, value]
@@ -71,6 +41,7 @@ module RoadForest::RDF
       end
       value
     end
+    alias first_or_add find_or_add
 
     def set_node(property, url=nil)
       create_node(url) do |node|
@@ -100,20 +71,5 @@ module RoadForest::RDF
       yield list if block_given?
       return list
     end
-  end
-
-  class GraphFocus < GraphWriting
-    def target_graph
-      @access_manager.target_graph
-    end
-
-    def source_graph=(graph)
-      @access_manager.source_graph = graph
-      @access_manager.target_graph = graph
-    end
-    alias target_graph= source_graph=
-
-    alias graph source_graph
-    alias graph= source_graph=
   end
 end

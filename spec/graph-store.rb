@@ -20,7 +20,11 @@ describe RoadForest::RDF do
   describe RoadForest::RDF::GraphStore do
     let :root_body do
       store = RoadForest::RDF::GraphStore.new
-      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", store, source_rigor)
+      access = RoadForest::RDF::WriteManager.new
+      access.source_graph = store
+      access.rigor = source_rigor
+      step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+
       step[[:foaf, :givenname]] = "Lester"
       step[[:dc, :date]] = Time.now
       step = step.node_at([:dc, :related], "http://lrdesign.com/test-rdf/sub")
@@ -31,7 +35,11 @@ describe RoadForest::RDF do
 
     let :second_body do
       store = RoadForest::RDF::GraphStore.new
-      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", store, source_rigor)
+      access = RoadForest::RDF::WriteManager.new
+      access.source_graph = store
+      access.rigor = source_rigor
+      step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+
       step[[:foaf, :givenname]] = "Foster"
       step[[:dc, :date]] = Time.now
 
@@ -52,12 +60,18 @@ describe RoadForest::RDF do
       end
     end
 
+    let :step do
+      access = RoadForest::RDF::WriteManager.new
+      access.source_graph = graph_store
+      access.rigor = source_rigor
+      RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+    end
+
     before :each do
       graph_store.insert_document(first_doc)
     end
 
     it "should transmit properties" do
-      step = RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", graph_store, source_rigor)
       step[:dc, :date].should be_an_instance_of(Time)
     end
 
@@ -65,7 +79,7 @@ describe RoadForest::RDF do
       expect{
         graph_store.insert_document(second_doc)
       }.to change{
-        RoadForest::RDF::GraphFocus.new("http://lrdesign.com/test-rdf", graph_store, source_rigor)[:foaf, :givenname]
+        step[:foaf, :givenname]
       }
     end
   end
@@ -91,8 +105,15 @@ describe RoadForest::RDF do
       graph_store.add_statement(main_subject, [:dc, :date], Time.now)
     end
 
+    let :access do
+      RoadForest::RDF::WriteManager.new.tap do |access|
+        access.rigor = source_rigor
+        access.source_graph = graph_store
+      end
+    end
+
     let :step do
-      RoadForest::RDF::GraphFocus.new(main_subject, graph_store, source_rigor)
+      RoadForest::RDF::GraphFocus.new(access, main_subject)
     end
 
     it "should enumerate forward properties" do
