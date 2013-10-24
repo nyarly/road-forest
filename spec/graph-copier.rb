@@ -1,7 +1,7 @@
 require 'roadforest/test-support/matchers'
 require 'roadforest/rdf/graph-copier'
 
-describe RoadForest::RDF::GraphCopier, :pending => "refactor of ContextFascade" do
+describe RoadForest::RDF::GraphFocus, "with a CopyManager" do
   class TestVoc < ::RDF::Vocabulary("http://test.com/");end
 
   let :start_subject do
@@ -32,12 +32,15 @@ describe RoadForest::RDF::GraphCopier, :pending => "refactor of ContextFascade" 
     ::RDF::Graph.new
   end
 
-  let :copier do
-    RoadForest::RDF::GraphCopier.new.tap do |copier|
-      copier.source_graph = source_graph
-      copier.target_graph = target_graph
-      copier.subject = start_subject
+  let :access do
+    RoadForest::RDF::CopyManager.new.tap do |access|
+      access.source_graph = source_graph
+      access.target_graph = target_graph
     end
+  end
+
+  let :copier do
+    RoadForest::RDF::GraphFocus.new(access, start_subject)
   end
 
   #copier needs URL accessor

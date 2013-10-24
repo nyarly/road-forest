@@ -144,5 +144,11 @@ module RoadForest::RDF
   end
 
   class CopyManager < SplitManager
+    def execute_search(search, &block)
+      super(search) do |statement|
+        destination_graph.insert(statement)
+        yield statement
+      end
+    end
   end
 end

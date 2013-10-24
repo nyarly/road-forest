@@ -7,7 +7,7 @@ module RoadForest
           pattern = [pattern]
         end
         pattern = pattern.map do |item|
-          ::RDF::Query::Pattern.from(item).tap{|value| puts "#{__FILE__}:#{__LINE__} => #{value.inspect}"}
+          ::RDF::Query::Pattern.from(item)
         end
         @query = ::RDF::Query.new(pattern, &block)
       end
@@ -33,6 +33,7 @@ module RoadForest
       end
 
       def subtract(one, other)
+        sorted = one.sort_by{|stmt| stmt.to_a}
         one.find_all do |expected_stmt|
           not other.any? do |actual_stmt|
             actual_stmt.eql? expected_stmt

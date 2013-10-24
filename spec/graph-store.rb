@@ -1,7 +1,9 @@
 require 'rdf'
-#require 'rdf/rdfa'
+require 'rdf/rdfa'
 require 'roadforest/rdf/document'
 require 'roadforest/rdf/graph-store'
+require 'roadforest/rdf/graph-focus'
+require 'roadforest/rdf/source-rigor'
 
 describe RoadForest::RDF do
   let :source_rigor do
@@ -97,12 +99,16 @@ describe RoadForest::RDF do
       RDF::Node.new
     end
 
+    let :graph_store do
+      RDF::Graph.new
+    end
+
     before :each do
-      graph_store.add_statement(root, [:dc, :relation], main_subject)
-      graph_store.add_statement(creator, [:foaf, :familyName], "Lester")
-      graph_store.add_statement(creator, [:foaf, :givenname], "Judson")
-      graph_store.add_statement(main_subject, [:dc, :creator], creator)
-      graph_store.add_statement(main_subject, [:dc, :date], Time.now)
+      graph_store.insert([root, ::RDF::DC.relation, main_subject])
+      graph_store.insert([creator, ::RDF::FOAF.familyName, "Lester"])
+      graph_store.insert([creator, ::RDF::FOAF.givenname, "Judson"])
+      graph_store.insert([main_subject, ::RDF::DC.creator, creator])
+      graph_store.insert([main_subject, ::RDF::DC.date, Time.now])
     end
 
     let :access do
@@ -143,7 +149,7 @@ describe RoadForest::RDF do
       step[:dc,:creator][:foaf,:givenname].should == "Judson"
     end
 
-    it "should be able to add properties with []=", :pending => "Should GraphStores accept local writes?" do
+    it "should be able to add properties with []=" do
       step[[:dc, :dateCopyrighted]] = Time.now #slightly ugly syntax
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|
@@ -151,13 +157,12 @@ describe RoadForest::RDF do
       end.execute(graph_store).should_not be_empty
     end
 
-    it "should be able to add properties with set", :pending => "Should GraphStores accept local writes?" do
+    it "should be able to add properties with set" do
       step.set(:dc, :dateCopyrighted, Time.now)
       step[:dc, :dateCopyrighted].should be_an_instance_of(Time)
       RDF::Query.new do |query|
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
-        store.execute(graph_store).should_not be_empty
-      end
+      end.execute(graph_store).should_not be_empty
     end
   end
 end
