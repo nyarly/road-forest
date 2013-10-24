@@ -1,11 +1,10 @@
+require 'rdf'
+require 'rdf/model/node'
+require 'roadforest/rdf'
 require 'roadforest/rdf/focus-list'
 require 'roadforest/rdf/normalization'
 require 'roadforest/rdf/resource-query'
-require 'rdf/model/node'
-require 'roadforest/rdf'
-
-require 'rdf'
-require 'roadforest/rdf/context-fascade'
+require 'roadforest/rdf/access-manager'
 
 
 module RoadForest::RDF

@@ -1,6 +1,6 @@
 require 'rdf'
 require 'roadforest/rdf/focus-list'
-require 'roadforest/rdf/graph-reading'
+require 'roadforest/rdf/graph-focus'
 
 describe RoadForest::RDF::FocusList do
   let :graph do

@@ -1,5 +1,5 @@
 require 'rdf'
-require 'roadforest/rdf/graph-reading'
+require 'roadforest/rdf/graph-focus'
 
 module RoadForest
   module RDF
