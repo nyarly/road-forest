@@ -26,9 +26,8 @@ Gem::Specification.new do |spec|
     lib/roadforest/rdf/graph-store.rb
     lib/roadforest/rdf/normalization.rb
     lib/roadforest/rdf/focus-list.rb
-    lib/roadforest/rdf/graph-reading.rb
     lib/roadforest/rdf/graph-copier.rb
-    lib/roadforest/rdf/context-fascade.rb
+    lib/roadforest/rdf/access-manager.rb
     lib/roadforest/rdf/source-rigor.rb
     lib/roadforest/rdf/graph-focus.rb
     lib/roadforest/rdf/etagging.rb
@@ -42,7 +41,6 @@ Gem::Specification.new do |spec|
     lib/roadforest/rdf/source-rigor/credence-annealer.rb
     lib/roadforest/rdf/post-focus.rb
     lib/roadforest/rdf/investigation.rb
-    lib/roadforest/rdf/update-focus.rb
     lib/roadforest/rdf/vocabulary.rb
     lib/roadforest/rdf/document.rb
     lib/roadforest/rdf/resource-pattern.rb
@@ -59,7 +57,6 @@ Gem::Specification.new do |spec|
     lib/roadforest/resource/http/form-parsing.rb
     lib/roadforest/resource/role/writable.rb
     lib/roadforest/resource/role/has-children.rb
-    lib/roadforest/resource/handlers.rb
     lib/roadforest/resource/rdf.rb
     lib/roadforest/test-support/http-client.rb
     lib/roadforest/test-support/trace-formatter.rb
@@ -110,8 +107,8 @@ Gem::Specification.new do |spec|
   spec.rdoc_options	+= %w{--main doc/README }
   spec.rdoc_options	+= ["--title", "#{spec.name}-#{spec.version} Documentation"]
 
-  spec.add_dependency("rdf", "= 1.0.6")
-  spec.add_dependency("json-ld", "~> 1.0.0")
+  spec.add_dependency("rdf", "~> 1.0.6")
+  spec.add_dependency("json-ld", "~> 1.0.8")
 
   spec.add_dependency("webmachine", ">= 1.1.0")
   spec.add_dependency("addressable", "~> 2.2.8")

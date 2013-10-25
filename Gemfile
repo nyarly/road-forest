@@ -1,10 +1,7 @@
-source :rubygems
+source "https://rubygems.org"
 
-gem 'rbench'
 gem 'corundum'
 gem 'fuubar'
 gem 'rdf-rdfa'
-gem 'rdf-turtle'
-gem 'cadre', :path => "../cadre/"
-gem 'valise', :path => "../valise/"
+gem 'cadre'
 gemspec
