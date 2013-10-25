@@ -65,6 +65,12 @@ module FileManagementExample
           graph.add_list(:lc, "needs") do |list|
             services.file_records.each do |record|
               if !record.resolved
+#                need = copy_from(:need, '*' => record.name)
+#                list.add_node(need.url) do |node|
+#                  need.target = node
+#                  need[:lc, :name]
+#                  need[:lc, :digest]
+#                end
                 list << path_for(:need, '*' => record.name)
               end
             end
