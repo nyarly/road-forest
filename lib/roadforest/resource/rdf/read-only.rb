@@ -6,7 +6,7 @@ module RoadForest
     def self.registry_purpose; "resource type"; end
     extend Utility::ClassRegistry::Registrar
 
-    module RDF
+    module RDF #XXX This shouldn't be in RDF - resource roles are on the REST side
       #Used for a resource that presents a read-only representation
       class ReadOnly < Webmachine::Resource
         def self.register(method_name)
@@ -84,6 +84,8 @@ module RoadForest
 
         def content_types_provided
           model.type_handling.renderers.type_map
+        rescue => ex
+          super
         end
 
         def resource_exists?

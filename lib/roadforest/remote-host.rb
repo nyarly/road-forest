@@ -3,6 +3,8 @@ require 'roadforest/rdf/source-rigor/credence-annealer'
 require 'roadforest/rdf/graph-store'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
+require 'roadforest/rdf/access-manager'
+require 'roadforest/rdf/graph-focus'
 
 module RoadForest
   class RemoteHost

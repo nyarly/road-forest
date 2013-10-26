@@ -12,13 +12,14 @@ module RoadForest
       attr_accessor :path_info, :query_params, :path_tokens
 
       def [](field_name)
-        return path_tokens if field_Name == '*'
-        @path_info[field_name] || @query_params[field_name]
+        fetch(field_name)
+      rescue KeyError
+        nil
       end
 
       def fetch(field_name)
-        return path_tokens if field_Name == '*'
-        @path_info[field_name] || @query_params.fetch(field_name)
+        return path_tokens if field_name == '*'
+        @path_info.fetch(field_name){ @query_params.fetch(field_name) }
       end
 
       def slice(*fields)

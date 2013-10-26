@@ -3,39 +3,16 @@ require 'roadforest/application/route-adapter'
 
 module RoadForest
   class Dispatcher < Webmachine::Dispatcher
-    def initialize(services)
+    def initialize(application)
       super(method(:create_resource))
-      @services = services
+      @application = application
       @route_names = {}
       @trace_by_default = false
     end
-    attr_accessor :services, :trace_by_default
+    attr_accessor :application, :trace_by_default
 
-    def bundle(resource_class, &block)
-      Application::RouteAdapter.new(resource_class, &block)
-    end
-
-    def bundle_typed_resource(resource_type, model_class, route_name)
-      resource_class = Resource.get(resource_type)
-      bundle(resource_class) do |resource, request, response|
-        resource.model = model_class.new(route_name, resource.params, services)
-      end
-    end
-
-    def bundle_traced_resource(resource_type, model_class, route_name)
-      resource_class = Resource.get(resource_type)
-      bundle(resource_class) do |resource, request, response|
-        resource.model = model_class.new(route_name, resource.params, services)
-        resource.trace = true
-      end
-    end
-
-    def resource_route(resource, name, path_spec, bindings)
-      route = Route.new(path_spec, resource, bindings || {})
-      yield route if block_given?
-      @route_names[name] = route
-      @routes << route
-      route
+    def route_for_name(name)
+      @route_names.fetch(name)
     end
 
     def add_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
@@ -59,8 +36,27 @@ module RoadForest
     end
     alias add_traced add_traced_route
 
-    def route_for_name(name)
-      @route_names.fetch(name)
+    def resource_route(resource, name, path_spec, bindings)
+      route = Route.new(path_spec, resource, bindings || {})
+      yield route if block_given?
+      @route_names[name] = route
+      @routes << route
+      route
+    end
+
+    def bundle_typed_resource(resource_type, model_class, route_name)
+      resource_class = Resource.get(resource_type)
+      Application::RouteAdapter.new(route_name, resource_class, model_class) do |adapter|
+        adapter.application = application
+      end
+    end
+
+    def bundle_traced_resource(resource_type, model_class, route_name)
+      resource_class = Resource.get(resource_type)
+      Application::RouteAdapter.new(route_name, resource_class, model_class) do |adapter|
+        adapter.application = application
+        adapter.trace = true
+      end
     end
 
     class Route < Webmachine::Dispatcher::Route
@@ -68,7 +64,8 @@ module RoadForest
       # substitution.
       # @param [Hash] vars values for the path variables
       # @return [String] the valid URL for the route
-      def build_path(vars = {})
+      def build_path(vars = nil)
+        vars ||= {}
         "/" + path_spec.map do |segment|
           case segment
           when '*',Symbol
@@ -77,6 +74,22 @@ module RoadForest
             segment
           end
         end.join("/")
+      end
+
+      def build_params(vars = nil)
+        vars ||= {}
+        params = Application::Parameters.new
+        path_set = Hash[path_spec.find_all{|segment| segment.is_a? Symbol}.map{|seg| [seg, true]}]
+        vars.to_hash.each do |key, value|
+          if(path_set.has_key?(key))
+            params.path_info[key] = value
+          elsif(key == '*')
+            params.path_tokens = value
+          else
+            params.query_params[key] = value
+          end
+        end
+        params
       end
     end
   end

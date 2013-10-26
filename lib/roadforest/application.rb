@@ -17,7 +17,7 @@ module RoadForest
     def initialize(canonical_host, services = nil, configuration = nil, dispatcher = nil)
       @canonical_host = normalize_resource(canonical_host)
       configuration ||= Webmachine::Configuration.default
-      dispatcher ||= Dispatcher.new(services)
+      dispatcher ||= Dispatcher.new(self)
       super(configuration, dispatcher)
       self.services = services unless services.nil?
 
@@ -32,7 +32,6 @@ module RoadForest
     alias router dispatcher
 
     def services=(service_host)
-      router.services = service_host
       @services = service_host
       @services.canonical_host = canonical_host
       @services.router = PathProvider.new(@dispatcher)

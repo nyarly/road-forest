@@ -1,4 +1,8 @@
 require 'roadforest/rdf/graph-store'
+require 'roadforest/rdf/etagging'
+require 'roadforest/rdf/access-manager'
+require 'roadforest/rdf/graph-focus'
+
 module RoadForest
   class ProcessingSequenceError < StandardError
   end
@@ -15,7 +19,15 @@ module RoadForest
     attr_reader :response_values
 
     def path_for(route_name = nil, params = nil)
-      services.router.path_for(route_name, (params || self.params).to_hash)
+      services.router.path_for(route_name, params || self.params)
+    end
+
+    def url_for(route_name, params = nil)
+      Addressable::URI.parse(canonical_host.to_s).join(path_for(route_name, params))
+    end
+
+    def model_for(route_name = nil, params = nil)
+      services.router.model_for(route_name, params || self.params)
     end
 
     def canonical_host
@@ -23,7 +35,7 @@ module RoadForest
     end
 
     def canonical_uri
-      Addressable::URI.parse(canonical_host.to_s).join(my_path)
+      url_for(route_name, params)
     end
 
     def type_handling
@@ -104,7 +116,6 @@ module RoadForest
 
   end
 
-  require 'roadforest/rdf/etagging'
   class RDFModel < Model
     include RDF::Etagging
 
@@ -139,6 +150,21 @@ module RoadForest
 
       yield focus if block_given?
       return focus
+    end
+
+    def copy_model(node, route_name, params=nil)
+      params ||= {}
+
+      url = url_for(route_name, params)
+      source_model = model_for(route_name, params)
+
+      access = RDF::CopyManager.new
+      access.source_graph = source_model.current_graph
+      access.target_graph = node.access_manager.destination_graph
+      copier = RDF::GraphFocus.new(access, url)
+
+      yield copier if block_given?
+      copier
     end
 
     def etag
