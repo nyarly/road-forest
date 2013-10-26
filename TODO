@@ -1,11 +1,25 @@
-Front Loading Graphs
-  Get the graph for a particular model (see Front-loading)
-  Deerpath for front-loading: get graph from other resources, pull statements
-  by pattern and include them into this graph.
+Define RDF affordance vocab?
+  Have reviewed rdforms, RDF Forms, Hydra, and draft RDF Affordances vocab. Not
+  thrilled with any of them. Hydra might provide almost everything I want, but
+  there's extra things I'd rather leave out. Something like woud be required to
+  complete the REST requirements. (q.v. Amundsen: RESTful Web APIs).
 
-Cross model interactions:
-  PUT/POST to create by generating ids and back-ending request to the other
-  model - requires Param manipulation
+  Missing link is an authorization affordance: akin to the keyhole next to the
+  knob on a door.
+
+Authorization support
+  Standard services host needs an authentication provider and an authorization
+  provider. Thinking very simple default implementations (single account with
+  h/c password for authn and "signed in -> everything" for authz)
+
+  Interface for authz:
+    {resource path, method, authenticated user} -> [grant|refuse]
+    reason for refusal?
+
+Application defaults
+  Wondering if there's a way that the current RoadForest.serve could be reduced
+  to a single line, in general. API defaults, overridden by application,
+  overriden by deployment.
 
 RDFa + HTML support:
   Implement the POST RDF representation per http://www.lsrn.org/semweb/rdfpost.html
@@ -23,7 +37,31 @@ RDFa + HTML support:
     POST thing/:id/put => PUT thing/:id
       Might need to convert mime type as well.
 
+
+Final cleanup of files, classes interface
+  Big question: Is "Model" the right name for that class?
+
 ***=== Current Target ===***
+
+Expect 100-continue
+
+Oauth2 support
+  A set of Oauth2 provider resources
+  An OA2 consumer for authn
+
+Authorization Affordance
+  Single property of affordances:
+    <#affordance> aa:authorized_by [opaque zToken] .
+  or
+    <#affordance> aa:authorized_by <#zToken resource>
+  GET on #zToken -> 401 unless you have it.
+  Resource (qparm for user or ...) with list of zTokens.
+  Authz provider that compares lists to consider grants, and exposes granting
+  tokens
+
+Cross model interactions:
+  PUT/POST to create by generating ids and back-ending request to the other
+  model - requires Param manipulation
 
 Ruby HTTP client that respects cache
   Options:
