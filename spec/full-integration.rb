@@ -41,6 +41,7 @@ describe "RoadForest integration", :integration => true do
           host.destination_dir = @destination_dir
           host.logger = Logger.new("integration-test.log")
           host.logger.level = Logger::DEBUG
+          host.authz.authenticator.add_account("admin", "passwerd", "toktok")
         end
       ) do |config|
         config.port = @server_port
@@ -84,7 +85,8 @@ describe "RoadForest integration", :integration => true do
 
   let :server do
     server = RoadForest::RemoteHost.new(server_url)
-    #server.graph_transfer.trace = true
+    server.add_credentials("admin","passwerd")
+    #server.trace = true
     server
   end
 

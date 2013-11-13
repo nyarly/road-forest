@@ -88,6 +88,18 @@ module RoadForest
           super
         end
 
+        def is_authorized?(header)
+          @authorization = @model.authorization(request.method, header)
+          if(@authorization == :public || @authorization == :granted)
+            return true
+          end
+          @model.authentication_challenge
+        end
+
+        #Add cache-control headers here
+        def finish_request
+        end
+
         def resource_exists?
           @model.exists?
         end

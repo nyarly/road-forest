@@ -1,6 +1,7 @@
 require 'roadforest/rdf/source-rigor'
 require 'roadforest/rdf/source-rigor/credence-annealer'
 require 'roadforest/rdf/graph-store'
+require 'roadforest/http/user-agent'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
 require 'roadforest/rdf/access-manager'
@@ -28,10 +29,20 @@ module RoadForest
       @http_client ||= HTTP::ExconAdapter.new(url)
     end
 
+    def trace=(target)
+      user_agent.trace = target
+    end
+
+    def user_agent
+      @user_agent ||= HTTP::UserAgent.new(http_client)
+    end
+
     def graph_transfer
-      @graph_transfer ||= HTTP::GraphTransfer.new.tap do |transfer|
-        transfer.http_client = http_client
-      end
+      @graph_transfer ||= HTTP::GraphTransfer.new(user_agent)
+    end
+
+    def add_credentials(username, password)
+      user_agent.keychain.add(url, username, password)
     end
 
     def source_rigor
@@ -56,11 +67,13 @@ module RoadForest
     end
 
     def putting(&block)
+
       graph = build_graph_store
       access = RDF::UpdateManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       updater = RDF::GraphFocus.new(access, url)
+
       annealer = RDF::SourceRigor::CredenceAnnealer.new(graph)
 
       annealer.resolve do
@@ -77,11 +90,13 @@ module RoadForest
 
     def posting(&block)
       require 'roadforest/rdf/post-focus'
+
       graph = build_graph_store
       access = RDF::PostManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       poster = RDF::PostFocus.new(access, url)
+
       graphs = {}
       poster.graphs = graphs
 
@@ -93,6 +108,7 @@ module RoadForest
     end
 
     def getting(&block)
+
       graph = build_graph_store
       access = RDF::ReadOnlyManager.new
       access.rigor = source_rigor
@@ -108,10 +124,7 @@ module RoadForest
       elsif destination.respond_to?(:to_s)
         destination = destination.to_s
       end
-      request = HTTP::Request.new("PUT", destination)
-      request.body = io
-      request.headers["Content-Type"] = type
-      response = http_client.do_request request
+      response = user_agent.make_request("PUT", destination, {"Content-Type" => type}, io)
     end
 
     #TODO:

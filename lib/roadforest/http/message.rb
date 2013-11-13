@@ -47,9 +47,17 @@ module RoadForest
       end
 
       def inspection_payload
+        if body.respond_to? :pos
+          [headers.inspect, inspection_stream]
+        else
+          [headers.inspect, body]
+        end
+      end
+
+      def inspection_stream
         old_pos = body.pos
         body.rewind
-        [headers.inspect, body.read]
+        body.read
       ensure
         body.pos = old_pos
       end

@@ -30,6 +30,25 @@ module RoadForest
       services.router.model_for(route_name, params || self.params)
     end
 
+    def required_grants(method)
+      services.authz.build_grants do |grants|
+        grants.add(:admin)
+      end
+    end
+
+    def authorization(method, header)
+      required = required_grants(method)
+      if required.empty?
+        :public
+      else
+        services.authz.authorization(header, required_grants(method))
+      end
+    end
+
+    def authentication_challenge
+      services.authz.challenge(:realm => "Roadforest")
+    end
+
     def canonical_host
       services.canonical_host
     end

@@ -1,3 +1,14 @@
+Add support for Expect: 100-continue
+  In the presence of a large body, UserAgent should add an Expect: 100-continue
+  header. Server should reply 100 if endpoint exists (+ other conditions? Model
+  concern.) Response code of 100 retries w/o the Expect header.
+
+  Implication probably is that UserAgent should have a method for making
+  requests that accepts "prior request, prior response" and loop over that.
+
+  Or even that there's a ClientTransaction with a string of requests and
+  responses.
+
 Define RDF affordance vocab?
   Have reviewed rdforms, RDF Forms, Hydra, and draft RDF Affordances vocab. Not
   thrilled with any of them. Hydra might provide almost everything I want, but

@@ -21,11 +21,15 @@ describe RoadForest::RemoteHost do
         FileManagementExample::FileRecord.new("three", false)
       ]
       host.destination_dir = destination_dir
+      host.authz.authenticator.add_account("user", "secret", "token")
     end
   end
 
   let :server do
-    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services))
+    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services)).tap do |server|
+      server.add_credentials("user", "secret")
+      #server.trace = true
+    end
   end
 
   def dump_trace

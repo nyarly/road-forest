@@ -46,6 +46,10 @@ module RoadForest
         @classes[name.to_s] = klass
       end
 
+      def names
+        @classes.keys.select{|key| key.is_a? Symbol}
+      end
+
       def get(name)
         @classes.fetch(name)
       rescue KeyError

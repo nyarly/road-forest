@@ -9,6 +9,7 @@ require 'roadforest/application/services-host'
 require 'roadforest/resource/rdf'
 require 'roadforest/content-handling/engine'
 require 'roadforest/rdf/normalization'
+require 'roadforest/authorization'
 
 module RoadForest
   class Application
@@ -31,16 +32,12 @@ module RoadForest
 
     alias router dispatcher
 
+    #XXX Is this the right place for this?
     def services=(service_host)
       @services = service_host
+      service_host.application = self
       @services.canonical_host = canonical_host
       @services.router = PathProvider.new(@dispatcher)
-      @services.type_handling ||= ContentHandling::Engine.default
-      @services.logger ||=
-        begin
-          require 'logger'
-          Logger.new("roadforest.log")
-        end
     end
   end
 end

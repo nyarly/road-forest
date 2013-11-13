@@ -1,0 +1,104 @@
+Roadforest needs a set of vocabularies in order to function Correctly
+
+(RF clients and servers can agree to proper use, but the ideal would be a real
+hypermedia framework, so)
+
+And affordances vocab
+  There are several close to the mark - notably Hydra, but they tend to specify
+  HTTP, which seems like an over-commit
+
+Would like to support the full MCA HFactor suite
+  http://amundsen.com/hypermedia/hfactor/
+
+  * Templated Navigation
+  * Embedded
+  * Idempotence
+  * Updates
+  * Method (or its proxy)
+  * Read control (change Accept-)
+  * Update control (change Content-)
+  * Link relations (satisfied by RDF)
+
+Would like to further have an authorization component to affordance
+
+So: Affordable looks like:
+
+Affordance a rdfs:Class
+
+SafeAffordance
+
+NavigationAffordance a rdfs:Class
+  subClassOf SafeAffordance
+EmbedAffordance
+  subClassOf SafeAffordance
+
+IdempotentAffordance
+
+UpdateAffordance
+RemoveAffordance
+
+
+UnsafeAffordance
+
+CreateAffordance
+MutateAffordance
+MetadataAffordance
+
+controlledBy a rdf:Property
+  domain Affordance
+  range Control
+
+Control a rdfs:Class
+
+controlName a rdf:Property
+  comment Valid values per protocol
+
+controlValue a rdf:Property
+controlPriority a rdf:Property
+
+MediaType a rdfs:Class
+  subClassOf Control
+
+Encoding a rdfs:Class
+  subClassOf Control
+
+Language a rdfs:Class
+  subClassOf Control
+
+EntityTag a rdfs:Class
+  subClassOf Control
+  comment Opaque descriptor to control retreival of data
+
+authorizedBy a rdf:Property
+  domain Affordance
+  range Resource
+  comment Opaque descriptors of authorization tokens - resource can be
+  dereferenced by users with that token
+
+target a rdf:Property
+  domain Affordance
+  range Resource
+  range Literal
+  comment Could be a templated URL
+
+uriVariable a rdf:Property
+  domain Affordance
+  range Parameter
+
+payload a rdf:Property
+  domain Affordance
+  range Term
+  comment Points to a node in an isolated graph that describes the possible
+    payload of the affordance. Graph might need a different entailment -
+    allowing e.g. a blank node to be the object of a property whose domain is
+    Literal... i.e. only using RDF entailment, not RDFS
+
+Parameter a rdfs:Class
+
+name a rdf:Property
+  domain Parameter
+  range Literal
+
+range a rdf:Property
+  domain Parameter
+  range Class

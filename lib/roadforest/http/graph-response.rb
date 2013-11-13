@@ -1,14 +1,10 @@
 module RoadForest
   module HTTP
     class BaseResponse
-      attr_reader :request, :response
+      attr_reader :url, :response
 
-      def initialize(request, response)
-        @request, @response = request, response
-      end
-
-      def url
-        request.url
+      def initialize(url, response)
+        @url, @response = url, response
       end
 
       def etag
