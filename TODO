@@ -1,9 +1,4 @@
 RDFa + HTML support:
-  Review the existing RDF::RDFa gem - how the hash of HAML templates works
-  especially
-
-  Consider RDFa helpers for HAML - provided by RDF::RDFa gem already
-
   Templates that recognize affordance vocab
 
   Implement the POST RDF representation per
@@ -29,6 +24,10 @@ Final cleanup of files, classes interface
   Big question: Is "Model" the right name for that class?
 
 ***=== Current Target ===***
+
+Performance
+  Currently it take 8 seconds to run spec/client.rb - where does that time go?
+  RDF smashing the method cache, or somewhere else?
 
 Define RDF affordance vocab
   Have reviewed rdforms, RDF Forms, Hydra, and draft RDF Affordances vocab. Not

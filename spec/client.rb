@@ -28,7 +28,7 @@ describe RoadForest::RemoteHost do
   let :base_server do
     RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services)).tap do |server|
       server.add_credentials("user", "secret")
-      server.trace = true
+      #server.trace = true
     end
   end
 
@@ -171,10 +171,6 @@ describe RoadForest::RemoteHost do
       end
 
       it "should return correct content-type" do
-        puts "\n#{__FILE__}:#{__LINE__} => #{server.http_exchanges.map do |exchange|
-          exchange.response.headers["Content-Type"]
-        end.inspect}"
-
         server.http_exchanges.each do |exchange|
           exchange.response.headers["Content-Type"].should == content_type
         end
@@ -202,13 +198,13 @@ describe RoadForest::RemoteHost do
     let :server do
       base_server.tap do |server|
         server.graph_transfer.type_handling = RoadForest::ContentHandling::Engine.new.tap do |engine|
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=1;rdfa"
+          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=1;rdfa=1"
         end
       end
     end
 
     let :content_type do
-      "text/html;rdfa"
+      "text/html;rdfa=1"
     end
 
     include_examples "client-server interaction"

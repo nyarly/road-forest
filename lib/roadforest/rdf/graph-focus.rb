@@ -151,7 +151,6 @@ module RoadForest::RDF
     end
 
     def add_list(property, extra=nil)
-      puts "\n#{__FILE__}:#{__LINE__} => #{property.inspect}"
       list = FocusList.new(::RDF::Node.new, access_manager)
       access_manager.insert([subject, normalize_property(property, extra), list.subject])
       yield list if block_given?
