@@ -25,10 +25,10 @@ describe RoadForest::RemoteHost do
     end
   end
 
-  let :server do
+  let :base_server do
     RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services)).tap do |server|
       server.add_credentials("user", "secret")
-      #server.trace = true
+      server.trace = true
     end
   end
 
@@ -50,46 +50,11 @@ describe RoadForest::RemoteHost do
     FileUtils.mkdir_p(destination_dir)
   end
 
-  describe "raw put of file data" do
-    before :each do
-      @destination = nil
-      server.getting do |graph|
-        items = graph.all(:skos, "hasTopConcept")
-
-        unresolved = items.find do |nav_item|
-          nav_item[:skos, "label"] == "Unresolved"
-        end
-
-        target = unresolved.first(:foaf, "page")
-
-        @destination = target.first(:lc, "needs").as_list.first[:lc, "contents"]
-      end
-
-      unless @destination.nil?
-        File::open(source_path) do |file|
-          server.put_file(@destination, "text/plain", file)
-        end
-      end
-    end
-
-    it "should be able to format traces correctly" do
-      RoadForest::TestSupport::FSM.trace_dump.should =~ /Decision/
-    end
-
-    it "should set destination" do
-      @destination.to_context.to_s.should == "http://localhost:8778/files/one"
-    end
-
-    it "should deliver file to destination path" do
-      File::read(File::join(destination_dir, "one")).should ==
-        File::read(source_path)
-    end
-  end
-
-  describe "posting data to server" do
-    before :each do
-      begin
-        server.posting do |graph|
+  shared_examples_for "client-server interaction" do
+    describe "raw put of file data" do
+      before :each do
+        @destination = nil
+        server.getting do |graph|
           items = graph.all(:skos, "hasTopConcept")
 
           unresolved = items.find do |nav_item|
@@ -98,77 +63,154 @@ describe RoadForest::RemoteHost do
 
           target = unresolved.first(:foaf, "page")
 
-          target.post_to do |new_need|
-            new_need[[:lc, "name"]] = "lawyers/guns/money"
+          @destination = target.first(:lc, "needs").as_list.first[:lc, "contents"]
+        end
+
+        unless @destination.nil?
+          File::open(source_path) do |file|
+            server.put_file(@destination, "text/plain", file)
           end
         end
-      ensure
-        dump_trace
+      end
+
+      it "should be able to format traces correctly" do
+        RoadForest::TestSupport::FSM.trace_dump.should =~ /Decision/
+      end
+
+      it "should set destination" do
+        @destination.to_context.to_s.should == "http://localhost:8778/files/one"
+      end
+
+      it "should deliver file to destination path" do
+        File::read(File::join(destination_dir, "one")).should ==
+          File::read(source_path)
       end
     end
 
-    it "should change the server state" do
-      services.file_records.find do |record|
-        record.name == "lawyers/guns/money"
-      end.should be_an_instance_of FileManagementExample::FileRecord
+    describe "posting data to server" do
+      before :each do
+        begin
+          server.posting do |graph|
+            items = graph.all(:skos, "hasTopConcept")
+
+            unresolved = items.find do |nav_item|
+              nav_item[:skos, "label"] == "Unresolved"
+            end
+
+            target = unresolved.first(:foaf, "page")
+
+            target.post_to do |new_need|
+              new_need[[:lc, "name"]] = "lawyers/guns/money"
+            end
+          end
+        ensure
+          dump_trace
+        end
+      end
+
+      it "should change the server state" do
+        services.file_records.find do |record|
+          record.name == "lawyers/guns/money"
+        end.should be_an_instance_of FileManagementExample::FileRecord
+      end
+    end
+
+    describe "putting data to server" do
+      before :each do
+        server.putting do |graph|
+          require 'rdf/turtle'
+          items = graph.all(:skos, "hasTopConcept")
+
+          unresolved = items.find do |nav_item|
+            nav_item[:skos, "label"] == "Unresolved"
+          end
+
+          target = unresolved.first(:foaf, "page")
+
+          needs = target.first(:lc, "needs")
+          needs = needs.as_list
+
+          needs.each do |need|
+            need[[:lc, "resolved"]] = true
+          end
+        end
+      end
+
+      it "should change the server state" do
+        services.file_records.each do |record|
+          record.resolved.should == true
+        end
+      end
+
+      it "should change the server's responses" do
+        server.getting do |graph|
+          @correct = 0
+          items = graph.all(:skos, "hasTopConcept")
+
+          unresolved = items.find do |nav_item|
+            nav_item[:skos, "label"] == "Unresolved"
+          end
+
+          unresolved.first(:foaf, "page").first(:lc, "needs").as_list.each do |need|
+            @correct += 1
+          end
+        end
+
+        @correct.should == 0
+      end
+
+      it "should extract data from server responses" do
+        server.should match_query do
+          pattern(:subject, [:lc, "path"], nil)
+          pattern(:subject, [:lc, "file"], nil)
+        end
+      end
+
+      it "should have transmitted data" do
+        server.http_exchanges.should_not be_empty
+      end
+
+      it "should return correct content-type" do
+        puts "\n#{__FILE__}:#{__LINE__} => #{server.http_exchanges.map do |exchange|
+          exchange.response.headers["Content-Type"]
+        end.inspect}"
+
+        server.http_exchanges.each do |exchange|
+          exchange.response.headers["Content-Type"].should == content_type
+        end
+      end
     end
   end
 
-  describe "putting data to server" do
-    before :each do
-      server.putting do |graph|
-        items = graph.all(:skos, "hasTopConcept")
-
-        unresolved = items.find do |nav_item|
-          nav_item[:skos, "label"] == "Unresolved"
-        end
-
-        target = unresolved.first(:foaf, "page")
-
-        needs = target.first(:lc, "needs").as_list
-
-        needs.each do |need|
-          need[[:lc, "resolved"]] = true
+  describe "using JSON-LD" do
+    let :server do
+      base_server.tap do |server|
+        server.graph_transfer.type_handling = RoadForest::ContentHandling::Engine.new.tap do |engine|
+          engine.add RoadForest::MediaType::Handlers::JSONLD.new, "application/ld+json"
         end
       end
     end
 
-    it "should change the server state" do
-      services.file_records.each do |record|
-        record.resolved.should == true
-      end
+    let :content_type do
+      "application/ld+json"
     end
 
-    it "should change the server's responses" do
-      server.getting do |graph|
-        @correct = 0
-        items = graph.all(:skos, "hasTopConcept")
+    include_examples "client-server interaction"
+  end
 
-        unresolved = items.find do |nav_item|
-          nav_item[:skos, "label"] == "Unresolved"
-        end
-
-        unresolved.first(:foaf, "page").first(:lc, "needs").as_list.each do |need|
-          @correct += 1
+  describe "using RDFa" do
+    let :server do
+      base_server.tap do |server|
+        server.graph_transfer.type_handling = RoadForest::ContentHandling::Engine.new.tap do |engine|
+          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=1;rdfa"
         end
       end
-
-      @correct.should == 0
     end
 
-    it "should extract data from server responses" do
-      server.should match_query do
-        pattern(:subject, [:lc, "path"], nil)
-        pattern(:subject, [:lc, "file"], nil)
-      end
+    let :content_type do
+      "text/html;rdfa"
     end
 
-    it "should return correct content-type" do
-      #test_server.http_exchanges.each{|ex| puts ex.response.body}
-      server.http_exchanges.should_not be_empty
-      server.http_exchanges.each do |exchange|
-        exchange.response.headers["Content-Type"].should == "application/ld+json"
-      end
-    end
+    include_examples "client-server interaction"
   end
 end

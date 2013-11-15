@@ -9,19 +9,10 @@ module RoadForest
         @engine ||= ContentHandling::Engine.new
       end
 
-      def add_type(type, handler)
-        add_parser(type, handler)
-        add_renderer(type, handler)
+      def add_type(handler, type)
+        type_handling.add_type(handler, type)
       end
       alias add add_type
-
-      def add_parser(type, handler)
-        type_handling.add_parser(type, handler)
-      end
-
-      def add_renderer(type, handler)
-        type_handling.add_renderer(type, handler)
-      end
     end
 
     def type_handling

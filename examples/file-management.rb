@@ -77,7 +77,7 @@ module FileManagementExample
       end
 
       class NeedContent < RoadForest::BlobModel
-        add_type "text/plain", TypeHandlers::Handler.new
+        add_type TypeHandlers::Handler.new, "text/plain"
       end
 
       class Need < RoadForest::RDFModel

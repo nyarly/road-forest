@@ -8,28 +8,32 @@ module RoadForest
       MEDIA_TYPE_REGEX = /^\s*([^;\s]+)\s*((?:;\s*\S+\s*)*)\s*$/
 
       # Matches sub-type parameters
-      PARAMS_REGEX = /;\s*([^=]+)=([^;=\s]+)/
+      PARAMS_REGEX = /;\s*([^;=]+)(?:=([^;=\s]+))?/
 
       # Creates a new MediaType by parsing an alternate representation.
       # @param [MediaType, String, Array<String,Hash>] obj the raw type
       #   to be parsed
       # @return [MediaType] the parsed media type
       # @raise [ArgumentError] when the type could not be parsed
-      def self.parse(obj)
-        case obj
-        when MediaType
+      def self.parse(*args)
+        if args.length == 1
+          obj = args.first
+        else
+          obj = args
+        end
+
+        if obj.is_a? MediaType
           obj
-        when MEDIA_TYPE_REGEX
-          type, raw_params = $1, $2
+        elsif obj.is_a? String and !(match = MEDIA_TYPE_REGEX.match(obj)).nil?
+          type, raw_params = *match[1,2]
           params = Hash[raw_params.scan(PARAMS_REGEX)]
           new(type, params)
-        else
-          unless Array === obj && String === obj[0] && Hash === obj[1]
-            raise ArgumentError, "Invalid media type #{obj.inspect}"
-          end
+        elsif Array === obj && String === obj[0] && Hash === obj[1]
           type = parse(obj[0])
           type.params.merge!(obj[1])
           type
+        else
+          raise ArgumentError, "Invalid media type #{obj.inspect}"
         end
       end
 
@@ -95,12 +99,16 @@ module RoadForest
         end
       end
 
+      def params_for_header
+        params.map {|k,v| ";#{k}#{v ? "=":""}#{v}" }.join("")
+      end
+
       def accept_header
-        [type, "q=#{quality}", *params.map {|k,v| "#{k}=#{v}" }].join(";")
+        "#{type};q=#{quality}#{params_for_header}"
       end
 
       def content_type_header
-        [type, *params.map {|k,v| "#{k}=#{v}" }].join(";")
+        "#{type}#{params_for_header}"
       end
       alias to_s content_type_header
 
