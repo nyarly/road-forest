@@ -1,13 +1,9 @@
 RDFa + HTML support:
-  Templates that recognize affordance vocab
-
-  Implement the POST RDF representation per
-  http://www.lsrn.org/semweb/rdfpost.html
-    Remember that RDFa + FORM children: the object of triples from RDFa are
-    either @content or the text children of the appropriate element - <input
-    text /> is a single element - it cannot have children, and the @value
-    doesn't play with RDFa, so will need to (naively) copy the @value to
-    @content - implies a "human form" filter to map the @content to @value
+  Remember that RDFa + FORM children: the object of triples from RDFa are
+  either @content or the text children of the appropriate element - <input
+  text /> is a single element - it cannot have children, and the @value
+  doesn't play with RDFa, so will need to (naively) copy the @value to
+  @content - implies a "human form" filter to map the @content to @value
 
   Test helpers: this graph is represented in this RDFa response
 
@@ -18,6 +14,8 @@ RDFa + HTML support:
     POST thing/:id/put => PUT thing/:id
       Might need to convert mime type as well.
     POST blob/:id/put [mime-multipart...] => PUT blob/:id [<embedded mime]
+
+  Templates that recognize affordance vocab
 
 
 Final cleanup of files, classes interface
@@ -41,7 +39,12 @@ Define RDF affordance vocab
 Client interaction with affordance vocab
   e.g. a resource that's the target of a NullAffordance should not be derefed.
 
-
+Authorization Affordance
+  Single property of affordances:
+    <#affordance> aa:authorized_by <#zToken resource>
+  GET on #zToken -> 401 unless you have it.
+  Resource (qparm for user or ...) with list of zTokens.
+    Search affordance for same in 401 responses
 
 Add support for Expect: 100-continue
   In the presence of a large body, UserAgent should add an Expect: 100-continue
@@ -57,13 +60,6 @@ Add support for Expect: 100-continue
 Oauth2 support
   A set of Oauth2 provider resources
   An OA2 consumer for authn
-
-Authorization Affordance
-  Single property of affordances:
-    <#affordance> aa:authorized_by <#zToken resource>
-  GET on #zToken -> 401 unless you have it.
-  Resource (qparm for user or ...) with list of zTokens.
-    Search affordance for same in 401 responses
 
 Cross model interactions:
   PUT/POST to create by generating ids and back-ending request to the other
