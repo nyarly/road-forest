@@ -1,3 +1,34 @@
+Ideas have crystalized about complete affordance support
+  Graph Focus needs to support creating and accessing named graphs. Because:
+  Create and Update affordances need payloads e.g. graph templates. Reflection
+  reveals that these templates need to be part of the resource but also
+  isolated from it, which actually requires a named graph.
+
+  Thinking:
+  focus.named_graph(name[=nil for random blank]) do |graph|
+    ...
+  end
+
+  for create and access - means that all writes set statement contexts and all
+  reads filter them.
+
+  That should be sufficient for C/S interactions with affordances.
+
+  Re Browser/RDFa: the RDFa provider needs to render templates based on the
+  affordance classes that will be forms that return rdfpost www-form-urlencoded
+  responses. The RDF::Writer really needs to be flexible enough to support many
+  different new templates - thinking it may need to be replaced - the current
+  callback approach may be too difficult to implement new versions of.
+
+  Key to making this really workable will be implementing the RDFa/rdfpost
+  templates as needed.
+
+  Also key will be the helper resources, and the Controls on Update affordances
+  - file handling for instance - if the sending mime type isn't a form type, it
+    needs to be handled by a blob upload helper that will extract the file from
+    the multipart/html-form
+
+
 RDFa + HTML support:
   Remember that RDFa + FORM children: the object of triples from RDFa are
   either @content or the text children of the appropriate element - <input

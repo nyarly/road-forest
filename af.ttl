@@ -125,7 +125,8 @@
 <payload> a rdf:Property ;
   rdfs:domain <Affordance> ;
   rdfs:range rdfs:Resource ;
-  rdfs:comment """Points to a node in an isolated graph that describes the possible
-    payload of the affordance. Graph might need a different entailment -
-    allowing e.g. a blank node to be the object of a property whose domain is
-    Literal... i.e. only using RDF entailment, not RDFS""" .
+  rdfs:comment """Points to a node in an isolated graph or to the name of a
+  named graph that describes the possible payload of the affordance. Graph
+  might need a different entailment - allowing e.g. a blank node to be the
+  object of a property whose domain is Literal... i.e. only using RDF
+  entailment, not RDFS""" .
