@@ -100,7 +100,7 @@ describe "RoadForest integration", :integration => true do
     items = graph.all(:skos, "hasTopConcept")
 
     unresolved = items.find do |nav_item|
-      nav_item[:skos, "label"] == "Unresolved"
+      nav_item[:skos, "prefLabel"] == "Unresolved"
     end
 
     return unresolved.first(:foaf, "page")

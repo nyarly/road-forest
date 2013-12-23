@@ -29,7 +29,7 @@ describe RoadForest::RDF do
 
       step[[:foaf, :givenname]] = "Lester"
       step[[:dc, :date]] = Time.now
-      step = step.node_at([:dc, :related], "http://lrdesign.com/test-rdf/sub")
+      step = step.node_at([:dc, :relation], "http://lrdesign.com/test-rdf/sub")
       step[[:dc, :date]] = Time.now
 
       store.graph_dump(:rdfa)

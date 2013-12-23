@@ -36,7 +36,7 @@ module FileManagementExample
         def nav_entry(graph, name, path)
           graph.add_node([:skos, :hasTopConcept], "#" + name) do |entry|
             entry[:rdf, :type] = [:skos, "Concept"]
-            entry[:skos, :label] = name
+            entry[:skos, :prefLabel] = name
             entry[:foaf, "page"] = path
           end
         end

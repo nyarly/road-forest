@@ -1,3 +1,4 @@
+require 'addressable/uri'
 require 'rdf'
 
 module RoadForest::RDF
@@ -118,7 +119,11 @@ module RoadForest::RDF
         end
         vocab
       end
-      vocab[property]
+      begin
+        vocab[property]
+      rescue KeyError
+        raise KeyError, "No property #{property} in #{vocab.inspect} - (try: #{vocab.methods(false).sort.inspect})"
+      end
     end
 
     def expand_curie(from)

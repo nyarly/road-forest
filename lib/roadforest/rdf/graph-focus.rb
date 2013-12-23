@@ -78,7 +78,7 @@ module RoadForest::RDF
     end
 
     def inspect
-      "#<#{self.class.name}:0x#{"%x" % object_id} (#{subject.to_s}) #{forward_properties.inspect}>"
+      "#<#{self.class.name}:0x#{"%x" % object_id} s:(#{subject.to_s}) p->o:#{forward_properties.inspect}>"
     end
     alias to_s inspect
 
@@ -171,7 +171,7 @@ module RoadForest::RDF
 
     def unwrap_value(value)
       return nil if value.nil?
-      if value.respond_to? :object
+      if RDF::Literal === value
         value.object
       elsif value == RDF.nil
         nil

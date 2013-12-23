@@ -58,7 +58,7 @@ describe RoadForest::RemoteHost do
           items = graph.all(:skos, "hasTopConcept")
 
           unresolved = items.find do |nav_item|
-            nav_item[:skos, "label"] == "Unresolved"
+            nav_item[:skos, "prefLabel"] == "Unresolved"
           end
 
           target = unresolved.first(:foaf, "page")
@@ -94,7 +94,7 @@ describe RoadForest::RemoteHost do
             items = graph.all(:skos, "hasTopConcept")
 
             unresolved = items.find do |nav_item|
-              nav_item[:skos, "label"] == "Unresolved"
+              nav_item[:skos, "prefLabel"] == "Unresolved"
             end
 
             target = unresolved.first(:foaf, "page")
@@ -122,7 +122,7 @@ describe RoadForest::RemoteHost do
           items = graph.all(:skos, "hasTopConcept")
 
           unresolved = items.find do |nav_item|
-            nav_item[:skos, "label"] == "Unresolved"
+            nav_item[:skos, "prefLabel"] == "Unresolved"
           end
 
           target = unresolved.first(:foaf, "page")
@@ -148,7 +148,7 @@ describe RoadForest::RemoteHost do
           items = graph.all(:skos, "hasTopConcept")
 
           unresolved = items.find do |nav_item|
-            nav_item[:skos, "label"] == "Unresolved"
+            nav_item[:skos, "prefLabel"] == "Unresolved"
           end
 
           unresolved.first(:foaf, "page").first(:lc, "needs").as_list.each do |need|
