@@ -1,4 +1,5 @@
 require 'rdf'
+require 'roadforest/debug'
 require 'roadforest/rdf/vocabulary'
 require 'roadforest/rdf/normalization'
 
@@ -51,8 +52,9 @@ module RoadForest::RDF
     end
 
     def debug(message)
-      return if @debug_io.nil?
-      @debug_io.puts(message)
+      io = @debug_io || RoadForest.debug_io
+      return if io.nil?
+      io.puts(message)
     end
 
     def repository_dump(format = :turtle)

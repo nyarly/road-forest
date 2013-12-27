@@ -1,0 +1,12 @@
+!!! XML
+!!! 5
+%html{:xmlns => "http://www.w3.org/1999/xhtml", :lang => lang, :prefix => prefix}
+  - if base || title
+    %head
+      - if base
+        %base{:href => base}
+      - if title
+        %title= title
+  %body
+    - subjects.each do |subject|
+      != yield(subject)

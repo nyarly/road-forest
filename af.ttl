@@ -87,7 +87,7 @@
   rdfs:range rdfs:Resource ;
   rdfs:comment """Opaque descriptors of authorization tokens - resource can be
   dereferenced by users with that token. It's recommended that the tokens be
-  referenceable, and that they be accessible iff the user is authorized to
+  defreferenceable, and that they be accessible iff the user is authorized to
   activate the affordance in question.""" .
 
 # Target

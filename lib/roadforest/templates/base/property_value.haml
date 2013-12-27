@@ -1,0 +1,18 @@
+- if heading_predicates.include?(predicate) && object.literal?
+  %h1{:property => get_curie(predicate), :content => get_content(object), :lang => get_lang(object), :datatype => get_dt_curie(object), :inlist => inlist}= escape_entities(get_value(object))
+- else
+  %div.property
+    %span.label
+      = get_predicate_name(predicate)
+    - if res = yield(object)
+      != res
+    - elsif get_curie(object) == 'rdf:nil'
+      %span{:rel => get_curie(predicate), :inlist => ''}
+    - elsif object.node?
+      %span{:property => get_curie(predicate), :resource => get_curie(object), :inlist => inlist}= get_curie(object)
+    - elsif object.uri?
+      %a{:property => get_curie(predicate), :href => object.to_s, :inlist => inlist}= object.to_s
+    - elsif object.datatype == RDF.XMLLiteral
+      %span{:property => get_curie(predicate), :lang => get_lang(object), :datatype => get_dt_curie(object), :inlist => inlist}<!= get_value(object)
+    - else
+      %span{:property => get_curie(predicate), :content => get_content(object), :lang => get_lang(object), :datatype => get_dt_curie(object), :inlist => inlist}= escape_entities(get_value(object))
