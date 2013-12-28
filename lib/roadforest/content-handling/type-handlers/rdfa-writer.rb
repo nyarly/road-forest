@@ -141,16 +141,17 @@ module RoadForest::MediaType
         engine.valise = Valise.define do
           ro up_to("lib") + "roadforest"
         end
+        engine.style_name = options[:haml]
         engine.base_uri = base_uri
         engine.lang = @lang
         engine.standard_prefixes = @options[:standard_prefixes]
         engine.top_classes = @options[:top_classes] || [RDF::RDFS.Class]
         engine.predicate_order = @options[:predicate_order] || [RDF.type, RDF::RDFS.label, RDF::DC.title]
         engine.heading_predicates = @options[:heading_predicates] || [RDF::RDFS.label, RDF::DC.title]
+        engine.haml_options = @options[:haml_options]
       end
 
       engine.prefixes.merge! @options[:prefixes] unless @options[:prefixes].nil?
-      $stderr.puts "\n#{__FILE__}:#{__LINE__} => #{engine.prefixes.inspect}"
 
       # Generate document
       rendered = engine.render_document
@@ -173,7 +174,7 @@ module RoadForest::MediaType
       attr_accessor :heading_predicates
 
       attr_accessor :prefixes, :base_uri, :lang, :standard_prefixes, :graph, :titles, :doc_title
-      attr_accessor :valise, :resource_name, :style_name, :template_cache
+      attr_accessor :valise, :resource_name, :style_name, :template_cache, :haml_options
       attr_reader :debug
 
       def initialize(graph, debug=nil)
@@ -211,6 +212,7 @@ module RoadForest::MediaType
 
       def setup_env(env)
         env.heading_predicates = heading_predicates
+        env.lang = lang
       end
 
       # Increase depth around a method invocation
@@ -225,38 +227,6 @@ module RoadForest::MediaType
         ret
       end
 
-      # @return [Hash<Symbol => String>]
-      def haml_template
-        return @haml_template if @haml_template
-        case @options[:haml]
-        when Symbol, String   then HAML_TEMPLATES.fetch(@options[:haml].to_sym, DEFAULT_HAML)
-        when Hash             then @options[:haml]
-        else                       DEFAULT_HAML
-        end
-      end
-
-      # Set the template to use within block
-      # @param [Hash{Symbol => String}] templ template to use for block evaluation; merged in with the existing template.
-      # @yield
-      #   Yields with no arguments
-      # @yieldreturn [Object] returns the result of yielding
-      # @return [Object]
-      def with_template(templ)
-        if templ
-          new_template = @options[:haml].
-            reject {|k,v| ![:subject, :property_value, :property_values, :rel].include?(k)}.
-            merge(templ || {})
-          old_template, @haml_template = @haml_template, new_template
-        else
-          old_template = @haml_template
-        end
-
-        res = yield
-        # Restore template
-        @haml_template = old_template
-
-        res
-      end
       ##
       # Find a template appropriate for the subject.
       # Override this method to provide templates based on attributes of a given subject
@@ -278,7 +248,12 @@ module RoadForest::MediaType
       end
 
       def template_config(type)
-        { :template_cache => template_cache }
+        config = { :template_cache => template_cache }
+        case type
+        when "haml"
+          config[:template_options] = haml_options
+        end
+        config
       end
 
       # Increase the reference count of this resource
@@ -470,6 +445,11 @@ module RoadForest::MediaType
       end
 
       def render(template, context)
+        add_debug "render"
+        depth do
+          add_debug{ "template: #{template.file}" }
+          add_debug{ "context: #{context.inspect}"}
+        end
         template.render(context) do |item|
           context.yielded(item)
         end
@@ -643,18 +623,12 @@ module RoadForest::MediaType
         # Pass other options from calling context
 
         env = SubjectEnvironment.new(self)
-        env.about = (get_curie(subject) unless render_opts[:rel])
         env.base = base_uri
-        env.element = nil
         env.predicates = prop_list
-        env.rel = nil
-        env.inlist = nil
-        env.resource = (get_curie(subject) if render_opts[:rel])
         env.subject = subject
-        env.typeof = nil
+        env.typeof = typeof
 
         yield env if block_given?
-
 
         depth do
           render(template, env)
@@ -735,7 +709,7 @@ module RoadForest::MediaType
     end
 
     class RenderEnvironment
-      attr_accessor :heading_predicates
+      attr_accessor :heading_predicates, :lang
 
       def initialize(engine)
         @_engine = engine
@@ -745,6 +719,12 @@ module RoadForest::MediaType
         @_engine.add_debug(msg, &block)
       end
 
+      def inspect
+        "<#{self.class.name}:#{"%x" % self.object_id} #{instance_variables.map do |name|
+          next if name == :@_engine
+          "#{name}=#{instance_variable_get(name).inspect}"
+        end.compact.join(" ")}>"
+      end
       # Display a subject.
       #
       # If the Haml template contains an entry matching the subject's rdf:type URI, that entry will be used as the template for this subject and it's properties.
@@ -764,8 +744,8 @@ module RoadForest::MediaType
       # @option options [RDF::Resource] :rel (nil)
       #   Optional @rel property
       # @return [String]
-      def subject(subject, options = {})
-        @_engine.render_subject(subject, options)
+      def subject(subject, options = {}, &block)
+        @_engine.render_subject(subject, options, &block)
       end
 
       # Haml rendering helper. Return CURIE for the literal datatype, if the
@@ -887,6 +867,22 @@ module RoadForest::MediaType
         @_engine.render_predicate(subject, predicate)
       end
 
+      def about
+        if rel.nil?
+          get_curie(subject)
+        else
+          nil
+        end
+      end
+
+      def resource
+        if rel.nil?
+          nil
+        else
+          get_curie(subject)
+        end
+      end
+
       def yielded(pred)
         predicate(pred)
       end
@@ -896,6 +892,7 @@ module RoadForest::MediaType
       attr_accessor :objects, :object, :predicate, :property, :rel, :inlist
       def yielded(item)
         subject(item) do |env|
+          env.rel = get_curie(predicate)
           env.inlist = inlist
           env.element = :li if objects.length > 1 || inlist
         end

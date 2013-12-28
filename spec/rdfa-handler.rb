@@ -1,7 +1,8 @@
-#require 'rdf/xsd'
+require 'rdf/xsd'
 #require 'rdf/spec/writer'
 require 'rdf/turtle'
 require 'rdf-matchers'
+require 'rdf'
 
 require 'roadforest/content-handling/type-handlers/rdfa-writer'
 
@@ -33,7 +34,6 @@ describe RoadForest::MediaType::RDFaWriter do
     reader_class.new(input, options).each do |statement|
       graph << statement
     end
-    puts "\n#{__FILE__}:#{__LINE__} => #{[input, graph].inspect}"
     graph
   end
 
@@ -513,7 +513,7 @@ describe RoadForest::MediaType::RDFaWriter do
               specify "test #{t.num}: #{t.description}" do
                 input = t.input("html5", "rdfa1.1")
                 @graph = RDF::Repository.load(t.input("html5", "rdfa1.1"))
-                result = serialize(:haml => template, :haml_options => {:ugly => false})
+                result = serialize(:haml => template, :haml_options => {:ugly => true})
                 graph2 = parse(result, :format => :rdfa)
                 # Need to put this in to avoid problems with added markup
                 statements = graph2.query(:object => RDF::URI("http://rdf.kellogg-assoc.com/css/distiller.css")).to_a

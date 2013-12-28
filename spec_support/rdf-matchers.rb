@@ -1,5 +1,6 @@
 require 'rspec/matchers'
 require 'nokogiri'
+require 'rdf/isomorphic'
 
 RSpec::Matchers.define :have_xpath do |xpath, value, trace|
   match do |actual|
