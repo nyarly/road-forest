@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name		= "roadforest"
-  spec.version		= "0.0.3"
+  spec.version		= "0.1"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com'
   }
@@ -75,12 +75,47 @@ Gem::Specification.new do |spec|
     lib/roadforest/rdf.rb
     lib/roadforest/blob-model.rb
     lib/roadforest/utility/class-registry.rb
-    lib/roadforest/content-handling/type-handlers/jsonld.rb
-    lib/roadforest/content-handling/media-type.rb
-    lib/roadforest/content-handling/engine.rb
     lib/roadforest/application.rb
     lib/roadforest/remote-host.rb
+    lib/roadforest/authorization.rb
+    lib/roadforest/debug.rb
+    lib/roadforest/http/user-agent.rb
+    lib/roadforest/http/keychain.rb
+    lib/roadforest/http.rb
     lib/roadforest.rb
+    lib/roadforest/content-handling/engine.rb
+    lib/roadforest/content-handling/media-type.rb
+    lib/roadforest/content-handling/handler-wrap.rb
+    lib/roadforest/content-handling/type-handler.rb
+    lib/roadforest/content-handling/type-handlers/jsonld.rb
+    lib/roadforest/content-handling/type-handlers/rdf-handler.rb
+    lib/roadforest/content-handling/type-handlers/rdfa.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer.rb
+    lib/roadforest/content-handling/type-handlers/rdfpost.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/render-engine.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/subject-environment.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/render-environment.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/property-environment.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/document-environment.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
+    lib/roadforest/content-handling/type-handlers/jsonld.rb
+    lib/roadforest/templates/min/subject.haml
+    lib/roadforest/templates/min/doc.haml
+    lib/roadforest/templates/min/property_values.haml
+    lib/roadforest/templates/base/subject.haml
+    lib/roadforest/templates/base/property_value.haml
+    lib/roadforest/templates/base/doc.haml
+    lib/roadforest/templates/base/property_values.haml
+    lib/roadforest/templates/distiller/subject.haml
+    lib/roadforest/templates/distiller/property_value.haml
+    lib/roadforest/templates/distiller/nil-object.haml
+    lib/roadforest/templates/distiller/doc.haml
+    lib/roadforest/templates/distiller/property_values.haml
+    lib/roadforest/templates/uri-object.haml
+    lib/roadforest/templates/xml-literal-object.haml
+    lib/roadforest/templates/object.haml
+    lib/roadforest/templates/node-object.haml
+    lib/roadforest/templates/nil-object.haml
     examples/file-management.rb
     spec/graph-store.rb
     spec/focus-list.rb
@@ -88,7 +123,7 @@ Gem::Specification.new do |spec|
     spec/rdf-parcel.rb
     spec/media-types.rb
     spec/rdf-normalization.rb
-    spec/excon-adapater.rb
+    spec/excon-adapter.rb
     spec/update-focus.rb
     spec/client.rb
     spec/form-parsing.rb
@@ -116,5 +151,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency("excon", "~> 0.25")
 
   spec.add_dependency("tilt", ">= 1.3.6")
-  spec.add_dependency("valise", ">= 0.9.1")
+  spec.add_dependency("valise", "~> 1.1")
 end

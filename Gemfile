@@ -8,8 +8,6 @@ gem 'perftools.rb'
 gem 'vcr'
 gem 'webmock'
 
-gem "valise", :path => "../valise"
-
 group :test do
   gem 'rdf-isomorphic'
   gem 'rdf-xsd'

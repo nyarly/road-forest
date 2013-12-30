@@ -9,9 +9,14 @@ module Corundum
   end
 
   core.in_namespace do
-    sanity = GemspecSanity.new(core)
-    QuestionableContent.new(core) do |dbg|
-      dbg.words = %w{p debugger}
+    GemspecFiles.new(core) do |files|
+      files.extra_files = Rake::FileList["lib/roadforest/templates/**"]
+    end
+
+    %w{debug profanity racism ableism}.each do |type| #"issues" also available
+      QuestionableContent.new(core) do |qc|
+        qc.type = type
+      end
     end
     rspec = RSpec.new(core)
     cov = SimpleCov.new(core, rspec) do |cov|

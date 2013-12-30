@@ -78,7 +78,7 @@ module RoadForest::RDF
     end
 
     def inspect
-      "#<#{self.class.name}:0x#{"%x" % object_id} s:(#{subject.to_s}) p->o:#{forward_properties.inspect}>"
+      "#<#{self.class.name}:0x#{"%x" % object_id} s:(#{subject.to_s}) p->o:#{forward_properties.inspect}>" #ok
     end
     alias to_s inspect
 
