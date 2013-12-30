@@ -1,6 +1,10 @@
+require 'rdf/isomorphic'
 require 'rspec/matchers'
 require 'nokogiri'
-require 'rdf/isomorphic'
+
+class RDF::Repository
+  include RDF::Isomorphic
+end
 
 RSpec::Matchers.define :have_xpath do |xpath, value, trace|
   match do |actual|

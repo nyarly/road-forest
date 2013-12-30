@@ -56,6 +56,8 @@ describe "RoadForest integration", :integration => true do
       end
     end
 
+    Excon.defaults[:mock] = false
+
     begin_time = Time.now
     begin
       test_conn =  TCPSocket.new 'localhost', @server_port

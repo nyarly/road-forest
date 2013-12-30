@@ -15,6 +15,10 @@ describe RoadForest::HTTP::ExconAdapter do
     end
   end
 
+  after :each do
+    Excon.stubs.clear
+  end
+
   describe "responses to GET requests" do
     let :request do
       RoadForest::HTTP::Request.new("GET", "http://test-site.com/test")
