@@ -1,0 +1,65 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/0251.html
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/turtle, text/rdf+turtle, text/turtle, application/x-turtle, application/n-triples,
+        text/plain;q=0.5, text/html;q=0.5, application/xhtml+xml, image/svg+xml, application/ld+json,
+        application/x-ld+json, application/n-quads, text/x-nquads, */*;q=0.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sun, 29 Dec 2013 23:56:42 GMT
+      Server:
+      - Apache/2.2.22 (Ubuntu)
+      X-Powered-By:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.17
+      Cache-Control:
+      - public, must-revalidate, max-age=3600
+      Etag:
+      - '"a499d58d6e06a203fc7b7deea9625f0aa2a42ed4"'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Digest:
+      - a499d58d6e06a203fc7b7deea9625f0aa2a42ed4
+      Age:
+      - '0'
+      X-Rack-Cache:
+      - miss, ignore, store
+      Status:
+      - '200'
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '179'
+      Keep-Alive:
+      - timeout=5, max=100
+      Connection:
+      - close
+      Content-Type:
+      - text/html;charset=utf-8
+    body:
+      encoding: UTF-8
+      string: "<!DOCTYPE html>\n<html prefix=\"ex: http://example.org/\">\n  <head
+        about=\"\">\n\t<title>Test 251</title>\n  \t<meta about=\"http://example.org/node\"
+        property=\"ex:property\" lang=\"fr\" content=\"chat\" />\n  </head>\n  <body>\n
+        \ \t<p></p>\n  </body>\n</html>"
+    http_version: 
+  recorded_at: Sun, 29 Dec 2013 23:50:30 GMT
+recorded_with: VCR 2.8.0

@@ -1,3 +1,2 @@
-        %div{:rel => rel, :resource => (about || resource), :typeof => typeof}
-          - predicates.each do |predicate|
-            != yield(predicate)
+- predicates.each do |predicate|
+  != yield(predicate)

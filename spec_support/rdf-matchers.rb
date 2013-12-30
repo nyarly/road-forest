@@ -84,8 +84,8 @@ RSpec::Matchers.define :be_equivalent_graph do |expected, info|
     "\n#{info + "\n" unless info.to_s.empty?}" +
     (@info.inputDocument ? "Input file: #{@info.inputDocument}\n" : "") +
     (@info.outputDocument ? "Output file: #{@info.outputDocument}\n" : "") +
-    "Expected:\n#{@expected.dump(@info.format, :standard_prefixes => true)}" +
-    "Results:\n#{@actual.dump(@info.format, :standard_prefixes => true)}" +
+    "\nExpected:\n#{@expected.dump(@info.format, :standard_prefixes => true)}" +
+    "\nResults:\n#{@actual.dump(@info.format, :standard_prefixes => true)}" +
     (@info.trace ? "\nDebug:\n#{@info.trace}" : "")
   end
 end

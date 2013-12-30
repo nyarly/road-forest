@@ -1,14 +1,5 @@
-        - if element == :li
-          %li{:rel => rel, :resource => (about || resource), :typeof => typeof, :inlist => inlist}
-            - if typeof
-              %span.type!= typeof
-            %table.properties
-              - predicates.each do |predicate|
-                != yield(predicate)
-        - else
-          %td{:rel => rel, :resource => (about || resource), :typeof => typeof, :inlist => inlist}
-            - if typeof
-              %span.type!= typeof
-            %table.properties
-              - predicates.each do |predicate|
-                != yield(predicate)
+- if typeof
+  %span.type!= typeof
+%table.properties
+  - predicates.each do |predicate|
+    != yield(predicate)

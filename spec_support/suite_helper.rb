@@ -66,5 +66,7 @@ module Fixtures
   end
 
   manifest = RDFA_INFO.join("manifest.json")
-  TestCase.from_jsonld(RDF::Util::File.open_file(manifest) {|f| JSON.load(f.read)})
+  VCR.use_cassette("rdfa.info") do
+    TestCase.from_jsonld(RDF::Util::File.open_file(manifest) {|f| JSON.load(f.read)})
+  end
 end

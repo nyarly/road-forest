@@ -3,14 +3,4 @@
     = get_predicate_name(predicate)
   %ul
     - objects.each do |object|
-      - if res = yield(object)
-        != res
-      - elsif object.node?
-        %li{:property => get_curie(predicate), :resource => get_curie(object), :inlist => inlist}= get_curie(object)
-      - elsif object.uri?
-        %li
-          %a{:property => get_curie(predicate), :href => object.to_s, :inlist => inlist}= object.to_s
-      - elsif object.datatype == RDF.XMLLiteral
-        %li{:property => get_curie(predicate), :lang => get_lang(object), :datatype => get_curie(object.datatype), :inlist => inlist}<!= get_value(object)
-      - else
-        %li{:property => get_curie(predicate), :content => get_content(object), :lang => get_lang(object), :datatype => get_dt_curie(object), :inlist => inlist}= escape_entities(get_value(object))
+      %li{object.attrs}<= yield(object)

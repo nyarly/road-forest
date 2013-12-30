@@ -1,9 +1,10 @@
-        !!! XML
-        !!! 5
-        %html{:xmlns => "http://www.w3.org/1999/xhtml", :lang => lang, :prefix => prefix}
-          - if base
-            %head
-              %base{:href => base}
-          %body
-            - subjects.each do |subject|
-              != yield(subject)
+!!! XML
+!!! 5
+%html{:xmlns => "http://www.w3.org/1999/xhtml", :lang => lang, :prefix => prefix}
+  - if base
+    %head
+      %base{:href => base}
+  %body
+    - subjects.each do |subject|
+      %div{subject.attrs}<
+        != yield(subject)

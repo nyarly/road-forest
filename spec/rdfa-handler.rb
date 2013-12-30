@@ -5,10 +5,12 @@ require 'rdf-matchers'
 require 'rdf'
 
 require 'roadforest/content-handling/type-handlers/rdfa-writer'
+require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
+require 'cgi'
 
 class EX < RDF::Vocabulary("http://example/"); end
 
-describe RoadForest::MediaType::RDFaWriter do
+describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
   # Heuristically detect the input stream
   def detect_format(stream)
     # Got to look into the file to see
@@ -28,7 +30,7 @@ describe RoadForest::MediaType::RDFaWriter do
 
   def parse(input, options = {})
     reader_class = RDF::Reader.for(options[:format]) if options[:format]
-    reader_class ||= options.fetch(:reader, RDF::Reader.for(detect_format(inpit)))
+    reader_class ||= options.fetch(:reader, RDF::Reader.for(detect_format(input)))
 
     graph = RDF::Repository.new
     reader_class.new(input, options).each do |statement|
@@ -37,19 +39,56 @@ describe RoadForest::MediaType::RDFaWriter do
     graph
   end
 
+  before(:all) do
+    @valise = Valise.define do
+      ro up_to("spec") + "../lib/roadforest"
+    end
+
+    @tilt_cache = ::Tilt::Cache.new
+  end
+
   # Serialize  @graph to a string and compare against regexps
   def serialize(options = {})
-    @debug = []
-    result = RoadForest::MediaType::RDFaWriter.buffer({:debug => @debug, :standard_prefixes => true}.merge(options)) do |writer|
-      writer << @graph
+
+    options = {:debug => debug, :standard_prefixes => true}.merge(options)
+    base_uri =
+      if options[:base_uri]
+        RDF::URI(options[:base_uri])
+      else
+        nil
+      end
+
+    engine = RoadForest::MediaType::RDFaWriter::RenderEngine.new(@graph, options[:debug]) do |engine|
+      engine.valise = Valise.define do
+        ro up_to("spec") + "../lib/roadforest"
+      end
+      engine.valise = @valise
+      engine.template_cache = @tilt_cache
+      engine.style_name = options[:haml]
+      engine.base_uri = base_uri
+      engine.lang = options[:lang]
+      engine.standard_prefixes = options[:standard_prefixes]
+      engine.top_classes = options[:top_classes] || [RDF::RDFS.Class]
+      engine.predicate_order = options[:predicate_order] || [RDF.type, RDF::RDFS.label, RDF::DC.title]
+      engine.heading_predicates = options[:heading_predicates] || [RDF::RDFS.label, RDF::DC.title]
+      engine.haml_options = options[:haml_options]
     end
-    require 'cgi'
+
+    engine.prefixes.merge! options[:prefixes] unless options[:prefixes].nil?
+
+    # Generate document
+    result = engine.render_document
+
     puts CGI.escapeHTML(result) if $verbose
     result
   end
 
   before(:each) do
     @graph = RDF::Repository.new
+  end
+
+  let :debug do
+    []
   end
 
   #include RDF_Writer
@@ -506,20 +545,20 @@ describe RoadForest::MediaType::RDFaWriter do
         require 'suite_helper'
 
         # Generate with each template set
-        %w{base min digester}.each do |name, template|
+        %w{base min distiller}.each do |name, template|
           context "Using #{name} template" do
             Fixtures::TestCase.for_specific("html5", "rdfa1.1", Fixtures::TestCase::Test.required) do |t|
               next if %w(0198 0225 0284 0295 0319 0329).include?(t.num)
               specify "test #{t.num}: #{t.description}" do
                 input = t.input("html5", "rdfa1.1")
                 @graph = RDF::Repository.load(t.input("html5", "rdfa1.1"))
-                result = serialize(:haml => template, :haml_options => {:ugly => true})
+                result = serialize(:haml => name, :haml_options => {:ugly => true})
                 graph2 = parse(result, :format => :rdfa)
                 # Need to put this in to avoid problems with added markup
                 statements = graph2.query(:object => RDF::URI("http://rdf.kellogg-assoc.com/css/distiller.css")).to_a
                 statements.each {|st| graph2.delete(st)}
                 #puts graph2.dump(:ttl)
-                graph2.should be_equivalent_graph(@graph, :trace => @debug.unshift(result.force_encoding("utf-8")).join("\n"))
+                graph2.should be_equivalent_graph(@graph, :trace => debug.unshift(result.force_encoding("utf-8")).join("\n"))
               end
             end
           end

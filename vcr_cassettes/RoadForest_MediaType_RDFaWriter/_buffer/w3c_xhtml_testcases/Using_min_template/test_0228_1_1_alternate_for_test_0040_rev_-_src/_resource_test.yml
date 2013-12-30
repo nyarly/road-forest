@@ -1,0 +1,66 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/0228.html
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/turtle, text/rdf+turtle, text/turtle, application/x-turtle, application/n-triples,
+        text/plain;q=0.5, text/html;q=0.5, application/xhtml+xml, image/svg+xml, application/ld+json,
+        application/x-ld+json, application/n-quads, text/x-nquads, */*;q=0.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sun, 29 Dec 2013 23:56:38 GMT
+      Server:
+      - Apache/2.2.22 (Ubuntu)
+      X-Powered-By:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.17
+      Cache-Control:
+      - public, must-revalidate, max-age=3600
+      Etag:
+      - '"d154ee472d9af9b4bdfdc1a4085549c8d4e010aa"'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Digest:
+      - d154ee472d9af9b4bdfdc1a4085549c8d4e010aa
+      Age:
+      - '0'
+      X-Rack-Cache:
+      - miss, ignore, store
+      Status:
+      - '200'
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '240'
+      Keep-Alive:
+      - timeout=5, max=100
+      Connection:
+      - close
+      Content-Type:
+      - text/html;charset=utf-8
+    body:
+      encoding: UTF-8
+      string: "<!DOCTYPE html>\n<html>\n  <head>\n\t\t<title>Test 0228</title>\n\t\t<!--
+        Based on 1.1 semantics for 0040 -->\n  </head>\n  <body>\n  \t<div>\n     <img
+        src=\"http://sw-app.org/img/mic_2007_01.jpg\"\n           rev=\"xhv:alternate\"\n
+        \          resource=\"http://sw-app.org/img/mic_2006_03.jpg\"\n           alt=\"A
+        photo depicting Michael\" />\t\n  \t</div>\n  </body>\n</html>"
+    http_version: 
+  recorded_at: Sun, 29 Dec 2013 23:50:26 GMT
+recorded_with: VCR 2.8.0

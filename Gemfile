@@ -4,6 +4,11 @@ gem 'corundum'
 gem 'fuubar'
 gem 'cadre'
 gem 'rdf-turtle'
+gem 'perftools.rb'
+gem 'vcr'
+gem 'webmock'
+
+gem "valise", :path => "../valise"
 
 group :test do
   gem 'rdf-isomorphic'

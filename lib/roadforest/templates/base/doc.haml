@@ -9,4 +9,5 @@
         %title= title
   %body
     - subjects.each do |subject|
-      != yield(subject)
+      %div{subject.attrs}
+        != yield(subject)
