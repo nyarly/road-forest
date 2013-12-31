@@ -56,6 +56,9 @@
   rdfs:subClassOf <Unsafe> ;
   rdfs:comment """Triggering this affordance implies a request to create a new
   resource""" .
+#Consider: <Append> - distinct from <Create> in that the implication is
+#specifically to create a child (or otherwise related) resource to the target, where <Create> might
+#specifically mean "create this resource" - review Fielding & 2616
 
 <Mutate> a rdfs:Class ;
   rdfs:subClassOf <Unsafe> ;
