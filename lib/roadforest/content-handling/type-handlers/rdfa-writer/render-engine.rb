@@ -136,6 +136,8 @@ module RoadForest::MediaType
       def setup
         add_debug {"\nserialize setup: graph size: #{@graph.size}"}
 
+        @base_uri = ::RDF::URI.intern(@base_uri) unless @base_uri.nil? or @base_uri.is_a?(::RDF::URI)
+
         preprocess
 
         @ordered_subjects = order_subjects
@@ -558,8 +560,6 @@ module RoadForest::MediaType
       # @option options [String] typeof (nil)
       #   RDF type as a CURIE, URI or Node definition.
       #   If :about is nil, this defaults to the empty string ("").
-      # @option options [:li, nil] element (nil)
-      #   Render with &lt;li&gt;, otherwise with template default.
       # @option options [String] haml (haml_template[:subject])
       #   Haml template to render.
       # @yield [predicate]

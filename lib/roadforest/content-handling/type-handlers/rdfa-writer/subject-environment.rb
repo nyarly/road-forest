@@ -2,7 +2,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer/render-environmen
 module RoadForest::MediaType
   class RDFaWriter
     class SubjectEnvironment < RenderEnvironment
-      attr_accessor :base, :element, :predicate_terms, :property_objects, :rel, :inlist, :subject, :typeof
+      attr_accessor :base, :predicate_terms, :property_objects, :rel, :inlist, :subject, :typeof
 
       # Write a predicate with one or more values.
       #

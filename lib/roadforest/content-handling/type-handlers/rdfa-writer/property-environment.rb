@@ -16,8 +16,6 @@ module RoadForest::MediaType
         object_terms.each do |term|
           env = @_engine.object_env(predicate, term)
           env.inlist = inlist
-          #XXX Remove element=
-          env.element = :li if object_terms.length > 1 || inlist
           yield(env)
         end
       end

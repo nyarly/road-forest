@@ -32,8 +32,6 @@ module RoadForest::MediaType
       #
       # @param [RDF::Resource] subject
       # @param [Hash{Symbol => Object}] options
-      # @option options [:li, nil] :element(:div)
-      #   Serialize using &lt;li&gt; rather than template default element
       # @option options [RDF::Resource] :rel (nil)
       #   Optional @rel property
       # @return [String]

@@ -2,7 +2,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer/render-environmen
 module RoadForest::MediaType
   class RDFaWriter
     class ObjectEnvironment < RenderEnvironment
-      attr_accessor :predicate, :object, :inlist, :element
+      attr_accessor :predicate, :object, :inlist
 
       def simple_attrs
         {:property => get_curie(predicate), :content => get_content(object), :lang => get_lang(object), :datatype => get_dt_curie(object), :inlist => inlist}
