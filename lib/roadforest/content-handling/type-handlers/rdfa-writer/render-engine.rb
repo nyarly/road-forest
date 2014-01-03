@@ -50,10 +50,6 @@ module RoadForest::MediaType
         @doc_title = ""
       end
 
-      def template_cache
-        @template_cache ||= ::Tilt::Cache.new
-      end
-
       def style_name
         @style_name ||= "base"
       end
@@ -74,38 +70,6 @@ module RoadForest::MediaType
         @debug_indent -= 1
         ret
       end
-
-      def templates
-        @templates ||= [resource_name, style_name, nil].uniq.map do |name|
-          valise.sub_set(["templates", name].compact.join("/"))
-        end.inject do |left, right|
-          left + right
-        end.handle_templates do |config|
-          config.add_type("haml", { :template_cache => template_cache, :template_options => haml_options })
-        end
-      end
-
-      ##
-      # Find a template appropriate for the subject.
-      # Override this method to provide templates based on attributes of a given subject
-      #
-      # @param [RDF::URI] subject
-      # @return [Hash] # return matched matched template
-      def find_template(kinds)
-        kind = kinds.shift
-        templates.contents(kind)
-      rescue Valise::Errors::NotFound
-        if kinds.empty?
-          raise RDF::WriterError, "Missing template for #{context.class.name}" if template.nil?
-        else
-          retry
-        end
-      end
-
-      def find_environment_template(env)
-        find_template(env.template_kinds)
-      end
-
       # Increase the reference count of this resource
       # @param [RDF::Resource] resource
       # @return [Integer] resulting reference count
@@ -294,6 +258,43 @@ module RoadForest::MediaType
         @uri_to_term_or_curie[uri] = curie
       rescue ArgumentError => e
         raise RDF::WriterError, "Invalid URI #{uri.inspect}: #{e.message}"
+      end
+
+      def template_cache
+        @template_cache ||= ::Tilt::Cache.new
+      end
+
+      def templates
+        @templates ||= [resource_name, style_name, nil].uniq.map do |name|
+          valise.sub_set(["templates", name].compact.join("/"))
+        end.inject do |left, right|
+          left + right
+        end.handle_templates do |config|
+          #At some point, should look into using HTML entities to preserve
+          #whitespace in XMLLiterals
+          config.add_type("haml", { :template_cache => template_cache, :template_options => haml_options || {:ugly => true} })
+        end
+      end
+
+      ##
+      # Find a template appropriate for the subject.
+      # Override this method to provide templates based on attributes of a given subject
+      #
+      # @param [RDF::URI] subject
+      # @return [Hash] # return matched matched template
+      def find_template(kinds)
+        kind = kinds.shift
+        templates.contents(kind)
+      rescue Valise::Errors::NotFound
+        if kinds.empty?
+          raise RDF::WriterError, "Missing template for #{context.class.name}" if template.nil?
+        else
+          retry
+        end
+      end
+
+      def find_environment_template(env)
+        find_template(env.template_kinds)
       end
 
       def render(context)
