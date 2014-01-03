@@ -21,6 +21,10 @@ module RoadForest
         end
         alias [] get
 
+        def all_names
+          registrar.registry.names
+        end
+
         def self.extended(mod)
           (
             class << mod; self; end

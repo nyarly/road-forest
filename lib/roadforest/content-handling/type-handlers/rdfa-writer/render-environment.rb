@@ -8,6 +8,10 @@ module RoadForest::MediaType
         @_engine = engine
       end
 
+      def _base_env_
+        self
+      end
+
       def add_debug(msg = nil, &block)
         @_engine.add_debug(msg, &block)
       end

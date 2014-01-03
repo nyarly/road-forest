@@ -3,6 +3,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer/document-environm
 require 'roadforest/content-handling/type-handlers/rdfa-writer/subject-environment'
 require 'roadforest/content-handling/type-handlers/rdfa-writer/property-environment'
 require 'roadforest/content-handling/type-handlers/rdfa-writer/object-environment'
+require 'roadforest/content-handling/type-handlers/rdfa-writer/environment-decorator'
 require 'haml'
 
 module RoadForest::MediaType
@@ -32,12 +33,6 @@ module RoadForest::MediaType
         end
       end
 
-      ##
-      # Find a template appropriate for the subject.
-      # Override this method to provide templates based on attributes of a given subject
-      #
-      # @param [RDF::URI] subject
-      # @return [Hash] # return matched matched template
       def find_template(kinds)
         kind = kinds.shift
         templates.contents(kind)
@@ -52,17 +47,10 @@ module RoadForest::MediaType
 
 
     class RenderEngine
-      # Defines rdf:type of subjects to be emitted at the beginning of the
-      # document.
-      # @return [Array<URI>]
       attr_accessor :top_classes
 
-      # Defines order of predicates to to emit at begninning of a resource description. Defaults to `[rdf:type, rdfs:label, dc:title]`
-      # @return [Array<URI>]
       attr_accessor :predicate_order
 
-      # Defines order of predicates to use in heading.
-      # @return [Array<URI>]
       attr_accessor :heading_predicates
 
       attr_accessor :prefixes, :base_uri, :lang, :standard_prefixes, :graph, :titles, :doc_title
@@ -94,40 +82,21 @@ module RoadForest::MediaType
         @doc_title = ""
       end
 
-      def setup_env(env)
-        env.heading_predicates = heading_predicates
-        env.lang = lang
-      end
-
-      # Increase depth around a method invocation
-      # @yield
-      #   Yields with no arguments
-      # @yieldreturn [Object] returns the result of yielding
-      # @return [Object]
       def depth
         @debug_indent += 1
         ret = yield
         @debug_indent -= 1
         ret
       end
-      # Increase the reference count of this resource
-      # @param [RDF::Resource] resource
-      # @return [Integer] resulting reference count
+
       def bump_reference(resource)
         @references[resource] += 1
       end
 
-      # Return the number of times this node has been referenced in the object position
-      # @param [RDF::Node] node
-      # @return [Boolean]
       def ref_count(node)
         @references[node]
       end
 
-      # Add debug event to debug array, if specified
-      #
-      # @param [String] message
-      # @yieldreturn [String] appended to message, to allow for lazy-evaulation of message
       def add_debug(message = nil)
         return unless ::RoadForest.debug_io || @debug
         message ||= ""
@@ -157,12 +126,7 @@ module RoadForest::MediaType
         @doc_title = titles[title_subject]
       end
 
-      # Perform any preprocessing of statements required
-      # @return [ignored]
       def preprocess
-        # Load initial contexts
-        # Add terms and prefixes to local store for converting URIs
-        # Keep track of vocabulary from left-most context
         [RDF::RDFa::XML_RDFA_CONTEXT, RDF::RDFa::HTML_RDFA_CONTEXT].each do |uri|
           ctx = RDF::RDFa::Context.find(uri)
           ctx.prefixes.each_pair do |k, v|
@@ -187,10 +151,6 @@ module RoadForest::MediaType
         add_debug{ "preprocess prefixes: #{@prefixes.inspect}" }
       end
 
-      # Order subjects for output. Override this to output subjects in another order.
-      #
-      # Uses #top_classes and #base_uri.
-      # @return [Array<Resource>] Ordered list of subjects
       def order_subjects
         seen = {}
         subjects = []
@@ -224,11 +184,6 @@ module RoadForest::MediaType
         subjects += recursable.map{|r| r.last}
       end
 
-      # Take a hash from predicate uris to lists of values.
-      # Sort the lists of values.  Return a sorted list of properties.
-      #
-      # @param [Hash{String => Array<Resource>}] properties A hash of Property to Resource mappings
-      # @return [Array<String>}] Ordered list of properties. Uses predicate_order.
       def order_properties(properties)
         # Make sorted list of properties
         prop_list = []
@@ -300,6 +255,26 @@ module RoadForest::MediaType
         raise RDF::WriterError, "Invalid URI #{uri.inspect}: #{e.message}"
       end
 
+      def type_of(type, subject)
+        # Find appropriate template
+        curie = case
+                when subject.node?
+                  subject.to_s if ref_count(subject) > 1
+                else
+                  get_curie(subject)
+                end
+
+        typeof = Array(type).map {|r| get_curie(r)}.join(" ")
+        typeof = nil if typeof.empty?
+
+        # Nodes without a curie need a blank @typeof to generate a subject
+        typeof ||= "" unless curie
+
+        add_debug {"subject: #{curie.inspect}, typeof: #{typeof.inspect}" }
+
+        typeof.freeze
+      end
+
       def find_environment_template(env)
         template_handler.find_template(env.template_kinds)
       rescue Valise::Errors::NotFound
@@ -322,23 +297,18 @@ module RoadForest::MediaType
         end
       end
 
-      # Mark a subject as done.
-      # @param [RDF::Resource] subject
-      # @return [Boolean]
+      def is_list?(object)
+        !(object == RDF.nil || (l = RDF::List.new(object, @graph)).invalid?)
+      end
+
       def subject_done(subject)
         @serialized[subject] = true
       end
 
-      # Determine if the subject has been completed
-      # @param [RDF::Resource] subject
-      # @return [Boolean]
       def is_done?(subject)
         @serialized.include?(subject)
       end
 
-
-      # @param [RDF::Resource] subject
-      # @return [Hash{String => Object}]
       def properties_for_subject(subject)
         properties = {}
         @graph.query(:subject => subject) do |st|
@@ -349,27 +319,41 @@ module RoadForest::MediaType
         properties
       end
 
-      # @param [Array,NilClass] type
-      # @param [RDF::Resource] subject
-      # @return [String] string representation of the specific RDF.type uri
-      def type_of(type, subject)
-        # Find appropriate template
-        curie = case
-                when subject.node?
-                  subject.to_s if ref_count(subject) > 1
-                else
-                  get_curie(subject)
-                end
+      def setup_env(env)
+        env.heading_predicates = heading_predicates
+        env.lang = lang
+      end
 
-        typeof = Array(type).map {|r| get_curie(r)}.join(" ")
-        typeof = nil if typeof.empty?
+      def decorate_env(env)
+        EnvironmentDecorator.decoration_for(env)
+      end
 
-        # Nodes without a curie need a blank @typeof to generate a subject
-        typeof ||= "" unless curie
+      def document_env
+        env = DocumentEnvironment.new(self)
+        setup_env(env)
+        env.subject_terms = @ordered_subjects
+        env.title = doc_title
+        env.prefixes = prefixes
+        env.lang = lang
+        env.base = base_uri
+        decorate_env(env)
+        env
+      end
 
-        add_debug {"subject: #{curie.inspect}, typeof: #{typeof.inspect}" }
+      def subject_env(subject)
+        return unless @subjects.include?(subject)
+        properties = properties_for_subject(subject)
 
-        typeof.freeze
+        env = SubjectEnvironment.new(self)
+        setup_env(env)
+        env.base = base_uri
+        env.predicate_terms = order_properties(properties)
+        env.property_objects = properties
+        env.subject = subject
+        env.typeof = type_of(properties.delete(RDF.type.to_s), subject)
+
+        env = decorate_env(env)
+        env
       end
 
       def list_property_envs(predicate, list_objects)
@@ -383,6 +367,19 @@ module RoadForest::MediaType
           env.inlist = "true"
           env
         end
+      end
+
+      def simple_property_env(predicate, objects)
+        return nil if objects.to_a.empty?
+
+        env = PropertyEnvironment.new(self)
+        setup_env(env)
+        env.object_terms = objects
+        env.predicate = predicate
+        env.inlist = nil
+
+        env = decorate_env(env)
+        env
       end
 
       def object_env(predicate, object)
@@ -404,141 +401,15 @@ module RoadForest::MediaType
           else
             ObjectEnvironment.new(self)
           end
+        setup_env(env)
         env.predicate = predicate
         env.object = object
         env.inlist = nil
+        env = decorate_env(env)
 
         env
       end
 
-      def simple_property_env(predicate, objects)
-        return nil if objects.to_a.empty?
-
-        env = PropertyEnvironment.new(self)
-        setup_env(env)
-        env.object_terms = objects
-        env.predicate = predicate
-        env.inlist = nil
-
-        env
-      end
-
-      def subject_env(subject)
-        return unless @subjects.include?(subject)
-        properties = properties_for_subject(subject)
-
-        env = SubjectEnvironment.new(self)
-        env.base = base_uri
-        env.predicate_terms = order_properties(properties)
-        env.property_objects = properties
-        env.subject = subject
-        env.typeof = type_of(properties.delete(RDF.type.to_s), subject)
-
-        env
-      end
-
-      def document_env
-        env = DocumentEnvironment.new(self)
-        env.subject_terms = @ordered_subjects
-        env.title = doc_title
-        env.prefixes = prefixes
-        env.lang = lang
-        env.base = base_uri
-        env
-      end
-
-      # Render a single- or multi-valued predicate using
-      # `haml_template[:property_value]` or `haml_template[:property_values]`.
-      # Yields each object for optional rendering. The block should only render
-      # for recursive subject definitions (i.e., where the object is also a
-      # subject and is rendered underneath the first referencing subject).
-      #
-      # If a multi-valued property definition is not found within the template, the writer will use the single-valued property definition multiple times.
-      #
-      # @param [Array<RDF::Resource>] predicate
-      #   Predicate to render.
-      # @param [Array<RDF::Resource>] objects
-      #   List of objects to render. If the list contains only a single element, the :property_value template will be used. Otherwise, the :property_values template is used.
-      # @param [Hash{Symbol => Object}] options Rendering options passed to Haml render.
-      # @option options [String] :haml (haml_template[:property_value], haml_template[:property_values])
-      #   Haml template to render. Otherwise, uses `haml_template[:property_value] or haml_template[:property_values]`
-      #   depending on the cardinality of objects.
-      # @yield object, inlist
-      #   Yields object and if it is contained in a list.
-      # @yieldparam [RDF::Resource] object
-      # @yieldparam [Boolean] inlist
-      # @yieldreturn [String, nil]
-      #   The block should only return a string for recursive object definitions.
-      # @return String
-      #   The rendered document is returned as a string
-      #
-      #
-      def render_predicate(subject, pred)
-        pred = RDF::URI(pred) if pred.is_a?(String)
-        objects = properties_for_subject(subject)[pred.to_s]
-
-        add_debug {"predicate: #{pred.inspect}, objects: #{objects}"}
-
-        return if objects.to_a.empty?
-
-        nonlists, lists = objects.partition do |object|
-          object == RDF.nil || (l = RDF::List.new(object, @graph)).invalid?
-        end
-
-        add_debug {"properties with lists: #{lists} non-lists: #{nonlists}"}
-
-        return ([simple_property_env(pred, nonlists)] + list_property_envs(pred, lists)).compact.map do |env|
-          render(env)
-        end.join(" ")
-      end
-
-      def is_list?(object)
-        !(object == RDF.nil || (l = RDF::List.new(object, @graph)).invalid?)
-      end
-
-      # @param [RDF::Resource] subject
-      # @param [Array] prop_list
-      # @param [Hash] render_opts
-      # @return [String]
-      def render_subject(subject)
-        # See if there's a template based on the sorted concatenation of all types of this subject
-        # or any type of this subject
-
-        env = subject_env(subject)
-
-        return if env.nil?
-
-        yield env if block_given?
-
-        add_debug {"props: #{env.predicates.inspect}"}
-
-        render(env)
-      end
-
-      # Render document using `haml_template[:doc]`. Yields each subject to be
-      # rendered separately.
-      #
-      # @param [Array<RDF::Resource>] subjects
-      #   Ordered list of subjects. Template must yield to each subject, which returns
-      #   the serialization of that subject (@see #subject_template)
-      # @param [Hash{Symbol => Object}] options Rendering options passed to Haml render.
-      # @option options [RDF::URI] base (nil)
-      #   Base URI added to document, used for shortening URIs within the document.
-      # @option options [Symbol, String] language (nil)
-      #   Value of @lang attribute in document, also allows included literals to omit
-      #   an @lang attribute if it is equivalent to that of the document.
-      # @option options [String] title (nil)
-      #   Value of html>head>title element.
-      # @option options [String] prefix (nil)
-      #   Value of @prefix attribute.
-      # @option options [String] haml (haml_template[:doc])
-      #   Haml template to render.
-      # @yield [subject]
-      #   Yields each subject
-      # @yieldparam [RDF::URI] subject
-      # @yieldreturn [:ignored]
-      # @return String
-      #   The rendered document is returned as a string
       def render_document
         add_debug{ "engine prefixes: #{prefixes.inspect}"}
         env = document_env
@@ -547,38 +418,6 @@ module RoadForest::MediaType
 
         render(env)
       end
-
-      # Render a subject using `haml_template[:subject]`.
-      #
-      # The _subject_ template may be called either as a top-level element, or recursively under another element if the _rel_ local is not nil.
-      #
-      # Yields each predicate/property to be rendered separately (@see #render_property_value and `#render_property_values`).
-      #
-      # @param [Array<RDF::Resource>] subject
-      #   Subject to render
-      # @param [Array<RDF::Resource>] predicates
-      #   Predicates of subject. Each property is yielded for separate rendering.
-      # @param [Hash{Symbol => Object}] options Rendering options passed to Haml render.
-      # @option options [String] about (nil)
-      #   About description, a CURIE, URI or Node definition.
-      #   May be nil if no @about is rendered (e.g. unreferenced Nodes)
-      # @option options [String] resource (nil)
-      #   Resource description, a CURIE, URI or Node definition.
-      #   May be nil if no @resource is rendered
-      # @option options [String] rel (nil)
-      #   Optional @rel property description, a CURIE, URI or Node definition.
-      # @option options [String] typeof (nil)
-      #   RDF type as a CURIE, URI or Node definition.
-      #   If :about is nil, this defaults to the empty string ("").
-      # @option options [String] haml (haml_template[:subject])
-      #   Haml template to render.
-      # @yield [predicate]
-      #   Yields each predicate
-      # @yieldparam [RDF::URI] predicate
-      # @yieldreturn [:ignored]
-      # @return String
-      #   The rendered document is returned as a string
-      # Return Haml template for document from `haml_template[:subject]`
     end
   end
 end
