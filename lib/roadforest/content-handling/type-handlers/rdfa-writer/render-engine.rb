@@ -7,6 +7,50 @@ require 'haml'
 
 module RoadForest::MediaType
   class RDFaWriter
+    class TemplateHandler
+      attr_accessor :haml_options, :valise
+      attr_accessor :resource_name
+      attr_writer :style_name, :template_cache
+
+      def template_cache
+        @template_cache ||= ::Tilt::Cache.new
+      end
+
+      def style_name
+        @style_name ||= "base"
+      end
+
+      def templates
+        @templates ||= [resource_name, style_name, nil].uniq.map do |name|
+          valise.sub_set(["templates", name].compact.join("/"))
+        end.inject do |left, right|
+          left + right
+        end.handle_templates do |config|
+          #At some point, should look into using HTML entities to preserve
+          #whitespace in XMLLiterals
+          config.add_type("haml", { :template_cache => template_cache, :template_options => haml_options || {:ugly => true} })
+        end
+      end
+
+      ##
+      # Find a template appropriate for the subject.
+      # Override this method to provide templates based on attributes of a given subject
+      #
+      # @param [RDF::URI] subject
+      # @return [Hash] # return matched matched template
+      def find_template(kinds)
+        kind = kinds.shift
+        templates.contents(kind)
+      rescue Valise::Errors::NotFound
+        if kinds.empty?
+          raise
+        else
+          retry
+        end
+      end
+    end
+
+
     class RenderEngine
       # Defines rdf:type of subjects to be emitted at the beginning of the
       # document.
@@ -22,7 +66,7 @@ module RoadForest::MediaType
       attr_accessor :heading_predicates
 
       attr_accessor :prefixes, :base_uri, :lang, :standard_prefixes, :graph, :titles, :doc_title
-      attr_accessor :valise, :resource_name, :style_name, :template_cache, :haml_options
+      attr_accessor :template_handler
       attr_reader :debug
 
       def initialize(graph, debug=nil)
@@ -48,10 +92,6 @@ module RoadForest::MediaType
         @ordered_subjects = []
         @titles = {}
         @doc_title = ""
-      end
-
-      def style_name
-        @style_name ||= "base"
       end
 
       def setup_env(env)
@@ -260,41 +300,10 @@ module RoadForest::MediaType
         raise RDF::WriterError, "Invalid URI #{uri.inspect}: #{e.message}"
       end
 
-      def template_cache
-        @template_cache ||= ::Tilt::Cache.new
-      end
-
-      def templates
-        @templates ||= [resource_name, style_name, nil].uniq.map do |name|
-          valise.sub_set(["templates", name].compact.join("/"))
-        end.inject do |left, right|
-          left + right
-        end.handle_templates do |config|
-          #At some point, should look into using HTML entities to preserve
-          #whitespace in XMLLiterals
-          config.add_type("haml", { :template_cache => template_cache, :template_options => haml_options || {:ugly => true} })
-        end
-      end
-
-      ##
-      # Find a template appropriate for the subject.
-      # Override this method to provide templates based on attributes of a given subject
-      #
-      # @param [RDF::URI] subject
-      # @return [Hash] # return matched matched template
-      def find_template(kinds)
-        kind = kinds.shift
-        templates.contents(kind)
-      rescue Valise::Errors::NotFound
-        if kinds.empty?
-          raise RDF::WriterError, "Missing template for #{context.class.name}" if template.nil?
-        else
-          retry
-        end
-      end
-
       def find_environment_template(env)
-        find_template(env.template_kinds)
+        template_handler.find_template(env.template_kinds)
+      rescue Valise::Errors::NotFound
+        raise RDF::WriterError, "No template found for #{env.class} in #{template_handler.inspect}"
       end
 
       def render(context)

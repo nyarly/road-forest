@@ -31,12 +31,14 @@ module RoadForest
 
           debug = []
 
+          templates = RDFaWriter::TemplateHandler.new
+          templates.valise = valise
+          templates.template_cache = tilt_cache
+
           engine = RDFaWriter::RenderEngine.new(rdf, debug) do |engine|
-            engine.valise = valise
-            engine.template_cache = tilt_cache
             engine.base_uri = base_uri
             engine.standard_prefixes = true
-
+            engine.template_handler = templates
 
             #engine.style_name = options[:haml]
             #engine.lang = options[:lang]

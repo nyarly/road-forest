@@ -58,20 +58,20 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         nil
       end
 
+    templates = RoadForest::MediaType::RDFaWriter::TemplateHandler.new
+    templates.valise = @valise
+    templates.template_cache = @tilt_cache
+    templates.style_name = options[:haml]
+    templates.haml_options = options[:haml_options]
+
     engine = RoadForest::MediaType::RDFaWriter::RenderEngine.new(@graph, options[:debug]) do |engine|
-      engine.valise = Valise.define do
-        ro up_to("spec") + "../lib/roadforest"
-      end
-      engine.valise = @valise
-      engine.template_cache = @tilt_cache
-      engine.style_name = options[:haml]
+      engine.template_handler = templates
       engine.base_uri = base_uri
       engine.lang = options[:lang]
       engine.standard_prefixes = options[:standard_prefixes]
       engine.top_classes = options[:top_classes] || [RDF::RDFS.Class]
       engine.predicate_order = options[:predicate_order] || [RDF.type, RDF::RDFS.label, RDF::DC.title]
       engine.heading_predicates = options[:heading_predicates] || [RDF::RDFS.label, RDF::DC.title]
-      engine.haml_options = options[:haml_options]
     end
 
     engine.prefixes.merge! options[:prefixes] unless options[:prefixes].nil?
