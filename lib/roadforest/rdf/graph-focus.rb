@@ -6,7 +6,6 @@ require 'roadforest/rdf/normalization'
 require 'roadforest/rdf/resource-query'
 require 'roadforest/rdf/access-manager'
 
-
 module RoadForest::RDF
   class NullFocus < ::BasicObject
     def initialize(focus, pattern, callsite)

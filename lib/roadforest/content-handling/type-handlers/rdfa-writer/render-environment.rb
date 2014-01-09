@@ -3,6 +3,7 @@ module RoadForest::MediaType
   class RDFaWriter
     class RenderEnvironment
       attr_accessor :heading_predicates, :lang
+      attr_reader :_engine
 
       def initialize(engine)
         @_engine = engine

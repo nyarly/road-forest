@@ -207,6 +207,7 @@ module RoadForest::MediaType
       # @return [ignored]
       def preprocess_statement(statement)
         #add_debug {"preprocess: #{statement.inspect}"}
+        return unless statement.context.nil?
         bump_reference(statement.subject)
         bump_reference(statement.object)
         @subjects[statement.subject] = true
@@ -311,7 +312,7 @@ module RoadForest::MediaType
 
       def properties_for_subject(subject)
         properties = {}
-        @graph.query(:subject => subject) do |st|
+        @graph.query(:subject => subject, :context => false) do |st|
           key = st.predicate.to_s.freeze
           properties[key] ||= []
           properties[key] << st.object
@@ -336,7 +337,7 @@ module RoadForest::MediaType
         env.prefixes = prefixes
         env.lang = lang
         env.base = base_uri
-        decorate_env(env)
+        env = decorate_env(env)
         env
       end
 

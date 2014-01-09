@@ -27,13 +27,16 @@ RSpec::Matchers.define :have_xpath do |xpath, value, trace|
   end
 
   failure_message_for_should do |actual|
-    msg = "expected that #{xpath.inspect} would be\n  #{value.inspect}\nwas:\n  #{@doc.root.at_xpath(xpath, @namespaces).text.inspect}\n"
+    trace ||= debug
+    text = @doc.root.at_xpath(xpath, @namespaces).text rescue nil
+    msg = "expected that #{xpath.inspect} would be\n  #{value.inspect}\nwas:\n  #{text.inspect}\n"
     msg += "in:\n" + actual.to_s
     msg +=  "\nDebug:#{trace.join("\n")}" if trace
     msg
   end
 
   failure_message_for_should_not do |actual|
+    trace ||= debug
     msg = "expected that #{xpath.inspect} would not be #{value.inspect} in:\n" + actual.to_s
     msg +=  "\nDebug:#{trace.join("\n")}" if trace
     msg

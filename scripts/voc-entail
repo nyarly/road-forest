@@ -1,0 +1,48 @@
+#!/bin/env ruby
+
+require 'rdf/vocab/rdfs'
+require 'roadforest/rdf/vocabulary'
+require 'rdf/turtle'
+require 'erb'
+
+class VocEntail
+  RDFS = ::RDF::RDFS
+  Af = ::RoadForest::RDF::Af
+
+  def subclass_of(klass)
+    ::RDF::Query.new { pattern [ :subclass, RDF::RDFS.subClassOf, klass ] }
+  end
+
+  def all_affordances
+    af = RDF::Graph.load('af.ttl', :base_uri => Af.to_uri)
+
+    all = []
+    list = [Af.Affordance]
+    until list.empty?
+
+      subclasses = list.inject([]) do |subclasses, affordance|
+        subclasses + (subclass_of(affordance).execute(af).map {|sol| sol[:subclass]} - all)
+      end
+      all += list
+      list = subclasses
+    end
+
+    all
+  end
+
+  def sub_name(uri)
+    uri.to_s.sub(/\A#{Af.to_uri}/,'')
+  end
+end
+
+template = ERB.new(<<-EOT)
+  def all_affordances
+    @all_affordances ||=
+      [<% entailment.all_affordances.each do |aff| %>
+        Af.<%= entailment.sub_name(aff) %>,<% end %>
+      ]
+  end
+EOT
+
+entailment = VocEntail.new
+puts template.result(binding)

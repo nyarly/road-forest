@@ -21,13 +21,16 @@ module RoadForest::MediaType
         %w{doc}
       end
 
-      def prefix
-        @prefix ||=
+      def build_prefix_header(prefixes)
           if prefixes.empty?
             nil
           else
             prefixes.keys.map {|pk| "#{pk}: #{prefixes[pk]}"}.sort.join(" ")
           end.tap{|prefix| add_debug {"\nserialize: prefixes: #{prefixes.inspect} prefix src: #{prefix.inspect}"}}
+      end
+
+      def prefix
+        @prefix ||= build_prefix_header(prefixes)
       end
     end
   end

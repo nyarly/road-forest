@@ -1,0 +1,8 @@
+%div.property
+  - unless curie_prefix.empty?
+    %input{type: "hidden", name: "pn", value: curie_prefix}
+  %input{type: "hidden", name: "pv", value: curie_suffix}
+  - objects.each do |object|
+    %label{object.label_attrs}
+      = get_predicate_name(predicate)
+      %input{object.input_attrs(yield(object))}

@@ -34,9 +34,9 @@ module RoadForest::MediaType
 
       def template_kinds
         if objects.to_a.length > 1
-          %w{property_values}
+          %w{property-values}
         else
-          %w{property_value property_values}
+          %w{property-value property-values}
         end
       end
     end
