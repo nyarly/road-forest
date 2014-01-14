@@ -28,7 +28,7 @@ RSpec::Matchers.define :have_xpath do |xpath, value, trace|
 
   failure_message_for_should do |actual|
     trace ||= debug
-    text = @doc.root.at_xpath(xpath, @namespaces).text rescue nil
+    text = @doc.root.at_xpath(xpath, @namespaces) rescue nil
     msg = "expected that #{xpath.inspect} would be\n  #{value.inspect}\nwas:\n  #{text.inspect}\n"
     msg += "in:\n" + actual.to_s
     msg +=  "\nDebug:#{trace.join("\n")}" if trace

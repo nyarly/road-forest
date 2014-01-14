@@ -36,6 +36,7 @@ module RoadForest
           templates.template_cache = tilt_cache
 
           engine = RDFaWriter::RenderEngine.new(rdf, debug) do |engine|
+            engine.graph_name = rdf.context
             engine.base_uri = base_uri
             engine.standard_prefixes = true
             engine.template_handler = templates

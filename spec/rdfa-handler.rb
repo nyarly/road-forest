@@ -49,7 +49,6 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
 
   # Serialize  @graph to a string and compare against regexps
   def serialize(options = {})
-
     options = {:debug => debug, :standard_prefixes => true}.merge(options)
     base_uri =
       if options[:base_uri]
@@ -82,6 +81,21 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
 
     puts CGI.escapeHTML(result) if $verbose
     result
+  end
+
+  shared_context "RDFa rendering" do
+    let :graph do
+      parse(turtle, :format => :ttl)
+    end
+
+    let :serialize_options do
+      {:haml_options => {:ugly => false}}
+    end
+
+    subject :html do
+      @graph = graph
+      serialize(serialize_options)
+    end
   end
 
   before(:each) do
@@ -300,19 +314,24 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
       it { should have_xpath( "//ul/li[2]/a[@property='ex:b']/@href" , EX.d.to_s ) }
     end
 
-    context "lists" do
-      shared_context "RDFa rendering" do
-        let :graph do
-          parse(turtle, :format => :ttl)
-        end
-
-        subject :html do
-          @graph = graph
-          serialize(:haml_options => {:ugly => false})
-        end
+    context "booleans" do
+      let :turtle do
+        %q{
+            @prefix lc: <http://lrdesign.com/vocabularies/logical-construct#> .
+            <http://localhost:8778/needs/one> <lc:resolved> true .
+        }
       end
 
+      include_context "RDFa rendering"
 
+      let :serialize_options do
+        { :base_uri => RDF::URI.new("http://localhost:8778/needs/one") }
+      end
+
+      it { should have_xpath( "//div/div[@class='property']/span[@datatype='xsd:boolean']/text()", "true") }
+    end
+
+    context "lists" do
       context "empty list" do
         let :turtle do
           %q(

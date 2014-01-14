@@ -53,7 +53,7 @@ module RoadForest::MediaType
 
       attr_accessor :heading_predicates
 
-      attr_accessor :prefixes, :base_uri, :lang, :standard_prefixes, :graph, :titles, :doc_title
+      attr_accessor :prefixes, :base_uri, :lang, :standard_prefixes, :graph, :titles, :doc_title, :graph_name
       attr_accessor :template_handler
       attr_reader :debug
 
@@ -62,6 +62,7 @@ module RoadForest::MediaType
       def initialize(graph, debug=nil)
         @debug = debug
         @graph = graph
+        @graph_name = nil
         @decoration_set = DecorationSet.new
         @render_stack = []
 
@@ -211,7 +212,7 @@ module RoadForest::MediaType
       # @return [ignored]
       def preprocess_statement(statement)
         #add_debug {"preprocess: #{statement.inspect}"}
-        return unless statement.context.nil?
+        return unless statement.context == graph_name
         bump_reference(statement.subject)
         bump_reference(statement.object)
         @subjects[statement.subject] = true
