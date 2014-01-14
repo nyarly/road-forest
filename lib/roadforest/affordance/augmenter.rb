@@ -25,6 +25,8 @@ module RoadForest
             end
           end
         end
+
+        augmenting.target_graph
       end
     end
 
@@ -53,7 +55,19 @@ module RoadForest
         if term.resource.allowed_methods.include?("PUT")
           node = ::RDF::Node.new
           yield [node, ::RDF.type, Af.Update]
-          yield [node, Af.target, term]
+          yield [node, Af.target, term.uri]
+        end
+      end
+    end
+
+    class Create < Augmentation
+      register :create
+
+      def apply(term)
+        if term.resource.allowed_methods.include?("POST")
+          node = ::RDF::Node.new
+          yield [node, ::RDF.type, Af.Create]
+          yield [node, Af.target, term.uri]
         end
       end
     end

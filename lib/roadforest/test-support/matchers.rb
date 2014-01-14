@@ -2,6 +2,9 @@ module RoadForest
   module Testing
     class MatchesQuery
       def initialize(pattern = nil, &block)
+        if pattern.nil? and block.nil?
+          raise "Matches query (e.g. should match_query) created with no patterns: probably used a do block..."
+        end
         pattern ||= []
         if Hash === pattern
           pattern = [pattern]
