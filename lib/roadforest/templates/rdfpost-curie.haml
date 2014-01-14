@@ -1,0 +1,6 @@
+- if reduced?
+  - unless prefix.empty?
+    %input{type: "hidden", name: "#{kind}n", value: prefix}
+  %input{type: "hidden", name: "#{kind}v", value: suffix}
+- else
+  %input{type: "hidden", name: "#{kind}u", value: uri}

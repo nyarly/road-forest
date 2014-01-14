@@ -57,9 +57,13 @@ module RoadForest::MediaType
       attr_accessor :template_handler
       attr_reader :debug
 
+      attr_reader :decoration_set
+
       def initialize(graph, debug=nil)
         @debug = debug
         @graph = graph
+        @decoration_set = DecorationSet.new
+        @render_stack = []
 
         reset
 
@@ -283,6 +287,8 @@ module RoadForest::MediaType
       end
 
       def render(context)
+        #puts "\n#{__FILE__.sub(/^#{Dir.pwd}/,'')}:#{__LINE__} =>
+        ##{context.class.inspect}"
         add_debug "render"
         if context.render_checked
           return ""
@@ -292,9 +298,14 @@ module RoadForest::MediaType
           add_debug{ "template: #{template.file}" }
           add_debug{ "context: #{context.inspect}"}
 
-          template.render(context) do |item|
-            context.yielded(item)
-          end.sub(/\n\Z/,'')
+          begin
+            @render_stack.push context
+            template.render(context) do |item|
+              context.yielded(item)
+            end.sub(/\n\Z/,'')
+          ensure
+            @render_stack.pop
+          end
         end
       end
 
@@ -320,41 +331,73 @@ module RoadForest::MediaType
         properties
       end
 
-      def setup_env(env)
-        env.heading_predicates = heading_predicates
-        env.lang = lang
-      end
-
-      def decorate_env(env)
-        EnvironmentDecorator.decoration_for(env)
-      end
-
       def document_env
-        env = DocumentEnvironment.new(self)
-        setup_env(env)
-        env.subject_terms = @ordered_subjects
-        env.title = doc_title
-        env.prefixes = prefixes
-        env.lang = lang
-        env.base = base_uri
-        env = decorate_env(env)
-        env
+        build_env(DocumentEnvironment) do |env|
+          env.subject_terms = @ordered_subjects
+          env.title = doc_title
+          env.prefixes = prefixes
+          env.lang = lang
+          env.base = base_uri
+        end
       end
 
       def subject_env(subject)
         return unless @subjects.include?(subject)
         properties = properties_for_subject(subject)
 
-        env = SubjectEnvironment.new(self)
-        setup_env(env)
-        env.base = base_uri
-        env.predicate_terms = order_properties(properties)
-        env.property_objects = properties
-        env.subject = subject
-        env.typeof = type_of(properties.delete(RDF.type.to_s), subject)
+        build_env(SubjectEnvironment) do |env|
+          env.base = base_uri
+          env.predicate_terms = order_properties(properties)
+          env.property_objects = properties
+          env.subject = subject
+          env.typeof = type_of(properties.delete(RDF.type.to_s), subject)
+        end
+      end
 
-        env = decorate_env(env)
-        env
+      def simple_property_env(predicate, objects)
+        return nil if objects.to_a.empty?
+
+        build_env(PropertyEnvironment) do |env|
+          env.object_terms = objects
+          env.predicate = predicate
+          env.inlist = nil
+        end
+      end
+
+      def build_env(klass)
+        env = klass.new(self)
+        env.heading_predicates = heading_predicates
+        env.lang = lang
+        env.parent = @render_stack.last
+        yield(env)
+        return decoration_set.decoration_for(env)
+      end
+
+      def object_env(predicate, object)
+        subj = subject_env(object)
+        unless subj.nil?
+          subj.rel = get_curie(predicate)
+          return subj
+        end
+
+        env_klass =
+          if get_curie(object) == 'rdf:nil'
+            NilObjectEnvironment
+          elsif object.node?
+            NodeObjectEnvironment
+          elsif object.uri?
+            UriObjectEnvironment
+          elsif object.datatype == RDF.XMLLiteral
+            XMLLiteralObjectEnvironment
+          else
+            ObjectEnvironment
+          end
+
+        build_env(env_klass) do |env|
+          env.predicate = predicate
+          env.object = object
+          env.inlist = nil
+        end
       end
 
       def list_property_envs(predicate, list_objects)
@@ -368,47 +411,6 @@ module RoadForest::MediaType
           env.inlist = "true"
           env
         end
-      end
-
-      def simple_property_env(predicate, objects)
-        return nil if objects.to_a.empty?
-
-        env = PropertyEnvironment.new(self)
-        setup_env(env)
-        env.object_terms = objects
-        env.predicate = predicate
-        env.inlist = nil
-
-        env = decorate_env(env)
-        env
-      end
-
-      def object_env(predicate, object)
-        subj = subject_env(object)
-        unless subj.nil?
-          subj.rel = get_curie(predicate)
-          return subj
-        end
-
-        env =
-          if get_curie(object) == 'rdf:nil'
-            NilObjectEnvironment.new(self)
-          elsif object.node?
-            NodeObjectEnvironment.new(self)
-          elsif object.uri?
-            UriObjectEnvironment.new(self)
-          elsif object.datatype == RDF.XMLLiteral
-            XMLLiteralObjectEnvironment.new(self)
-          else
-            ObjectEnvironment.new(self)
-          end
-        setup_env(env)
-        env.predicate = predicate
-        env.object = object
-        env.inlist = nil
-        env = decorate_env(env)
-
-        env
       end
 
       def render_document

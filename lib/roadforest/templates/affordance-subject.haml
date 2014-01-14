@@ -1,11 +1,9 @@
-/ Affordance subject
 - if typeof
   %span.type!= typeof
-%input{type: "hidden", name: "rdf"}
-- prefixes.each do |name, target|
-  - unless name.nil? or name.empty?
-    %input{type: "hidden", name: "n"}= name
-  %input{type: "hidden", name: "v"}=target
+
+= rdfpost_curie("s", subject)
 
 - predicates.each do |predicate|
   != yield(predicate)
+- predicate_nodes.each do |subject|
+  %div{subject.attrs}= yield subject

@@ -97,6 +97,18 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
 
   describe "#buffer" do
     context "an affordanced graph" do
+      #Needed tests
+      #  3 levels nesting of subject pred subject pred subject (tricky in terms
+      #  of RDFPOST repetition) Each subject needs literal terms
+      #
+      #Non-afforded subject, property with afforded subject
+      #  (Currently, forms are only produced by document)
+      #
+      #Produce www-form-encoded response based on the form, parse with RDFPOST,
+      #confirm identical (or close, b/c forms etc) to base graph. Capybara?
+      #Webmachine?
+
+
       let :base_graph do
         RDF::Repository.new.tap do |graph|
           graph << [EX.a, EX.b, "foo"]

@@ -1,6 +1,6 @@
 require 'roadforest/affordance/augmenter'
 require 'roadforest/model'
-require 'roadforest/application/dispatcher'
+require 'roadforest/application'
 
 describe RoadForest::Affordance::Augmenter do
   class TestModel < RoadForest::RDFModel
@@ -13,7 +13,7 @@ describe RoadForest::Affordance::Augmenter do
   end
 
   let :application do
-    double(RoadForest::Application).tap do |app|
+    double("RoadForest::Application").tap do |app|
       app.stub(:services).and_return(service_host)
     end
   end

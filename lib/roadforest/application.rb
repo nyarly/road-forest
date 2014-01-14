@@ -36,8 +36,6 @@ module RoadForest
     def services=(service_host)
       @services = service_host
       service_host.application = self
-      @services.canonical_host = canonical_host
-      @services.router = PathProvider.new(@dispatcher)
     end
   end
 end

@@ -4,17 +4,13 @@ module RoadForest::MediaType
     class PropertyEnvironment < RenderEnvironment
       attr_accessor :object_terms, :predicate, :inlist
 
-      def yielded(item)
-        @_engine.render(item)
-      end
-
       def objects
         enum_for(:each_object)
       end
 
       def each_object
         object_terms.each do |term|
-          env = @_engine.object_env(predicate, term)
+          env = object_env(predicate, term)
           env.inlist = inlist
           yield(env)
         end

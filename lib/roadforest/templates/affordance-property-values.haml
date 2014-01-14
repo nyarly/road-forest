@@ -1,8 +1,11 @@
 %div.property
-  - unless curie_prefix.empty?
-    %input{type: "hidden", name: "pn", value: curie_prefix}
-  %input{type: "hidden", name: "pv", value: curie_suffix}
+  = rdfpost_curie("p", predicate)
   - objects.each do |object|
-    %label{object.label_attrs}
-      = get_predicate_name(predicate)
-      %input{object.input_attrs(yield(object))}
+    - if object.is_subject?
+      = rdfpost_curie("o", object.subject)
+    - elsif object.attrs.empty?
+      = yield(object)
+    - else
+      %label{object.label_attrs}
+        = get_predicate_name(predicate)
+        %input{object.input_attrs(yield(object))}

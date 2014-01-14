@@ -82,6 +82,19 @@ module RoadForest
 
   module MediaType
     class RDFaWriter
+      class DecorationSet
+        def initialize
+          @names = EnvironmentDecorator.all_names
+        end
+        attr_accessor :names
+
+        def decoration_for(env)
+          names.inject(env) do |env, name|
+            EnvironmentDecorator[name].perhaps_decorate(env)
+          end
+        end
+      end
+
       class EnvironmentDecorator
         extend Utility::ClassRegistry::Registrar
 
@@ -114,11 +127,6 @@ module RoadForest
             end
           end
 
-          def decoration_for(env)
-            all_names.inject(env) do |env, name|
-              get(name).perhaps_decorate(env)
-            end
-          end
         end
 
         def initialize(env)
@@ -129,7 +137,40 @@ module RoadForest
         def setup
         end
 
+        def like_a?(klass)
+          is_a?(klass) || _decorated_.like_a?(klass)
+        end
+
         attr_reader :_decorated_
+      end
+
+      class RDFPostCurie < RenderEnvironment
+        def initialize(engine, kind, uri)
+          super(engine)
+          @kind, @uri = kind, uri
+        end
+
+        attr_reader :kind, :uri
+
+        def curie
+          @curie ||= get_curie(uri)
+        end
+
+        def reduced?
+          @curie != uri
+        end
+
+        def prefix
+          @prefix ||= curie.split(":").first
+        end
+
+        def suffix
+          @suffix ||= curie.split(":").last
+        end
+
+        def template_kinds
+          %w{rdfpost-curie}
+        end
       end
 
       class AffordanceDecorator < EnvironmentDecorator
@@ -142,6 +183,12 @@ module RoadForest
 
         def affordance?
           true
+        end
+
+        def rdfpost_curie(kind, uri)
+          curie = RDFPostCurie.new(_engine, kind, uri)
+
+          _engine.render(curie)
         end
 
         def template_kinds
@@ -184,11 +231,30 @@ module RoadForest
         decorates SubjectEnvironment
 
         def self.can_decorate?(env)
-          (env._base_env_.class <= SubjectEnvironment) &&
-            (
-              [:Update, :Remove, :Create].find do |type|
-              affordance_type_in_graph?(env.subject, type, env._engine.graph)
+          return false unless env._base_env_.class <= SubjectEnvironment
+          return false unless env.parent.like_a? AffordanceDecorator
+
+          return (
+            [:Update, :Remove, :Create].find do |type|
+            affordance_type_in_graph?(env.subject, type, env._engine.graph)
             end || parameterized_navigation_affordance_in_graph?(env.subject, env._engine.graph))
+        end
+
+        def predicate_nodes
+          @predicate_nodes ||=
+            begin
+              [].tap do |nodes|
+                each_predicate do |pred|
+                  pred.each_object do |object|
+                    subj = _engine.subject_env(object)
+                    next if subj.nil?
+                    subj.rel = get_curie(pred.predicate)
+                    nodes << subj
+                  end
+                end
+              end
+            end
+          @predicate_nodes.enum_for(:each)
         end
 
         def prefixes
@@ -205,17 +271,20 @@ module RoadForest
       class PropertyAffordanceDecorator < AffordanceDecorator
         decorates PropertyEnvironment
 
-        def curie_prefix
-          @curie_prefix ||= get_curie(predicate).split(":").first
+        def self.can_decorate?(env)
+          return false unless env._base_env_.class <= PropertyEnvironment
+          return false unless env.parent.like_a? AffordanceDecorator
         end
 
-        def curie_suffix
-          @curie_suffix ||= get_curie(predicate).split(":").last
-        end
       end
 
       class ObjectAffordanceDecorator < AffordanceDecorator
         decorates ObjectEnvironment
+
+        def self.can_decorate?(env)
+          return false unless env._base_env_.class <= ObjectEnvironment
+          return false unless env.parent.like_a? AffordanceDecorator
+        end
 
         def label_attrs
           {}

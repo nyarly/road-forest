@@ -65,6 +65,7 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
     templates.haml_options = options[:haml_options]
 
     engine = RoadForest::MediaType::RDFaWriter::RenderEngine.new(@graph, options[:debug]) do |engine|
+      #engine.decoration_set.names.clear
       engine.template_handler = templates
       engine.base_uri = base_uri
       engine.lang = options[:lang]
@@ -100,9 +101,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:prefixes => {:dc => "http://purl.org/dc/terms/"})
       end
 
-      specify { subject.should have_xpath("/html/@prefix", %r(dc: http://purl.org/dc/terms/), @debug)}
-      specify { subject.should have_xpath("/html/@prefix", %r(ex: http://example/), @debug)}
-      specify { subject.should have_xpath("/html/@prefix", %r(ex:), @debug)}
+      it { should have_xpath("/html/@prefix", %r(dc: http://purl.org/dc/terms/), @debug)}
+      it { should have_xpath("/html/@prefix", %r(ex: http://example/), @debug)}
+      it { should have_xpath("/html/@prefix", %r(ex:), @debug)}
     end
 
     context "plain literal" do
@@ -111,15 +112,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:haml_options => {:ugly => false})
       end
 
-      {
-        "/html/body/div/@resource" => "ex:a",
-        "//div[@class='property']/span[@property]/@property" => "ex:b",
-        "//div[@class='property']/span[@property]/text()" => "foo",
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "/html/body/div/@resource" , "ex:a" ) }
+      it { should have_xpath( "//div[@class='property']/span[@property]/@property" , "ex:b" ) }
+      it { should have_xpath( "//div[@class='property']/span[@property]/text()" , "foo" ) }
     end
 
     context "dc:title" do
@@ -128,16 +123,10 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:prefixes => {:dc => RDF::DC.to_s})
       end
 
-      {
-        "/html/head/title/text()" => "foo",
-        "/html/body/div/@resource" => "ex:a",
-        "/html/body/div/h1/@property" => "dc:title",
-        "/html/body/div/h1/text()" => "foo",
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "/html/head/title/text()" , "foo" ) }
+      it { should have_xpath( "/html/body/div/@resource" , "ex:a" ) }
+      it { should have_xpath( "/html/body/div/h1/@property" , "dc:title" ) }
+      it { should have_xpath( "/html/body/div/h1/text()" , "foo" ) }
     end
 
     context "typed resources" do
@@ -147,14 +136,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "/html/body/div/@resource" => "ex:a",
-          "/html/body/div/@typeof" => "ex:Type",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/body/div/@resource" , "ex:a" ) }
+        it { should have_xpath( "/html/body/div/@typeof" , "ex:Type" ) }
       end
 
       context "resource with two types" do
@@ -164,14 +147,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "/html/body/div/@resource" => "ex:a",
-          "/html/body/div/@typeof" => "ex:t1 ex:t2",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/body/div/@resource" , "ex:a" ) }
+        it { should have_xpath( "/html/body/div/@typeof" , "ex:t1 ex:t2" ) }
       end
     end
 
@@ -182,14 +159,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:prefixes => {:dc => "http://purl.org/dc/terms/"})
         end
 
-        {
-          "/html/body/div/h1/@property" => "dc:title",
-          "/html/body/div/h1/@lang" => "en",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/body/div/h1/@property" , "dc:title" ) }
+        it { should have_xpath( "/html/body/div/h1/@lang" , "en" ) }
       end
 
       context "literal with language and same default language" do
@@ -198,14 +169,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:lang => :en)
         end
 
-        {
-          "/html/@lang" => "en",
-          "/html/body/div/h1/@lang" => false,
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/@lang" , "en" ) }
+        it { should have_xpath( "/html/body/div/h1/@lang" , false ) }
       end
 
       context "literal with language and different default language" do
@@ -214,14 +179,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:lang => :de)
         end
 
-        {
-          "/html/@lang" => "de",
-          "/html/body/div/h1/@lang" => "en",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/@lang" , "de" ) }
+        it { should have_xpath( "/html/body/div/h1/@lang" , "en" ) }
       end
 
       context "property and rel serialize to different elements" do
@@ -231,14 +190,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize
         end
 
-        {
-          "/html/body/div/div/ul/li[@property='rdf:value']/text()" => "foo",
-          "/html/body/div/div/ul/li/a[@property='rdf:value']/@href" => EX.b.to_s,
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "/html/body/div/div/ul/li[@property='rdf:value']/text()" , "foo" ) }
+        it { should have_xpath( "/html/body/div/div/ul/li/a[@property='rdf:value']/@href" , EX.b.to_s ) }
       end
     end
 
@@ -249,16 +202,10 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => "xsd:date",
-          "//span[@property]/@content" => "2011-03-18",
-          "//span[@property]/text()" => "Friday, 18 March 2011",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , "xsd:date" ) }
+        it { should have_xpath( "//span[@property]/@content" , "2011-03-18" ) }
+        it { should have_xpath( "//span[@property]/text()" , "Friday, 18 March 2011") }
       end
 
       context "xsd:time" do
@@ -267,16 +214,10 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => "xsd:time",
-          "//span[@property]/@content" => "12:34:56",
-          "//span[@property]/text()" => /12:34:56/,
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , "xsd:time" ) }
+        it { should have_xpath( "//span[@property]/@content" , "12:34:56" ) }
+        it { should have_xpath( "//span[@property]/text()" , /12:34:56/ ) }
       end
 
       context "xsd:dateTime" do
@@ -285,16 +226,10 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => "xsd:dateTime",
-          "//span[@property]/@content" => "2011-03-18T12:34:56",
-          "//span[@property]/text()" => /12:34:56 \w+ on Friday, 18 March 2011/,
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , "xsd:dateTime" ) }
+        it { should have_xpath( "//span[@property]/@content" , "2011-03-18T12:34:56" ) }
+        it { should have_xpath( "//span[@property]/text()" , /12:34:56 \w+ on Friday, 18 March 2011/) }
       end
 
       context "rdf:XMLLiteral" do
@@ -303,15 +238,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => "rdf:XMLLiteral",
-          "//span[@property]" => %r(<span [^>]+>E = mc<sup>2</sup>: The Most Urgent Problem of Our Time<\/span>),
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , "rdf:XMLLiteral" ) }
+        it { should have_xpath( "//span[@property]", %r(<span [^>]+>E = mc<sup>2</sup>: The Most Urgent Problem of Our Time<\/span>)) }
       end
 
       context "xsd:string" do
@@ -320,15 +249,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => false, # xsd:string implied in RDF 1.1
-          "//span[@property]/text()" => "Albert Einstein",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , false ) } # xsd:string implied in RDF 1.1
+        it { should have_xpath( "//span[@property]/text()" , "Albert Einstein" ) }
       end
 
       context "unknown" do
@@ -337,15 +260,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
           serialize(:haml_options => {:ugly => false})
         end
 
-        {
-          "//span[@property]/@property" => "ex:b",
-          "//span[@property]/@datatype" => "ex:unknown",
-          "//span[@property]/text()" => "Albert Einstein",
-        }.each do |path, value|
-          it "returns #{value.inspect} for xpath #{path}" do
-            subject.should have_xpath(path, value, @debug)
-          end
-        end
+        it { should have_xpath( "//span[@property]/@property" , "ex:b" ) }
+        it { should have_xpath( "//span[@property]/@datatype" , "ex:unknown" ) }
+        it { should have_xpath( "//span[@property]/text()" , "Albert Einstein" ) }
       end
     end
 
@@ -356,14 +273,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:haml_options => {:ugly => false})
       end
 
-      {
-        "//ul/li[1][@property='ex:b']/text()" => "c",
-        "//ul/li[2][@property='ex:b']/text()" => "d",
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "//ul/li[1][@property='ex:b']/text()" , "c" ) }
+      it { should have_xpath( "//ul/li[2][@property='ex:b']/text()" , "d" ) }
     end
 
     context "resource objects" do
@@ -372,15 +283,9 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:haml_options => {:ugly => false})
       end
 
-      {
-        "//div/@resource" => "ex:a",
-        "//a/@property" => "ex:b",
-        "//a/@href" => EX.c.to_s,
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "//div/@resource" , "ex:a" ) }
+      it { should have_xpath( "//a/@property" , "ex:b" ) }
+      it { should have_xpath( "//a/@href" , EX.c.to_s ) }
     end
 
     context "multi-valued resource objects" do
@@ -390,107 +295,143 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:haml_options => {:ugly => false})
       end
 
-      {
-        "//div/@resource" => "ex:a",
-        "//ul/li[1]/a[@property='ex:b']/@href" => EX.c.to_s,
-        "//ul/li[2]/a[@property='ex:b']/@href" => EX.d.to_s,
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "//div/@resource" , "ex:a" ) }
+      it { should have_xpath( "//ul/li[1]/a[@property='ex:b']/@href" , EX.c.to_s ) }
+      it { should have_xpath( "//ul/li[2]/a[@property='ex:b']/@href" , EX.d.to_s ) }
     end
 
     context "lists" do
-      {
-        "empty list" => [
+      shared_context "RDFa rendering" do
+        let :graph do
+          parse(turtle, :format => :ttl)
+        end
+
+        subject :html do
+          @graph = graph
+          serialize(:haml_options => {:ugly => false})
+        end
+      end
+
+
+      context "empty list" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value () .
-          ),
-          {
-            "//div/span[@inlist]/@rel" => 'rdf:value',
-            "//div/span[@inlist]/text()" => false,
-          }
-        ],
-        "literal" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div/span[@inlist]/@rel" , 'rdf:value' ) }
+        it { should have_xpath( "//div/span[@inlist]/text()" , false ) }
+      end
+
+
+      context "literal" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value ("Foo") .
-          ),
-          {
-            "//div/span[@inlist]/@property" => 'rdf:value',
-            "//div/span[@inlist]/text()" => 'Foo',
-          }
-        ],
-        "IRI" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div/span[@inlist]/@property" , 'rdf:value' ) }
+        it { should have_xpath( "//div/span[@inlist]/text()" , 'Foo' ) }
+      end
+
+
+      context "IRI" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value (<foo>) .
-          ),
-          {
-            "//div/a[@inlist]/@property" => 'rdf:value',
-            "//div/a[@inlist]/@href" => 'foo',
-          }
-        ],
-        "implicit list with hetrogenious membership" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div/a[@inlist]/@property" , 'rdf:value' ) }
+        it { should have_xpath( "//div/a[@inlist]/@href" , 'foo' ) }
+      end
+
+      context "implicit list with hetrogenious membership" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value ("Foo" <foo>) .
-          ),
-          {
-            "//ul/li[1][@inlist]/@property" => 'rdf:value',
-            "//ul/li[1][@inlist]/text()" => 'Foo',
-            "//ul/li[2]/a[@inlist]/@property" => 'rdf:value',
-            "//ul/li[2]/a[@inlist]/@href" => 'foo',
-          }
-        ],
-        "property with list and literal" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//ul/li[1][@inlist]/@property" , 'rdf:value' ) }
+        it { should have_xpath( "//ul/li[1][@inlist]/text()" , 'Foo' ) }
+        it { should have_xpath( "//ul/li[2]/a[@inlist]/@property" , 'rdf:value' ) }
+        it { should have_xpath( "//ul/li[2]/a[@inlist]/@href" , 'foo' ) }
+      end
+
+      context  "property with list and literal" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value ("Foo" "Bar"), "Baz" .
-          ),
-          {
-            "//div[@class='property']/span[@property='rdf:value']/text()" => "Baz",
-            "//div[@class='property']/ul/li[1][@inlist][@property='rdf:value']/text()" => 'Foo',
-            "//div[@class='property']/ul/li[2][@inlist][@property='rdf:value']/text()" => 'Bar',
-          }
-        ],
-        "multiple rel items" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div[@class='property']/span[@property='rdf:value']/text()" , "Baz" ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[1][@inlist][@property='rdf:value']/text()" , 'Foo' ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[2][@inlist][@property='rdf:value']/text()" , 'Bar' ) }
+      end
+
+      context "multiple rel items" do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <> rdf:value (<foo> <bar>) .
-          ),
-          {
-            "//div[@class='property']/ul/li[1]/a[@inlist][@property='rdf:value']/@href" => 'foo',
-            "//div[@class='property']/ul/li[2]/a[@inlist][@property='rdf:value']/@href" => 'bar',
-          }
-        ],
-        "multiple collections" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div[@class='property']/ul/li[1]/a[@inlist][@property='rdf:value']/@href" , 'foo' ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[2]/a[@inlist][@property='rdf:value']/@href" , 'bar' ) }
+      end
+
+      context "multiple collections", :pending => true do
+        let :turtle do
           %q(
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
             <foo> rdf:value ("Foo"), ("Bar") .
-          ),
-          {
-            "//div[@class='property']/ul/li[1][@inlist][@property='rdf:value']/text()" => 'Foo',
-            "//div[@class='property']/ul/li[2][@inlist][@property='rdf:value']/text()" => 'Bar',
-          }
-        ],
-        "issue 14" => [
+          )
+        end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div[@class='property']/ul/li[1][@inlist][@property='rdf:value']/text()" , 'Foo' ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[2][@inlist][@property='rdf:value']/text()" , 'Bar' ) }
+      end
+
+      context "issue 14" do
+        let :turtle do
           %q(
             @base <http://example/> .
             @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -500,22 +441,14 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
             <needs/one> rdfs:label "one" .
             <needs/three> rdfs:label "three" .
             <needs/two> rdfs:label "two" .
-          ),
-          {
-            "//div[@class='property']/ul/li[1][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" => 'one',
-            "//div[@class='property']/ul/li[2][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" => 'two',
-            "//div[@class='property']/ul/li[3][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" => 'three',
-          }
-        ]
-      }.each do |test, (input, result)|
-        it test do
-          pending("Serializing multiple lists") if test == "multiple collections"
-          @graph = parse(input, :format => :ttl)
-          html = serialize(:haml_options => {:ugly => false})
-          result.each do |path, value|
-            html.should have_xpath(path, value, @debug)
-          end
+          )
         end
+
+        include_context "RDFa rendering"
+
+        it { should have_xpath( "//div[@class='property']/ul/li[1][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" , 'one' ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[2][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" , 'two' ) }
+        it { should have_xpath( "//div[@class='property']/ul/li[3][@inlist][@rel='rdf:value']/h1[@property='rdfs:label']/text()" , 'three' ) }
       end
     end
 
@@ -526,17 +459,11 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         serialize(:haml_options => {:ugly => false})
       end
 
-      {
-        "/html/body/div/@resource" => "ex:a",
-        "//div[@resource='ex:a']/div[@class='property']/div[@rel]/@rel" => "ex:b",
-        "//div[@rel]/@resource" => "ex:c",
-        "//div[@rel]/div[@class='property']/a/@href" => EX.e.to_s,
-        "//div[@rel]/div[@class='property']/a/@property" => "ex:d",
-      }.each do |path, value|
-        it "returns #{value.inspect} for xpath #{path}" do
-          subject.should have_xpath(path, value, @debug)
-        end
-      end
+      it { should have_xpath( "/html/body/div/@resource" , "ex:a" ) }
+      it { should have_xpath( "//div[@resource='ex:a']/div[@class='property']/div[@rel]/@rel" , "ex:b" ) }
+      it { should have_xpath( "//div[@rel]/@resource" , "ex:c" ) }
+      it { should have_xpath( "//div[@rel]/div[@class='property']/a/@href" , EX.e.to_s ) }
+      it { should have_xpath( "//div[@rel]/div[@class='property']/a/@property" , "ex:d" ) }
     end
 
     unless ENV['CI'] # Not for continuous integration

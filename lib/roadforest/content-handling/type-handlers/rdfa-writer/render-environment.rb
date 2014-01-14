@@ -2,7 +2,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer'
 module RoadForest::MediaType
   class RDFaWriter
     class RenderEnvironment
-      attr_accessor :heading_predicates, :lang
+      attr_accessor :heading_predicates, :lang, :parent
       attr_reader :_engine
 
       def initialize(engine)
@@ -23,25 +23,9 @@ module RoadForest::MediaType
           "#{name}=#{instance_variable_get(name).inspect}"
         end.compact.join(" ")}>"
       end
-      # Display a subject.
-      #
-      # If the Haml template contains an entry matching the subject's rdf:type URI, that entry will be used as the template for this subject and it's properties.
-      #
-      # @example Displays a subject as a Resource Definition:
-      #     <div typeof="rdfs:Resource" about="http://example.com/resource">
-      #       <h1 property="dc:title">label</h1>
-      #       <ul>
-      #         <li content="2009-04-30T06:15:51Z" property="dc:created">2009-04-30T06:15:51+00:00</li>
-      #       </ul>
-      #     </div>
-      #
-      # @param [RDF::Resource] subject
-      # @param [Hash{Symbol => Object}] options
-      # @option options [RDF::Resource] :rel (nil)
-      #   Optional @rel property
-      # @return [String]
-      def subject(subject, &block)
-        @_engine.render_subject(subject, &block)
+
+      def like_a?(klass)
+        is_a?(klass)
       end
 
       def is_subject?
@@ -54,6 +38,26 @@ module RoadForest::MediaType
 
       def render_checked
         false
+      end
+
+      def yielded(item)
+        _engine.render(item)
+      end
+
+      def subject_env(term)
+        _engine.subject_env(term)
+      end
+
+      def simple_property_env(predicate, nonlists)
+        _engine.simple_property_env(predicate, nonlists)
+      end
+
+      def list_property_envs(predicate, lists)
+        _engine.list_property_envs(predicate, lists)
+      end
+
+      def object_env(predicate, term)
+        _engine.object_env(predicate, term)
       end
 
       # Haml rendering helper. Return CURIE for the literal datatype, if the
@@ -74,7 +78,7 @@ module RoadForest::MediaType
       # @raise [RDF::WriterError]
       def get_lang(literal)
         raise RDF::WriterError, "Getting datatype CURIE for #{literal.inspect}, which must be a literal" unless literal.is_a?(RDF::Literal)
-        literal.language if literal.literal? && literal.language && literal.language.to_s != @_engine.lang.to_s
+        literal.language if literal.literal? && literal.language && literal.language.to_s != _engine.lang.to_s
       end
 
       # Haml rendering helper. Data to be added to a @content value
@@ -128,7 +132,7 @@ module RoadForest::MediaType
       # @return [String] value to use to identify URI
       # @raise [RDF::WriterError]
       def get_curie(resource)
-        @_engine.get_curie(resource)
+        _engine.get_curie(resource)
       end
 
       ##

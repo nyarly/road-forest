@@ -11,6 +11,12 @@
     - subjects.each do |subject|
       - if subject.respond_to? :affordance?
         %form{subject.attrs}
+          %input{type: "hidden", name: "rdf"}
+          - prefixes.each do |name, target|
+            - unless name.nil? or name.empty?
+              %input{type: "hidden", name: "n"}= name
+            %input{type: "hidden", name: "v"}=target
+
           != yield(subject)
       - else
         %div{subject.attrs}

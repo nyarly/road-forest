@@ -3,9 +3,6 @@ module RoadForest::MediaType
   class RDFaWriter
     class DocumentEnvironment < RenderEnvironment
       attr_accessor :subject_terms, :title, :prefixes, :lang, :base
-      def yielded(item)
-        @_engine.render(item)
-      end
 
       def subjects
         enum_for(:each_subject_environment)
@@ -13,7 +10,7 @@ module RoadForest::MediaType
 
       def each_subject_environment
         subject_terms.each do |term|
-          yield @_engine.subject_env(term)
+          yield subject_env(term)
         end
       end
 
