@@ -24,9 +24,9 @@ describe RoadForest::RDF::FocusList do
   it "should add an item to graph" do
     list.append_node("#test")
 
-    graph.should match_query do |query|
+    graph.should match_query { |query|
       query.pattern(:subject => "urn:root#test")
-    end
+    }
   end
 
   it "should add several items to the graph" do

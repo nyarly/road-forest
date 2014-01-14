@@ -159,10 +159,10 @@ describe RoadForest::RemoteHost do
       end
 
       it "should extract data from server responses" do
-        server.should match_query do
-          pattern(:subject, [:lc, "path"], nil)
-          pattern(:subject, [:lc, "file"], nil)
-        end
+        server.should match_query {
+          pattern([:subject, [:lc, "path"], nil])
+          pattern([:subject, [:lc, "file"], nil])
+        }
       end
 
       it "should have transmitted data" do

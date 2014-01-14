@@ -83,6 +83,7 @@ Gem::Specification.new do |spec|
     lib/roadforest/http/keychain.rb
     lib/roadforest/http.rb
     lib/roadforest.rb
+    lib/roadforest/affordance/augmenter.rb
     lib/roadforest/content-handling/engine.rb
     lib/roadforest/content-handling/media-type.rb
     lib/roadforest/content-handling/handler-wrap.rb
@@ -98,6 +99,7 @@ Gem::Specification.new do |spec|
     lib/roadforest/content-handling/type-handlers/rdfa-writer/property-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/document-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/environment-decorator.rb
     lib/roadforest/content-handling/type-handlers/jsonld.rb
     lib/roadforest/templates/min/subject.haml
     lib/roadforest/templates/min/doc.haml
