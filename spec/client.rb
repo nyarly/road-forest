@@ -158,10 +158,11 @@ describe RoadForest::RemoteHost do
         @correct.should == 0
       end
 
-      it "should extract data from server responses" do
+      it "should extract data from server responses", :pending => "RemoteHost understanding RDF::Query" do
+        lc = FileManagementExample::Vocabulary::LC
         server.should match_query {
-          pattern([:subject, [:lc, "path"], nil])
-          pattern([:subject, [:lc, "file"], nil])
+          pattern([:subject, lc.path, nil])
+          pattern([:subject, lc.file, nil])
         }
       end
 

@@ -25,7 +25,7 @@ describe RoadForest::RDF::FocusList do
     list.append_node("#test")
 
     graph.should match_query { |query|
-      query.pattern(:subject => "urn:root#test")
+      query.pattern(:object => RDF::URI.new("urn:root#test"))
     }
   end
 
