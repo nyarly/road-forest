@@ -18,7 +18,7 @@ module RoadForest
       def augment(graph)
         augmenting = AugmentingProcess.new(graph)
 
-        augmenting.resources(router).each do |resource|
+        augmenting.subject_resources(router).each do |resource|
           augmentations.each do |augmentation|
             augmentation.apply(resource) do |statement|
               augmenting.target_graph << statement
@@ -123,12 +123,14 @@ module RoadForest
         @objects ||= base_graph.objects.select{|obj| ::RDF::URI === obj}
       end
 
-      def uris
-        @uris ||= subjects + objects
+      def subject_resources(router)
+        subjects.map do |uri|
+          LazyResource.new(uri, router)
+        end
       end
 
-      def resources(router)
-        uris.map do |uri|
+      def object_resources(router)
+        objects.map do |uri|
           LazyResource.new(uri, router)
         end
       end

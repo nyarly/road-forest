@@ -79,6 +79,16 @@ RSpec::Matchers.define :be_equivalent_graph do |expected, info|
     @actual.isomorphic_with?(@expected)# rescue false
   end
 
+  def dump_graph(graph)
+    graph.dump(@info.format, :standard_prefixes => true)
+  rescue
+    begin
+      graph.dump(:nquads, :standard_prefixes => true)
+    rescue
+      graph.inspect
+    end
+  end
+
   failure_message_for_should do |actual|
     info = @info.respond_to?(:about) ? @info.about : @info.inspect
     if @expected.is_a?(RDF::Graph) && @actual.size != @expected.size
@@ -91,8 +101,8 @@ RSpec::Matchers.define :be_equivalent_graph do |expected, info|
     "\n#{info + "\n" unless info.to_s.empty?}" +
     (@info.inputDocument ? "Input file: #{@info.inputDocument}\n" : "") +
     (@info.outputDocument ? "Output file: #{@info.outputDocument}\n" : "") +
-    "\nExpected:\n#{@expected.dump(@info.format, :standard_prefixes => true)}" +
-    "\nResults:\n#{@actual.dump(@info.format, :standard_prefixes => true)}" +
+    "\nExpected:\n#{dump_graph(@expected)}" +
+    "\nResults:\n#{dump_graph(@actual)}" +
     (@info.trace ? "\nDebug:\n#{@info.trace}" : "")
   end
 end

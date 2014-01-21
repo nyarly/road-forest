@@ -6,6 +6,8 @@ describe RoadForest::MediaType::Handlers::RDFPost do
     RoadForest::MediaType::Handlers::RDFPost.new
   end
 
+  #XXX Need tests for malformed graphs
+
   let :turtle_source do
     <<-EOT
 @prefix : <http://xmlns.com/foaf/0.1/> .

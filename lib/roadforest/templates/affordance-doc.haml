@@ -14,8 +14,8 @@
           %input{type: "hidden", name: "rdf"}
           - prefixes.each do |name, target|
             - unless name.nil? or name.empty?
-              %input{type: "hidden", name: "n"}= name
-            %input{type: "hidden", name: "v"}=target
+              %input{type: "hidden", name: "n", value: name}
+            %input{type: "hidden", name: "v", value: target}
 
           != yield(subject)
       - else

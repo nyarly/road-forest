@@ -40,6 +40,8 @@ GEM
       safe_yaml (~> 0.9.0)
     diff-lcs (1.2.5)
     docile (1.1.1)
+    domain_name (0.5.15)
+      unf (>= 0.0.5, < 1.0.0)
     ebnf (0.3.5)
       rdf
       sxp
@@ -51,6 +53,8 @@ GEM
     haml (4.0.4)
       tilt
     htmlentities (4.3.1)
+    http-cookie (1.0.2)
+      domain_name (~> 0.5)
     i18n (0.6.9)
     json (1.8.1)
     json-ld (1.0.8.1)
@@ -62,11 +66,23 @@ GEM
       rake (~> 10.0)
       tilt (> 0)
       valise (>= 0.9.1)
+    mechanize (2.7.3)
+      domain_name (~> 0.5, >= 0.5.1)
+      http-cookie (~> 1.0)
+      mime-types (~> 2.0)
+      net-http-digest_auth (~> 1.1, >= 1.1.1)
+      net-http-persistent (~> 2.5, >= 2.5.2)
+      nokogiri (~> 1.4)
+      ntlm-http (~> 0.1, >= 0.1.1)
+      webrobots (>= 0.0.9, < 0.2)
     mime-types (2.0)
     mini_portile (0.5.2)
     multi_json (1.8.4)
+    net-http-digest_auth (1.4)
+    net-http-persistent (2.9)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
+    ntlm-http (0.1.1)
     perftools.rb (2.0.1)
     rake (10.1.1)
     rdf (1.1.1)
@@ -104,6 +120,9 @@ GEM
       json (>= 1.1.1)
     thor (0.18.1)
     tilt (1.4.1)
+    unf (0.1.3)
+      unf_ext
+    unf_ext (0.0.6)
     valise (1.1.0)
     vcr (2.8.0)
     webmachine (1.2.2)
@@ -113,6 +132,7 @@ GEM
     webmock (1.16.1)
       addressable (>= 2.2.7)
       crack (>= 0.3.2)
+    webrobots (0.1.1)
     yard (0.8.7.3)
 
 PLATFORMS
@@ -122,6 +142,7 @@ DEPENDENCIES
   cadre
   corundum
   fuubar
+  mechanize
   perftools.rb
   rdf-isomorphic
   rdf-turtle
