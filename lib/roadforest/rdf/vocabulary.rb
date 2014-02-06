@@ -11,6 +11,7 @@ module RoadForest::RDF
   end
 
   class Af < ::RDF::StrictVocabulary("http://judsonlester.info/affordance#")
+
     # Class definitions
     property :Affordance, :comment =>
       %(Base class for all affordances)
@@ -24,20 +25,21 @@ module RoadForest::RDF
     property :Idempotent, :comment =>
       %(An affordance that will cause a change, but that can be
         repeated without further hazard)
+    property :LiteralTemplate
     property :Metadata, :comment =>
       %(There is extra metadata available about this resource)
     property :Mutate, :comment =>
       %(Triggering this affordance expresses a desire to make changes
         to a resource)
-    property :Navigation, :comment =>
+    property :Navigate, :comment =>
       %(A link to another resource. The assumption is that otherwise
         undescribed URLs have a navigation affordance)
     property :Null, :comment =>
       %(The provided affordance is null. i.e. not dereferenceable, no
         actions provided)
-    property :Parameter
     property :Remove, :comment =>
       %(Triggering this affordance is a request to delete the resource)
+    property :ResourceTemplate
     property :Safe, :comment =>
       %(A safe affordance - it is asserted that no change will be
         triggered by activating the affordance)
@@ -60,21 +62,33 @@ module RoadForest::RDF
         'Media-Type', 'Encoding' or 'EntityTag')
     property :controlValue
     property :controlledBy
-    property :parameterName
-    property :parameterRange
-    property :payload, :comment =>
-      %(Points to a the name of a named graph that describes the
-        possible payload of the affordance. Graph might need a
-        different entailment - allowing e.g. a blank node to be the
-        object of a property whose domain is Literal... i.e. only
-        using RDF entailment, not RDFS)
+    property :defaultValue
+    property :label
+    property :name
+    property :objectTemplate, :comment =>
+      %(Used to indicate that a resource or literal template can be
+        used as the property in a statement)
+    property :pattern, :comment =>
+      %(An IRITemplate \(RFC 5xxx\) that defines how the template is
+        rendered - implicitly, all the parameters of the template are
+        provided as a key, value set called param_list, so something
+        like \(?param_list*\) should work like an HTML action=GET form)
+    property :payload
+    property :predicateTemplate, :comment =>
+      %(Used to indicate that a resource template can be used as the
+        property in a statement)
+    property :range
+    property :statement
+    property :subjectTemplate, :comment =>
+      %(Used to indicate that a resource template can be used as the
+        subject in a statement)
     property :target, :comment =>
       %(Could be a templated URL, or a URL resource. If not a
         template, but the Affordance has one or more uriVariable
         properties, the implication is that the target resource should
         be used as the basis of a URI template by appending
         \(?name,other,...\) to the URI.)
-    property :uriVariable, :comment =>
+    property :var, :comment =>
       %(When the object is list, the members of the list should be
         Parameters, the the list order implies the order in which the
         parameters should be used)

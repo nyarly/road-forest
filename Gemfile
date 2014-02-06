@@ -7,6 +7,7 @@ gem 'rdf-turtle'
 gem 'perftools.rb'
 gem 'vcr'
 gem 'webmock'
+gem 'linkeddata'
 
 group :test do
   gem 'rdf-isomorphic'

@@ -186,6 +186,17 @@ describe "The full affordances flow" do
   #Non-afforded subject, property with afforded subject
   #  (Currently, forms are only produced by document)
 
+  #Proper affordances on parents and children
+  #
+  #Affordance payloads
+  #
+  #Parameterized navigations
+  #
+  #Embed affordances
+  #
+  #Re-routing + method support resources (i.e.
+  #  POST other/route/put -> PUT other/route )
+
   describe "simple updateable resource" do
     class TestModel < RoadForest::RDFModel
     end
@@ -205,6 +216,8 @@ describe "The full affordances flow" do
     let :affordance_graph do
       caff = ::RDF::Node.new(:caff)
       uaff = ::RDF::Node.new(:uaff)
+      naff = ::RDF::Node.new(:naff)
+      daff = ::RDF::Node.new(:daff)
       #payload = ::RDF::Node.new(:payload_for_a)
       #b_param = ::RDF::Node.new(:b_param)
 
@@ -213,6 +226,10 @@ describe "The full affordances flow" do
         graph << [caff, Af.target, EX.a]
         graph << [uaff, ::RDF.type, Af.Create]
         graph << [uaff, Af.target, EX.a]
+        graph << [daff, ::RDF.type, Af.Remove]
+        graph << [daff, Af.target, EX.a]
+        graph << [naff, ::RDF.type, Af.Navigate]
+        graph << [naff, Af.target, EX.a]
         #graph << [aff, Af.payload, payload]
         #graph << [EX.a, EX.b, b_param, payload]
         #graph << [b_param, ::RDF.type, Af.Parameter, payload]
@@ -239,14 +256,10 @@ describe "The full affordances flow" do
           pattern [:node, Af.target, EX.a]
         }
       end
-      it "should add Delete affordance"
-      it "should add Navigable affordance to child"
+      #it "should add Delete affordance"
+      #it "should add Navigable affordance to child"
     end
 
-    it_behaves_like "resubmitted RDFPOST" do
-      it {
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{rdfa}"
-        post_data.should == "something useful" }
-    end
+    it_behaves_like "resubmitted RDFPOST"
   end
 end

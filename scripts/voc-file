@@ -2,4 +2,7 @@
 require 'rdf/cli/vocab-loader'
 
 loader = RDF::VocabularyLoader.new
+puts "\n#{__FILE__}:#{__LINE__} => #{loader.inspect}"
+puts "\n#{__FILE__}:#{__LINE__} => #{ARGV.inspect}"
+puts "\n#{__FILE__}:#{__LINE__} => #{loader.method(:go).source_location.inspect}"
 loader.go(ARGV)

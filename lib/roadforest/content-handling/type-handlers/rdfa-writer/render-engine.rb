@@ -297,7 +297,7 @@ module RoadForest::MediaType
         template = find_environment_template(context)
         depth do
           add_debug{ "template: #{template.file}" }
-          add_debug{ "context: #{context.inspect}"}
+          add_debug{ "context: #{context.class.name}"}
 
           begin
             @render_stack.push context

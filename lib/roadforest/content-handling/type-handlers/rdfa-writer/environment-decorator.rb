@@ -12,7 +12,7 @@ module RoadForest
           Af.Safe,
           Af.Idempotent,
           Af.Unsafe,
-          Af.Navigation,
+          Af.Navigate,
           Af.Embed,
           Af.Metadata,
           Af.Update,
@@ -76,7 +76,8 @@ module RoadForest
     end
 
     def parameterized_navigation_affordance_in_graph?(node, graph)
-      query_matches(has_affordance(node, :Navigation) + payload_has_param(node), graph)
+      return false #to be implemented
+      query_matches(has_affordance(node, :Navigate) + payload_has_param(node), graph)
     end
   end
 
@@ -272,8 +273,9 @@ module RoadForest
         decorates PropertyEnvironment
 
         def self.can_decorate?(env)
-          return false unless env._base_env_.class <= PropertyEnvironment
-          return false unless env.parent.like_a? AffordanceDecorator
+          return false unless (env._base_env_.class <= PropertyEnvironment)
+          return false unless (env.parent.like_a? AffordanceDecorator)
+          return true
         end
 
       end
@@ -284,10 +286,17 @@ module RoadForest
         def self.can_decorate?(env)
           return false unless env._base_env_.class <= ObjectEnvironment
           return false unless env.parent.like_a? AffordanceDecorator
+          return true
         end
 
         def label_attrs
           {}
+        end
+
+        def type_uri
+          if object.literal? and object.datatype?
+            object.datatype
+          end
         end
 
         def input_attrs(value)

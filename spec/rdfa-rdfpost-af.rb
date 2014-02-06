@@ -149,6 +149,8 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
       it { should have_xpath('//form/@action', put_uri) }
       it { should have_xpath("//form[@action='#{put_uri}']/@method", "POST") }
       it { should have_xpath("//form[@action='#{put_uri}']/input[@type='hidden']/@name", "rdf") }
+      it { should have_xpath("//form[@action='#{put_uri}']//input[@name='pv']", true) }
+      it { should have_xpath("//form[@action='#{put_uri}']//input[@name='ol']", true) }
 
       it "should parse base to base_graph" do
         parse(subject, :format => :rdfa).should be_equivalent_graph(base_graph, :trace => debug)

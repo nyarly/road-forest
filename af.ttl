@@ -1,4 +1,4 @@
-@base <#http://judsonlester.info/affordance> .
+@base <http://judsonlester.info/affordance> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
@@ -13,14 +13,6 @@
   rdfs:subClassOf <#Affordance> ;
   rdfs:comment "A safe affordance - it is asserted that no change will be triggered by activating the affordance" .
 
-<#Navigation> a rdfs:Class ;
-  rdfs:subClassOf <#Safe> ;
-  rdfs:comment "A link to another resource. The assumption is that otherwise undescribed URLs have a navigation affordance" .
-
-<#Embed> a rdfs:Class ;
-  rdfs:subClassOf <#Safe> ;
-  rdfs:comment "A resource that should be properly displayed in-line rather than provided as a hyperlink" .
-
 <#Metadata> a rdfs:Class ;
   rdfs:subClassOf <#Safe> ;
   rdfs:comment "There is extra metadata available about this resource" .
@@ -28,6 +20,18 @@
 <#Idempotent> a rdfs:Class ;
   rdfs:subClassOf <#Affordance> ;
   rdfs:comment "An affordance that will cause a change, but that can be repeated without further hazard" .
+
+<#Unsafe> a rdfs:Class ;
+  rdfs:subClassOf <#Affordance> ;
+  rdfs:comment "Affordances whose effects cannot be simply modeled and should be triggered with care" .
+
+<#Navigate> a rdfs:Class ;
+  rdfs:subClassOf <#Safe> ;
+  rdfs:comment "A link to another resource. The assumption is that otherwise undescribed URLs have a navigation affordance" .
+
+<#Embed> a rdfs:Class ;
+  rdfs:subClassOf <#Safe> ;
+  rdfs:comment "A resource that should be properly displayed in-line rather than provided as a hyperlink" .
 
 <#Update> a rdfs:Class ;
   rdfs:subClassOf <#Idempotent> ;
@@ -37,23 +41,19 @@
   rdfs:subClassOf <#Idempotent> ;
   rdfs:comment "Triggering this affordance is a request to delete the resource" .
 
-<#Unsafe> a rdfs:Class ;
-  rdfs:subClassOf <#Affordance> ;
-  rdfs:comment "Affordances whose effects cannot be simply modeled and should be triggered with care" .
-
 <#Create> a rdfs:Class ;
   rdfs:subClassOf <#Unsafe> ;
   rdfs:comment """Triggering this affordance implies a request to create a new
   resource""" .
 
-#Consider: <#Append> - distinct from <#Create> in that the implication is
-#specifically to create a child (or otherwise related) resource to the target, where <#Create> might
-#specifically mean "create this resource" - review Fielding & 2616
-
 <#Mutate> a rdfs:Class ;
   rdfs:subClassOf <#Unsafe> ;
   rdfs:comment """Triggering this affordance expresses a desire to make changes
   to a resource""" .
+
+#Consider: <#Append> - distinct from <#Create> in that the implication is
+#specifically to create a child (or otherwise related) resource to the target, where <#Create> might
+#specifically mean "create this resource" - review Fielding & 2616
 
 # Controls
 
@@ -87,35 +87,73 @@
 <#target> a rdf:Property ;
   rdfs:domain <#Affordance> ;
   rdfs:range rdfs:Resource ;
-  rdfs:range rdfs:Literal ;
   rdfs:comment """Could be a templated URL, or a URL resource. If not a template,
   but the Affordance has one or more uriVariable properties, the implication is
   that the target resource should be used as the basis of a URI template by
   appending (?name,other,...) to the URI.""" .
 
-<#Parameter> a rdfs:Class .
+# Payload
 
-<#uriVariable> a rdf:Property ;
-  rdfs:domain <#Affordance> ;
-  rdfs:range <#Parameter> , rdf:List ;
+<#ResourceTemplate> a rdfs:Class .
+
+<#pattern> a rdf:Property ;
+  rdfs:domain <#ResourceTemplate> ;
+  rdfs:range rdfs:Literal ;
+  rdfs:comment """An IRITemplate (RFC 5xxx) that defines how the template is
+    rendered - implicitly, all the parameters of the template are provided as a
+    key, value set called param_list, so something like (?param_list*) should
+    work like an HTML action=GET form""" .
+
+<#var> a rdf:Property ;
+  rdfs:domain <#ResourceTemplate> ;
+  rdfs:range <#LiteralTemplate> , rdf:List ;
   rdfs:comment """When the object is list, the members of the list should be
-  Parameters, the the list order implies the order in which the parameters
-  should be used""" .
+    Parameters, the the list order implies the order in which the parameters
+    should be used""" .
 
-<#parameterName> a rdf:Property ;
-  rdfs:domain <#Parameter> ;
+<#LiteralTemplate> a rdfs:Class .
+
+<#name> a rdf:Property ;
+  rdfs:domain <#LiteralTemplate> ;
   rdfs:range rdfs:Literal .
 
-<#parameterRange> a rdf:Property ;
-  rdfs:domain <#Parameter> ;
+<#label> a rdf:Property ;
+  rdfs:domain <#LiteralTemplate> ;
+  rdfs:range rdfs:Literal .
+
+<#range> a rdf:Property ;
+  rdfs:domain <#LiteralTemplate> ;
   rdfs:range rdfs:Class .
 
-# Payload
+<#defaultValue> a rdf:Property ;
+  rdfs:domain <#LiteralTemplate> ;
+  rdfs:domain rdfs:Resource .
+
+#Omittable vs required values?
+
+<#subjectTemplate> a rdf:Property ;
+  rdfs:domain rdf:Statement ;
+  rdfs:range <#ResourceTemplate> ;
+  rdfs:comment """Used to indicate that a resource template can be used as the
+  subject in a statement""" .
+
+<#predicateTemplate> a rdf:Property ;
+  rdfs:domain rdf:Statement ;
+  rdfs:range <#ResourceTemplate> ;
+  rdfs:comment """Used to indicate that a resource template can be used as the
+  property in a statement""" .
+
+<#objectTemplate> a rdf:Property ;
+  rdfs:domain rdf:Statement ;
+  rdfs:range <#ResourceTemplate> , <#LiteralTemplate> ;
+  rdfs:comment """Used to indicate that a resource or literal template can be
+  used
+  as the property in a statement""" .
 
 <#payload> a rdf:Property ;
   rdfs:domain <#Affordance> ;
-  rdfs:range rdfs:Resource ;
-  rdfs:comment """Points to a the name of a named graph that describes the
-  possible payload of the affordance. Graph might need a different entailment -
-  allowing e.g. a blank node to be the object of a property whose domain is
-  Literal... i.e. only using RDF entailment, not RDFS""" .
+  rdfs:range rdfs:Resource .
+
+<#statement> a rdf:Property ;
+  rdfs:domain rdfs:Resource ;
+  rdfs:range rdf:Statement .

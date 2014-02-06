@@ -7,5 +7,7 @@
       = yield(object)
     - else
       %label{object.label_attrs}
-        = get_predicate_name(predicate)
+        %span= get_predicate_name(predicate)
         %input{object.input_attrs(yield(object))}
+      - if(object.type_uri)
+        %input{type: "hidden", name: "lt", value: object.type_uri}

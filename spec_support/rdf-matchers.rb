@@ -7,29 +7,38 @@ class RDF::Repository
 end
 
 RSpec::Matchers.define :have_xpath do |xpath, value, trace|
+  found = nil
   match do |actual|
     @doc = Nokogiri::HTML.parse(actual)
     @doc.should be_a(Nokogiri::HTML::Document)
     @doc.root.should be_a(Nokogiri::XML::Element)
     @namespaces = @doc.namespaces.merge("xhtml" => "http://www.w3.org/1999/xhtml", "xml" => "http://www.w3.org/XML/1998/namespace")
+    found = @doc.root.at_xpath(xpath, @namespaces)
     case value
     when false
-      @doc.root.at_xpath(xpath, @namespaces).should be_nil
+      found.nil?
     when true
-      @doc.root.at_xpath(xpath, @namespaces).should_not be_nil
+      !found.nil?
     when Array
-      @doc.root.at_xpath(xpath, @namespaces).to_s.split(" ").should include(*value)
+      found.to_s.split(" ").include?(*value)
     when Regexp
-      @doc.root.at_xpath(xpath, @namespaces).to_s.should =~ value
+      found.to_s =~ value
     else
-      @doc.root.at_xpath(xpath, @namespaces).to_s.should == value
+      found.to_s == value
     end
   end
 
   failure_message_for_should do |actual|
     trace ||= debug
-    text = @doc.root.at_xpath(xpath, @namespaces) rescue nil
-    msg = "expected that #{xpath.inspect} would be\n  #{value.inspect}\nwas:\n  #{text.inspect}\n"
+    msg =
+      case value
+      when true
+        "expected that #{xpath.inspect} would be present\nwas:\n  #{found.inspect}\n"
+      when false
+        "expected that #{xpath.inspect} would be absent\nwas:\n  #{found.inspect}\n"
+      else
+        "expected that #{xpath.inspect} would be\n  #{value.inspect}\nwas:\n  #{found.inspect}\n"
+      end
     msg += "in:\n" + actual.to_s
     msg +=  "\nDebug:#{trace.join("\n")}" if trace
     msg

@@ -48,6 +48,31 @@ module RoadForest
       end
     end
 
+    class Remove < Augmentation
+      register :remove
+
+      def apply(term)
+        if term.resource.allowed_methods.include?("DELETE")
+          node = ::RDF::Node.new
+          yield [node, ::RDF.type, Af.Remove]
+          yield [node, Af.target, term.uri]
+        end
+      end
+    end
+
+    class Navigate < Augmentation
+      register :navigate
+
+      def apply(term)
+        if term.resource.allowed_methods.include?("GET")
+          node = ::RDF::Node.new
+          yield [node, ::RDF.type, Af.Navigate]
+          yield [node, Af.target, term.uri]
+        end
+      end
+    end
+
+
     class Update < Augmentation
       register :update
 
