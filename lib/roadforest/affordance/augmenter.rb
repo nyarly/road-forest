@@ -9,17 +9,41 @@ module RoadForest
     class Augmenter
       attr_accessor :router
 
-      def augmentations
-        Augmentation.map_classes do |klass|
+      def self.subject_augmentations_registry
+        @subject_registry ||= Utility::ClassRegistry.new(self, "subject augmentation")
+      end
+
+      def self.object_augmentations_registry
+        @object_registry ||= Utility::ClassRegistry.new(self, "object augmentation")
+      end
+
+      def subject_augmentations
+        self.class.subject_augmentations_registry.map_classes do |klass|
           klass.new(self)
         end
       end
+
+      def object_augmentations
+        self.class.object_augmentations_registry.map_classes do |klass|
+          klass.new(self)
+        end
+      end
+
+      attr_accessor :canonical_uri
 
       def augment(graph)
         augmenting = AugmentingProcess.new(graph)
 
         augmenting.subject_resources(router).each do |resource|
-          augmentations.each do |augmentation|
+          subject_augmentations.each do |augmentation|
+            augmentation.apply(resource) do |statement|
+              augmenting.target_graph << statement
+            end
+          end
+        end
+
+        augmenting.object_resources(router).each do |resource|
+          object_augmentations.each do |augmentation|
             augmentation.apply(resource) do |statement|
               augmenting.target_graph << statement
             end
@@ -31,16 +55,20 @@ module RoadForest
     end
 
     class Augmentation
-      extend Utility::ClassRegistry::Registrar
+      def self.register_for_subjects
+        Augmenter.subject_augmentations_registry.add(self.name, self)
+      end
+
+      def self.register_for_objects
+        Augmenter.object_augmentations_registry.add(self.name, self)
+      end
 
       def initialize(augmenter)
         @augmenter = augmenter
       end
 
-      def self.map_classes
-        all_names.map do |name|
-          yield get(name)
-        end
+      def canonical_uri
+        @augmenter.canonical_uri
       end
 
       def router
@@ -49,7 +77,7 @@ module RoadForest
     end
 
     class Remove < Augmentation
-      register :remove
+      register_for_subjects
 
       def apply(term)
         if term.resource.allowed_methods.include?("DELETE")
@@ -60,21 +88,41 @@ module RoadForest
       end
     end
 
-    class Navigate < Augmentation
-      register :navigate
+    class Links < Augmentation
+      register_for_subjects
+      register_for_objects
 
       def apply(term)
-        if term.resource.allowed_methods.include?("GET")
+        if term.uri.host != canonical_uri.hostname
+          return
+        end
+
+        case term.resource
+        when Webmachine::Dispatcher::NotFoundResource
           node = ::RDF::Node.new
-          yield [node, ::RDF.type, Af.Navigate]
+          yield [node, ::RDF.type, Af.Null]
           yield [node, Af.target, term.uri]
+        else
+          if term.resource.allowed_methods.include?("GET")
+            embeddable = ContentHandling::MediaTypeList.build(["image/jpeg"])
+
+            if embeddable.matches?(term.type_list)
+              node = ::RDF::Node.new
+              yield [node, ::RDF.type, Af.Embed]
+              yield [node, Af.target, term.uri]
+            else
+              node = ::RDF::Node.new
+              yield [node, ::RDF.type, Af.Navigate]
+              yield [node, Af.target, term.uri]
+            end
+          end
         end
       end
     end
 
 
     class Update < Augmentation
-      register :update
+      register_for_subjects
 
       def apply(term)
         if term.resource.allowed_methods.include?("PUT")
@@ -86,7 +134,7 @@ module RoadForest
     end
 
     class Create < Augmentation
-      register :create
+      register_for_subjects
 
       def apply(term)
         if term.resource.allowed_methods.include?("POST")
@@ -119,6 +167,13 @@ module RoadForest
 
       def resource
         @resource ||= router.find_resource(request, response)
+      end
+
+      def type_list
+        @type_list ||=
+          resource.content_types_provided.inject(ContentHandling::MediaTypeList.new) do |list, (type, method)|
+            list.add_header_val(type)
+          end
       end
     end
 

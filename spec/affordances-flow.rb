@@ -7,6 +7,7 @@ require 'rdf/turtle'
 require 'rdf-matchers'
 
 require 'roadforest/model'
+require 'roadforest/blob-model'
 require 'roadforest/application'
 require 'roadforest/rdf/vocabulary'
 require 'roadforest/affordance/augmenter'
@@ -14,13 +15,13 @@ require 'roadforest/content-handling/type-handlers/rdfpost'
 require 'roadforest/content-handling/type-handlers/rdfa-writer'
 require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
 
-class EX < RDF::Vocabulary("http://example/"); end
+class EX < RDF::Vocabulary("http://example.com/"); end
 
 describe "The full affordances flow" do
   Af = RoadForest::RDF::Af
 
   let :service_host do
-    double("ServiceHost")
+    RoadForest::Application::ServicesHost.new
   end
 
   let :application do
@@ -36,6 +37,7 @@ describe "The full affordances flow" do
   let :augmenter do
     RoadForest::Affordance::Augmenter.new.tap do |augmenter|
       augmenter.router = router
+      augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
     end
   end
 
@@ -197,6 +199,178 @@ describe "The full affordances flow" do
   #Re-routing + method support resources (i.e.
   #  POST other/route/put -> PUT other/route )
 
+  describe "a resource that refers to another resource" do
+    class TestModel < RoadForest::RDFModel
+    end
+
+    let :router do
+      RoadForest::Dispatcher.new(application).tap do |router|
+        router.add :test, ["a"], :parent, TestModel
+        router.add :target, ["z"], :parent, TestModel
+      end
+    end
+
+    let :base_graph do
+      RDF::Repository.new.tap do |graph|
+        graph << [EX.a, EX.b, EX.z]
+      end
+    end
+
+    let :affordance_graph do
+      caff = ::RDF::Node.new(:caff)
+      uaff = ::RDF::Node.new(:uaff)
+      naff = ::RDF::Node.new(:naff)
+      onaff = ::RDF::Node.new(:onaff)
+      daff = ::RDF::Node.new(:daff)
+
+      RDF::Repository.new.tap do |graph|
+        graph << [caff, ::RDF.type, Af.Update]
+        graph << [caff, Af.target, EX.a]
+        graph << [uaff, ::RDF.type, Af.Create]
+        graph << [uaff, Af.target, EX.a]
+        graph << [daff, ::RDF.type, Af.Remove]
+        graph << [daff, Af.target, EX.a]
+        graph << [naff, ::RDF.type, Af.Navigate]
+        graph << [naff, Af.target, EX.a]
+        graph << [onaff, ::RDF.type, Af.Navigate]
+        graph << [onaff, Af.target, EX.z]
+      end
+    end
+
+    it_behaves_like "written to RDFa"
+    it_behaves_like "affordance augmentation"
+    it_behaves_like "resubmitted RDFPOST"
+  end
+
+  describe "a resource that refers to a foreign IRI" do
+    class TestModel < RoadForest::RDFModel
+    end
+
+    let :router do
+      RoadForest::Dispatcher.new(application).tap do |router|
+        router.add :test, ["a"], :parent, TestModel
+      end
+    end
+
+    let :base_graph do
+      RDF::Repository.new.tap do |graph|
+        graph << [EX.a, EX.b, RDF::Resource.new("http://google.com/help")]
+      end
+    end
+
+    let :affordance_graph do
+      caff = ::RDF::Node.new(:caff)
+      uaff = ::RDF::Node.new(:uaff)
+      naff = ::RDF::Node.new(:naff)
+      daff = ::RDF::Node.new(:daff)
+      zaff = ::RDF::Node.new(:zaff)
+
+      RDF::Repository.new.tap do |graph|
+        graph << [caff, ::RDF.type, Af.Update]
+        graph << [caff, Af.target, EX.a]
+        graph << [uaff, ::RDF.type, Af.Create]
+        graph << [uaff, Af.target, EX.a]
+        graph << [daff, ::RDF.type, Af.Remove]
+        graph << [daff, Af.target, EX.a]
+        graph << [naff, ::RDF.type, Af.Navigate]
+        graph << [naff, Af.target, EX.a]
+      end
+    end
+
+    it_behaves_like "written to RDFa"
+    it_behaves_like "affordance augmentation"
+    it_behaves_like "resubmitted RDFPOST"
+  end
+
+  describe "a resource that refers to a unserved IRI" do
+    class TestModel < RoadForest::RDFModel
+    end
+
+    let :router do
+      RoadForest::Dispatcher.new(application).tap do |router|
+        router.add :test, ["a"], :parent, TestModel
+      end
+    end
+
+    let :base_graph do
+      RDF::Repository.new.tap do |graph|
+        graph << [EX.a, EX.b, EX.z]
+      end
+    end
+
+    let :affordance_graph do
+      caff = ::RDF::Node.new(:caff)
+      uaff = ::RDF::Node.new(:uaff)
+      naff = ::RDF::Node.new(:naff)
+      daff = ::RDF::Node.new(:daff)
+      zaff = ::RDF::Node.new(:zaff)
+
+      RDF::Repository.new.tap do |graph|
+        graph << [caff, ::RDF.type, Af.Update]
+        graph << [caff, Af.target, EX.a]
+        graph << [uaff, ::RDF.type, Af.Create]
+        graph << [uaff, Af.target, EX.a]
+        graph << [daff, ::RDF.type, Af.Remove]
+        graph << [daff, Af.target, EX.a]
+        graph << [naff, ::RDF.type, Af.Navigate]
+        graph << [naff, Af.target, EX.a]
+        graph << [zaff, ::RDF.type, Af.Null]
+        graph << [zaff, Af.target, EX.z]
+      end
+    end
+
+    it_behaves_like "written to RDFa"
+    it_behaves_like "affordance augmentation"
+    it_behaves_like "resubmitted RDFPOST"
+  end
+
+  describe "a resource that refers to a blob" do
+    class TestModel < RoadForest::RDFModel
+    end
+
+    class Blobby < RoadForest::BlobModel
+      add_type TypeHandlers::Handler.new, "image/jpeg"
+    end
+
+    let :router do
+      RoadForest::Dispatcher.new(application).tap do |router|
+        router.add :test, ["a"], :parent, TestModel
+        router.add :blob, ["z"], :leaf, Blobby
+      end
+    end
+
+    let :base_graph do
+      RDF::Repository.new.tap do |graph|
+        graph << [EX.a, EX.b, EX.z]
+      end
+    end
+
+    let :affordance_graph do
+      caff = ::RDF::Node.new(:caff)
+      uaff = ::RDF::Node.new(:uaff)
+      naff = ::RDF::Node.new(:naff)
+      daff = ::RDF::Node.new(:daff)
+      eaff = ::RDF::Node.new(:eaff)
+
+      RDF::Repository.new.tap do |graph|
+        graph << [caff, ::RDF.type, Af.Update]
+        graph << [caff, Af.target, EX.a]
+        graph << [uaff, ::RDF.type, Af.Create]
+        graph << [uaff, Af.target, EX.a]
+        graph << [daff, ::RDF.type, Af.Remove]
+        graph << [daff, Af.target, EX.a]
+        graph << [naff, ::RDF.type, Af.Navigate]
+        graph << [naff, Af.target, EX.a]
+        graph << [eaff, ::RDF.type, Af.Embed]
+        graph << [eaff, Af.target, EX.z]
+      end
+    end
+
+    it_behaves_like "written to RDFa"
+    it_behaves_like "affordance augmentation"
+    it_behaves_like "resubmitted RDFPOST"
+  end
+
   describe "simple updateable resource" do
     class TestModel < RoadForest::RDFModel
     end
@@ -218,8 +392,6 @@ describe "The full affordances flow" do
       uaff = ::RDF::Node.new(:uaff)
       naff = ::RDF::Node.new(:naff)
       daff = ::RDF::Node.new(:daff)
-      #payload = ::RDF::Node.new(:payload_for_a)
-      #b_param = ::RDF::Node.new(:b_param)
 
       RDF::Repository.new.tap do |graph|
         graph << [caff, ::RDF.type, Af.Update]
@@ -230,9 +402,6 @@ describe "The full affordances flow" do
         graph << [daff, Af.target, EX.a]
         graph << [naff, ::RDF.type, Af.Navigate]
         graph << [naff, Af.target, EX.a]
-        #graph << [aff, Af.payload, payload]
-        #graph << [EX.a, EX.b, b_param, payload]
-        #graph << [b_param, ::RDF.type, Af.Parameter, payload]
       end
     end
 

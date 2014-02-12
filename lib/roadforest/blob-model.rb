@@ -4,6 +4,9 @@ require 'roadforest/content-handling/type-handlers/jsonld'
 module RoadForest
   class BlobModel < Model
     TypeHandlers = RoadForest::MediaType::Handlers
+
+    #XXX Where should ContentHandling live?
+    #Embedded in the class is ... easy, but hard to test
     class << self
       def type_handling
         @engine ||= ContentHandling::Engine.new

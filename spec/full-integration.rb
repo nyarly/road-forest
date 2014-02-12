@@ -19,7 +19,7 @@ describe "RoadForest integration", :integration => true do
     rescue Errno::ECONNREFUSED
       #That's what we're hoping for
     ensure
-      #test_conn.close
+      test_conn.close
     end
 
     @setup_time_limit = 3

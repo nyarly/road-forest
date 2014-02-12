@@ -85,6 +85,7 @@ RSpec::Matchers.define :be_equivalent_graph do |expected, info|
     @info.format ||= :ttl
     @expected = normalize(expected)
     @actual = normalize(actual)
+
     @actual.isomorphic_with?(@expected)# rescue false
   end
 
@@ -96,6 +97,10 @@ RSpec::Matchers.define :be_equivalent_graph do |expected, info|
     rescue
       graph.inspect
     end
+  end
+
+  description do
+    "be equivalent to an expected graph" #graphs tend to be too long to use
   end
 
   failure_message_for_should do |actual|

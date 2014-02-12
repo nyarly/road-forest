@@ -190,6 +190,11 @@ module RoadForest
         end
       end
 
+      def matches?(other)
+        type = best_match_from(other)
+        include?(type) && other.include?(type)
+      end
+
       def by_precedence
         self.sort do |left, right|
           right.precedence_index <=> left.precedence_index
@@ -201,6 +206,7 @@ module RoadForest
       # @param [String] choice the acceptable item
       def add(type)
         @list << type
+        self
       end
 
       # Given a raw acceptable value from an acceptance header,

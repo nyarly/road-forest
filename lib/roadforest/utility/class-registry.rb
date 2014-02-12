@@ -25,6 +25,10 @@ module RoadForest
           registrar.registry.names
         end
 
+        def map_classes(&block)
+          registrar.map_classes(&block)
+        end
+
         def self.extended(mod)
           (
             class << mod; self; end
@@ -36,13 +40,23 @@ module RoadForest
         end
       end
 
-      def initialize(registrar)
-        if registrar.respond_to?(:registry_purpose)
-          @purpose = registrar.registry_purpose
+      def initialize(registrar, purpose=nil)
+        if purpose.nil?
+          if registrar.respond_to?(:registry_purpose)
+            @purpose = registrar.registry_purpose
+          else
+            @purpose = registrar.name
+          end
         else
-          @purpose = registrar.name
+          @purpose = purpose
         end
         @classes = {}
+      end
+
+      def map_classes
+        names.map do |name|
+          yield get(name)
+        end
       end
 
       def add(name, klass)
@@ -57,7 +71,7 @@ module RoadForest
       def get(name)
         @classes.fetch(name)
       rescue KeyError
-        raise "No #@purpose class registered as name: #{name.inspect}"
+        raise "No #@purpose class registered as name: #{name.inspect} (there are: #{names.inspect})"
       end
     end
   end

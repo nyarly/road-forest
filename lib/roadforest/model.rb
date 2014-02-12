@@ -58,7 +58,7 @@ module RoadForest
     end
 
     def type_handling
-      services.type_handling
+      services.type_handling #XXX should this be services?
     end
 
     def my_path
