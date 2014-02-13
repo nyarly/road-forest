@@ -249,6 +249,7 @@ module RoadForest
             if @lineno >= @input.length
               raise EOFError
             end
+
             while @lineno < @input.length
               @current_state.accept(*@input[@lineno])
               if @new_triple
@@ -256,10 +257,15 @@ module RoadForest
                 return build_triple
               end
             end
+
             return build_triple
           end
 
           def build_triple
+            if @object.nil? or @predicate.nil? or @subject.nil?
+              raise EOFError
+            end
+
             object = @object
             if object.is_a? String
               object = ::RDF::Literal.new(object, :datatype => object_type, :language => object_lang)
