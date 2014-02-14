@@ -158,7 +158,7 @@ module RoadForest
         end
 
         def reduced?
-          @curie != uri
+          curie != uri
         end
 
         def prefix

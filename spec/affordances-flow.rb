@@ -171,13 +171,10 @@ describe "The full affordances flow" do
 
     subject :received_graph do
       RDF::Repository.new.tap do |graph|
-        puts "\n#{__FILE__}:#{__LINE__} => #{post_data.inspect}"
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{base_graph.dump(:turtle)}"
         list = URI::decode_www_form(post_data)
         RoadForest::MediaType::Handlers::RDFPost::Reader.new(list).each_statement do |stmt|
           graph.insert(stmt)
         end
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{graph.dump(:ntriples)}"
       end
     end
 
