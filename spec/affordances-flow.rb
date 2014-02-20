@@ -18,7 +18,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
 class EX < RDF::Vocabulary("http://example.com/"); end
 
 describe "The full affordances flow" do
-  Af = RoadForest::RDF::Af
+  Aff = RoadForest::RDF::Af
 
   let :service_host do
     RoadForest::Application::ServicesHost.new
@@ -224,16 +224,16 @@ describe "The full affordances flow" do
       daff = ::RDF::Node.new(:daff)
 
       RDF::Repository.new.tap do |graph|
-        graph << [caff, ::RDF.type, Af.Update]
-        graph << [caff, Af.target, EX.a]
-        graph << [uaff, ::RDF.type, Af.Create]
-        graph << [uaff, Af.target, EX.a]
-        graph << [daff, ::RDF.type, Af.Remove]
-        graph << [daff, Af.target, EX.a]
-        graph << [naff, ::RDF.type, Af.Navigate]
-        graph << [naff, Af.target, EX.a]
-        graph << [onaff, ::RDF.type, Af.Navigate]
-        graph << [onaff, Af.target, EX.z]
+        graph << [caff, ::RDF.type, Aff.Update]
+        graph << [caff, Aff.target, EX.a]
+        graph << [uaff, ::RDF.type, Aff.Create]
+        graph << [uaff, Aff.target, EX.a]
+        graph << [daff, ::RDF.type, Aff.Remove]
+        graph << [daff, Aff.target, EX.a]
+        graph << [naff, ::RDF.type, Aff.Navigate]
+        graph << [naff, Aff.target, EX.a]
+        graph << [onaff, ::RDF.type, Aff.Navigate]
+        graph << [onaff, Aff.target, EX.z]
       end
     end
 
@@ -266,14 +266,14 @@ describe "The full affordances flow" do
       zaff = ::RDF::Node.new(:zaff)
 
       RDF::Repository.new.tap do |graph|
-        graph << [caff, ::RDF.type, Af.Update]
-        graph << [caff, Af.target, EX.a]
-        graph << [uaff, ::RDF.type, Af.Create]
-        graph << [uaff, Af.target, EX.a]
-        graph << [daff, ::RDF.type, Af.Remove]
-        graph << [daff, Af.target, EX.a]
-        graph << [naff, ::RDF.type, Af.Navigate]
-        graph << [naff, Af.target, EX.a]
+        graph << [caff, ::RDF.type, Aff.Update]
+        graph << [caff, Aff.target, EX.a]
+        graph << [uaff, ::RDF.type, Aff.Create]
+        graph << [uaff, Aff.target, EX.a]
+        graph << [daff, ::RDF.type, Aff.Remove]
+        graph << [daff, Aff.target, EX.a]
+        graph << [naff, ::RDF.type, Aff.Navigate]
+        graph << [naff, Aff.target, EX.a]
       end
     end
 
@@ -306,16 +306,16 @@ describe "The full affordances flow" do
       zaff = ::RDF::Node.new(:zaff)
 
       RDF::Repository.new.tap do |graph|
-        graph << [caff, ::RDF.type, Af.Update]
-        graph << [caff, Af.target, EX.a]
-        graph << [uaff, ::RDF.type, Af.Create]
-        graph << [uaff, Af.target, EX.a]
-        graph << [daff, ::RDF.type, Af.Remove]
-        graph << [daff, Af.target, EX.a]
-        graph << [naff, ::RDF.type, Af.Navigate]
-        graph << [naff, Af.target, EX.a]
-        graph << [zaff, ::RDF.type, Af.Null]
-        graph << [zaff, Af.target, EX.z]
+        graph << [caff, ::RDF.type, Aff.Update]
+        graph << [caff, Aff.target, EX.a]
+        graph << [uaff, ::RDF.type, Aff.Create]
+        graph << [uaff, Aff.target, EX.a]
+        graph << [daff, ::RDF.type, Aff.Remove]
+        graph << [daff, Aff.target, EX.a]
+        graph << [naff, ::RDF.type, Aff.Navigate]
+        graph << [naff, Aff.target, EX.a]
+        graph << [zaff, ::RDF.type, Aff.Null]
+        graph << [zaff, Aff.target, EX.z]
       end
     end
 
@@ -353,16 +353,16 @@ describe "The full affordances flow" do
       eaff = ::RDF::Node.new(:eaff)
 
       RDF::Repository.new.tap do |graph|
-        graph << [caff, ::RDF.type, Af.Update]
-        graph << [caff, Af.target, EX.a]
-        graph << [uaff, ::RDF.type, Af.Create]
-        graph << [uaff, Af.target, EX.a]
-        graph << [daff, ::RDF.type, Af.Remove]
-        graph << [daff, Af.target, EX.a]
-        graph << [naff, ::RDF.type, Af.Navigate]
-        graph << [naff, Af.target, EX.a]
-        graph << [eaff, ::RDF.type, Af.Embed]
-        graph << [eaff, Af.target, EX.z]
+        graph << [caff, ::RDF.type, Aff.Update]
+        graph << [caff, Aff.target, EX.a]
+        graph << [uaff, ::RDF.type, Aff.Create]
+        graph << [uaff, Aff.target, EX.a]
+        graph << [daff, ::RDF.type, Aff.Remove]
+        graph << [daff, Aff.target, EX.a]
+        graph << [naff, ::RDF.type, Aff.Navigate]
+        graph << [naff, Aff.target, EX.a]
+        graph << [eaff, ::RDF.type, Aff.Embed]
+        graph << [eaff, Aff.target, EX.z]
       end
     end
 
@@ -394,14 +394,14 @@ describe "The full affordances flow" do
       daff = ::RDF::Node.new(:daff)
 
       RDF::Repository.new.tap do |graph|
-        graph << [caff, ::RDF.type, Af.Update]
-        graph << [caff, Af.target, EX.a]
-        graph << [uaff, ::RDF.type, Af.Create]
-        graph << [uaff, Af.target, EX.a]
-        graph << [daff, ::RDF.type, Af.Remove]
-        graph << [daff, Af.target, EX.a]
-        graph << [naff, ::RDF.type, Af.Navigate]
-        graph << [naff, Af.target, EX.a]
+        graph << [caff, ::RDF.type, Aff.Update]
+        graph << [caff, Aff.target, EX.a]
+        graph << [uaff, ::RDF.type, Aff.Create]
+        graph << [uaff, Aff.target, EX.a]
+        graph << [daff, ::RDF.type, Aff.Remove]
+        graph << [daff, Aff.target, EX.a]
+        graph << [naff, ::RDF.type, Aff.Navigate]
+        graph << [naff, Aff.target, EX.a]
       end
     end
 
@@ -414,15 +414,15 @@ describe "The full affordances flow" do
     it_behaves_like "affordance augmentation" do
       it "should add Update affordance" do
         subject.should match_query {
-          pattern [:node, RDF.type, Af.Update]
-          pattern [:node, Af.target, EX.a]
+          pattern [:node, RDF.type, Aff.Update]
+          pattern [:node, Aff.target, EX.a]
         }
       end
 
       it "should add Create affordance" do
         subject.should match_query {
-          pattern [:node, RDF.type, Af.Create]
-          pattern [:node, Af.target, EX.a]
+          pattern [:node, RDF.type, Aff.Create]
+          pattern [:node, Aff.target, EX.a]
         }
       end
       #it "should add Delete affordance"

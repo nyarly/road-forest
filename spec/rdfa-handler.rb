@@ -8,7 +8,7 @@ require 'roadforest/content-handling/type-handlers/rdfa-writer'
 require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
 require 'cgi'
 
-class EX < RDF::Vocabulary("http://example/"); end
+class EX < RDF::Vocabulary("http://example.com/"); end
 
 describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
   # Heuristically detect the input stream
@@ -116,7 +116,7 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
       end
 
       it { should have_xpath("/html/@prefix", %r(dc: http://purl.org/dc/terms/), @debug)}
-      it { should have_xpath("/html/@prefix", %r(ex: http://example/), @debug)}
+      it { should have_xpath("/html/@prefix", %r(ex: http://example.com/), @debug)}
       it { should have_xpath("/html/@prefix", %r(ex:), @debug)}
     end
 

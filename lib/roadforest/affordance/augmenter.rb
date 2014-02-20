@@ -1,4 +1,4 @@
-require 'roadforest/utility/class-registry'
+  require 'roadforest/utility/class-registry'
 require 'roadforest/rdf/vocabulary'
 require 'rdf'
 

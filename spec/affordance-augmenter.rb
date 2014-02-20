@@ -3,18 +3,20 @@ require 'roadforest/model'
 require 'roadforest/application'
 
 describe RoadForest::Affordance::Augmenter do
-  class TestModel < RoadForest::RDFModel
+  let :test_model do
+    Class.new(RoadForest::RDFModel)
   end
 
-  class OtherTestModel < RoadForest::RDFModel
+  let :other_test_model do
+    Class.new(RoadForest::RDFModel)
   end
 
   Af = RoadForest::RDF::Af
 
-  class EX < RDF::Vocabulary("http://example/"); end
+  class EX < RDF::Vocabulary("http://example.com/"); end
 
   let :service_host do
-    double("ServiceHost")
+    RoadForest::Application::ServicesHost.new
   end
 
   let :application do
@@ -25,18 +27,19 @@ describe RoadForest::Affordance::Augmenter do
 
   let :router do
     RoadForest::Dispatcher.new(application).tap do |router|
-      router.add :test, ["a"], :parent, TestModel
-      router.add :nest, ["a", "b", :id], :leaf, OtherTestModel
+      router.add :test, ["a"], :parent, test_model
+      router.add :nest, ["a", "b", :id], :leaf, other_test_model
     end
   end
 
   let :augmenter do
     described_class.new.tap do |augmenter|
       augmenter.router = router
+      augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
     end
   end
 
-  subject :augemented_graph do
+  subject :augmented_graph do
     augmenter.augment(graph)
   end
 
