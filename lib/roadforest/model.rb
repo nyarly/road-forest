@@ -18,6 +18,8 @@ module RoadForest
     attr_reader :route_name, :params, :services, :data
     attr_reader :response_values
 
+    #@!group Utility methods
+
     def path_for(route_name = nil, params = nil)
       services.router.path_for(route_name, params || self.params)
     end
@@ -29,6 +31,22 @@ module RoadForest
     def model_for(route_name = nil, params = nil)
       services.router.model_for(route_name, params || self.params)
     end
+
+    def canonical_uri
+      url_for(route_name, params)
+    end
+
+    def my_path
+      path_for(route_name, params)
+    end
+
+    def my_url
+      canonical_uri.to_s
+    end
+
+    #@!endgroup
+
+    #@!group Authorization
 
     def required_grants(method)
       services.authz.build_grants do |grants|
@@ -49,28 +67,20 @@ module RoadForest
       services.authz.challenge(:realm => "Roadforest")
     end
 
+    #@!endgroup
+
     def canonical_host
       services.canonical_host
-    end
-
-    def canonical_uri
-      url_for(route_name, params)
     end
 
     def type_handling
       services.type_handling #XXX should this be services?
     end
 
-    def my_path
-      path_for(route_name, params)
+    def reset #XXX remove?
     end
 
-    def my_url
-      canonical_uri.to_s
-    end
-
-    def reset
-    end
+    #group Resource interface
 
     def exists?
       !data.nil?
@@ -132,7 +142,6 @@ module RoadForest
     def delete
       false
     end
-
   end
 
   class RDFModel < Model

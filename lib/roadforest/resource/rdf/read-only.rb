@@ -96,7 +96,7 @@ module RoadForest
           @model.authentication_challenge
         end
 
-        #Add cache-control headers here
+        #XXX Add cache-control headers here
         def finish_request
         end
 

@@ -17,6 +17,13 @@ module FileManagementExample
 
   class Application < RoadForest::Application
     def setup
+      router.add do |route|
+        route.name = :root
+        route.path = []
+        route.kind = :read_only
+        route.interface = Interface::Navigation
+        route.content_engine = rdf_default
+      end
       router.add         :root,              [],                    :read_only,  Models::Navigation
       router.add         :unresolved_needs,  ["unresolved_needs"],  :parent,     Models::UnresolvedNeedsList
       router.add_traced  :need,              ["needs",'*'],         :leaf,       Models::Need

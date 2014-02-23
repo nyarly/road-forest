@@ -16,6 +16,43 @@ module RoadForest
       @route_names.fetch(name)
     end
 
+
+#      router.add do |route|
+#        route.name = :root
+#        route.path = []
+#        route.kind = :read_only
+#        route.interface = Interface::Navigation
+#        route.content_engine = rdf_default
+#      end
+
+    def add_route(name=nil, path_spec=nil, resource_type=nil, model_class=nil)
+      route = Application::RouteAdapter.new(self)
+
+      route.name = name
+      route.path_spec = path_spec
+
+      unless resource_type.nil?
+        route.build_resource_adapter do |request, response|
+          Resource.get(resource_type).new(request, response)
+        end
+      end
+
+      unless interface_class.nil?
+        route.build_interface do |name, params, services|
+          interface_class.new(name,params,services)
+        end
+      end
+
+      yield route if block_given?
+
+      route.validate!
+
+      @route_names[name] = route
+      @routes << route
+      route
+    end
+
+
     def add_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
       if trace_by_default
         return add_traced_route(name, path_spec, resource_type, model_class, bindings, &block)

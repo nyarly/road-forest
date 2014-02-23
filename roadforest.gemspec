@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name		= "roadforest"
-  spec.version		= "0.1"
+  spec.version		= "0.2"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com'
   }
@@ -101,18 +101,18 @@ Gem::Specification.new do |spec|
     lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/environment-decorator.rb
     lib/roadforest/content-handling/type-handlers/jsonld.rb
+    lib/roadforest/templates/affordance-doc.haml
+    lib/roadforest/templates/affordance-property-values.haml
+    lib/roadforest/templates/affordance-subject.haml
+    lib/roadforest/templates/affordance-uri-object.haml
+    lib/roadforest/templates/rdfpost-curie.haml
     lib/roadforest/templates/min/subject.haml
     lib/roadforest/templates/min/doc.haml
-    lib/roadforest/templates/min/property_values.haml
     lib/roadforest/templates/base/subject.haml
-    lib/roadforest/templates/base/property_value.haml
     lib/roadforest/templates/base/doc.haml
-    lib/roadforest/templates/base/property_values.haml
     lib/roadforest/templates/distiller/subject.haml
-    lib/roadforest/templates/distiller/property_value.haml
     lib/roadforest/templates/distiller/nil-object.haml
     lib/roadforest/templates/distiller/doc.haml
-    lib/roadforest/templates/distiller/property_values.haml
     lib/roadforest/templates/uri-object.haml
     lib/roadforest/templates/xml-literal-object.haml
     lib/roadforest/templates/object.haml
