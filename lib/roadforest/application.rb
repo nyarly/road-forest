@@ -28,7 +28,7 @@ module RoadForest
     def setup
     end
 
-    attr_accessor :services, :canonical_host
+    attr_accessor :services, :canonical_host, :default_content_engine
 
     alias router dispatcher
 
@@ -36,6 +36,24 @@ module RoadForest
     def services=(service_host)
       @services = service_host
       service_host.application = self
+    end
+
+    def default_content_engine
+      @default_content_engine ||=
+        begin
+          require 'roadforest/content-handling/type-handlers/jsonld'
+          require 'roadforest/content-handling/type-handlers/rdfa'
+          rdfa = MediaType::Handlers::RDFa.new
+          jsonld = MediaType::Handlers::JSONLD.new
+
+          ContentHandling::Engine.new.tap do |engine|
+            engine.add rdfa, "text/html;q=1;rdfa=1"
+            engine.add rdfa, "application/xhtml+xml;q=1;rdfa=1"
+            engine.add jsonld, "application/ld+json"
+            engine.add rdfa, "text/html;q=0.5"
+            engine.add rdfa, "application/xhtml+xml;q=0.5"
+          end
+        end
     end
   end
 end

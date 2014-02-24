@@ -11,7 +11,7 @@ module RoadForest
         end
 
         def process_post
-          parser = model.type_handling.choose_parser(request.content_type || 'application/octet-stream')
+          parser = content_engine.choose_parser(request.content_type || 'application/octet-stream')
 
           parser.add_child(self)
           return true

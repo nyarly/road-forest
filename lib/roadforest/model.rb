@@ -8,20 +8,21 @@ module RoadForest
   end
 
   class Model
-    def initialize(route_name, params, services)
+    def initialize(route_name, params, router, services)
       @route_name = route_name
       @params = params
+      @router = router
       @services = services
       @data = nil
       @response_values = {}
     end
-    attr_reader :route_name, :params, :services, :data
+    attr_reader :route_name, :params, :services, :data, :router
     attr_reader :response_values
 
     #@!group Utility methods
 
     def path_for(route_name = nil, params = nil)
-      services.router.path_for(route_name, params || self.params)
+      router.path_for(route_name, params || self.params)
     end
 
     def url_for(route_name, params = nil)
@@ -29,7 +30,7 @@ module RoadForest
     end
 
     def model_for(route_name = nil, params = nil)
-      services.router.model_for(route_name, params || self.params)
+      router.model_for(route_name, params || self.params)
     end
 
     def canonical_uri
@@ -71,10 +72,6 @@ module RoadForest
 
     def canonical_host
       services.canonical_host
-    end
-
-    def type_handling
-      services.type_handling #XXX should this be services?
     end
 
     def reset #XXX remove?

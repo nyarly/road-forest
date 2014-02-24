@@ -26,10 +26,6 @@ module RoadForest
           end
       end
 
-      def type_handling
-        @type_handling ||= ContentHandling::Engine.default
-      end
-
       def logger
         @logger ||=
           begin

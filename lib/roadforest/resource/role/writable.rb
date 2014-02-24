@@ -22,7 +22,7 @@ module RoadForest
         end
 
         def content_types_accepted
-          model.type_handling.parsers.type_map
+          content_engine.parsers.type_map
         end
 
         def request_body

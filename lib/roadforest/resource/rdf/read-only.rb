@@ -15,7 +15,7 @@ module RoadForest
 
         register :read_only
 
-        attr_accessor :model, :trace
+        attr_accessor :model, :trace, :content_engine
 
         ### RoadForest interface
 
@@ -64,7 +64,7 @@ module RoadForest
         #Overridden rather than metaprogram content type methods
         def send(*args)
           if args.length == 1 and not model.nil?
-            model.type_handling.fetch(args.first).call(self)
+            content_engine.fetch(args.first).call(self)
           else
             super
           end
@@ -76,14 +76,14 @@ module RoadForest
           if model.nil?
             super
           else
-            model.type_handling.fetch(name).method(:call)
+            content_engine.fetch(name).method(:call)
           end
         rescue KeyError
           super
         end
 
         def content_types_provided
-          model.type_handling.renderers.type_map
+          content_engine.renderers.type_map
         rescue => ex
           super
         end

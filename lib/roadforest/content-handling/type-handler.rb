@@ -17,7 +17,7 @@ module RoadForest
 
           update_model(model, input_data)
 
-          renderer = model.type_handling.choose_renderer(resource.request_accept_header)
+          renderer = resource.content_engine.choose_renderer(resource.request_accept_header)
           body = renderer.local_to_network(model.my_url, model.response_data)
 
           build_response(resource)
@@ -42,7 +42,7 @@ module RoadForest
         def build_response(resource)
           model = resource.model
 
-          renderer = model.type_handling.choose_renderer(resource.request_accept_header)
+          renderer = resource.content_engine.choose_renderer(resource.request_accept_header)
           body = renderer.local_to_network(model.my_url, model.response_data)
 
           resource.response_content_type = renderer.content_type_header

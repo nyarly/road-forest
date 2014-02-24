@@ -1,12 +1,8 @@
 module RoadForest
   class Application
-    class RouteAdapter
-      def initialize(router)
-        @router = router
-      end
-
-      attr_accessor :route_name, :resource_type, :interface_class, :services, :trace
-
+    #Embedded in WebMachine's Routes to compose the object structure at need
+    class ResourceAdapter
+      attr_accessor :resource_builder, :interface_builder, :route_name, :router, :services, :content_engine, :trace, :router
 
       def <(klass)
         if klass <= Webmachine::Resource
@@ -16,38 +12,137 @@ module RoadForest
         end
       end
 
-
-      def initialize(route_name, resource_class, interface_class)
-        @resource_class = resource_class
-
-        @route_name = route_name
-        @interface_class = interface_class
-        @application = nil
-        @trace = false
-        yield self if block_given?
-      end
-      attr_accessor :route_name, :resource_class, :interface_class, :application, :trace
-
-      # WebMachine expects a Resource class on the end of a dispatcher route,
-      # but we need to assemble the resource based on the composition of the
-      # interface and resource role, so #new does that composition and returns the
-      # newly created resource - Ruby classes are in fact their object
-      # factories.
       def new(request, response)
-        resource = build_resource(request, response)
-        resource.interface = build_interface(resource.params)
-        resource.trace = trace
+        resource = resource_builder.call(request, response)
+        resource.model = build_interface(resource.params)
+        resource.content_engine = content_engine || router.default_content_engine
+        resource.trace = trace?
         resource
       end
 
-      def build_resource(request, response)
-        resource_class.new(request, response)
-      end
-
       def build_interface(params)
-        interface_class.new(route_name, params, application.services)
+        interface_builder.call(route_name, params, router, services)
       end
 
+      def trace?
+        if @trace.nil?
+          router.trace_by_default
+        else
+          !!@trace
+        end
+      end
+    end
+
+    #Extension of Webmachine's Routes that allows for rendering url paths and
+    #parameter lists.
+    class Route < Webmachine::Dispatcher::Route
+      # Create a complete URL for this route, doing any necessary variable
+      # substitution.
+      # @param [Hash] vars values for the path variables
+      # @return [String] the valid URL for the route
+      def build_path(vars = nil)
+        vars ||= {}
+        "/" + path_spec.map do |segment|
+          case segment
+          when '*',Symbol
+            vars.fetch(segment)
+          when String
+            segment
+          end
+        end.join("/")
+      end
+
+      def build_params(vars = nil)
+        vars ||= {}
+        params = Application::Parameters.new
+        path_set = Hash[path_spec.find_all{|segment| segment.is_a? Symbol}.map{|seg| [seg, true]}]
+        vars.to_hash.each do |key, value|
+          if(path_set.has_key?(key))
+            params.path_info[key] = value
+          elsif(key == '*')
+            params.path_tokens = value
+          else
+            params.query_params[key] = value
+          end
+        end
+        params
+      end
+    end
+
+    class RouteBinding
+      def initialize(router)
+        @router = router
+      end
+
+      attr_accessor :route_name, :path_spec, :bindings, :guard
+      attr_accessor :resource_type, :interface_class, :services, :trace, :content_engine
+
+      def resource_builder
+        @resource_builder ||= proc do |request, response|
+          Resource.get(resource_type).new(request, response)
+        end
+      end
+
+      def build_resource(&block)
+        @resource_builder = block
+      end
+
+      def interface_builder
+        @interface_builder ||= proc do |name, params, router, services|
+          interface_class.new(name, params, router.path_provider, services)
+        end
+      end
+
+      def build_interface(&block)
+        @interface_builder = block
+      end
+
+      def route
+        @route ||=
+          begin
+            if guard.nil?
+              Route.new(path_spec, resource_adapter, bindings || {})
+            else
+              Route.new(path_spec, resource_adapter, bindings || {}, &guard)
+            end
+          end
+      end
+
+      def resource_adapter
+        @resource_adapter ||=
+          begin
+            ResourceAdapter.new.tap do |adapter|
+              adapter.router = @router
+              adapter.route_name = route_name
+              adapter.interface_builder = interface_builder
+              adapter.resource_builder = resource_builder
+              adapter.services = services
+              adapter.content_engine = content_engine
+              adapter.trace = trace
+            end
+          end
+      end
+
+      def validate!
+        problems = []
+
+        if @path_spec.nil?
+          problems << "Path specification is nil - no way to route URLs here."
+        end
+
+        if @resource_builder.nil? && @resource_type.nil?
+          problems << "No means provided to build a resource adapter: set resource_type or resource_builder"
+        end
+
+        if @interface_builder.nil? and @interface_class.nil?
+          problems << "No means provided to build an application interface: set interface_class or interface_builder"
+        end
+
+        unless problems.empty?
+          raise InvalidRouteDefinition, "Route invalid:\n  #{problems.join("  \n")}"
+        end
+        return true
+      end
     end
   end
 end

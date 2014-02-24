@@ -13,6 +13,7 @@ group :test do
   gem 'rdf-isomorphic'
   gem 'rdf-xsd'
   gem 'mechanize'
+  gem 'fuubar'
 end
 
 gemspec

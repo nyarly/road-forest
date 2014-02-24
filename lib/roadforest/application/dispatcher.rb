@@ -16,119 +16,54 @@ module RoadForest
       @route_names.fetch(name)
     end
 
-
-#      router.add do |route|
-#        route.name = :root
-#        route.path = []
-#        route.kind = :read_only
-#        route.interface = Interface::Navigation
-#        route.content_engine = rdf_default
-#      end
-
-    def add_route(name=nil, path_spec=nil, resource_type=nil, model_class=nil)
-      route = Application::RouteAdapter.new(self)
-
-      route.name = name
-      route.path_spec = path_spec
-
-      unless resource_type.nil?
-        route.build_resource_adapter do |request, response|
-          Resource.get(resource_type).new(request, response)
-        end
-      end
-
-      unless interface_class.nil?
-        route.build_interface do |name, params, services|
-          interface_class.new(name,params,services)
-        end
-      end
-
-      yield route if block_given?
-
-      route.validate!
-
-      @route_names[name] = route
-      @routes << route
-      route
+    def default_content_engine
+      @application.default_content_engine
     end
 
+    def path_provider
+      @path_provider ||= PathProvider.new(self)
+    end
 
-    def add_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
-      if trace_by_default
-        return add_traced_route(name, path_spec, resource_type, model_class, bindings, &block)
-      else
-        return add_untraced_route(name, path_spec, resource_type, model_class, bindings, &block)
-      end
+    # Add a named route to the dispatcher - the 90% case is handled by passing
+    # arguments in, but more control is available but manipulating the
+    # RouteBinding object used to create the Route and ResourceAdapter
+    #
+    # @yields [RouteBinding] temporary configuration object
+    def add_route(name=nil, path_spec=nil, resource_type=nil, interface_class=nil)
+      binder = Application::RouteBinding.new(self)
+
+      binder.route_name = name
+      binder.path_spec = path_spec
+      binder.resource_type = resource_type
+      binder.interface_class = interface_class
+      binder.services = application.services
+
+      yield binder if block_given?
+
+      binder.validate!
+
+      @route_names[name] = binder.route
+      @routes << binder.route
+      binder.route
     end
     alias add add_route
 
-    def add_untraced_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
-      resource = bundle_typed_resource(resource_type, model_class, name)
-      resource_route(resource, name, path_spec, bindings, &block)
+    # @deprecated Just use add_route
+    def add_untraced_route(name = nil, path_spec = nil, resource_type = nil, model_class = nil)
+      add_route(name, path_spec, resource_type, model_class) do |binder|
+        binder.trace = false
+        yield binder if block_given?
+      end
     end
     alias add_untraced add_untraced_route
 
+    # @deprecated Just use add_route
     def add_traced_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
-      resource = bundle_traced_resource(resource_type, model_class, name)
-      resource_route(resource, name, path_spec, bindings, &block)
+      add_route(name, path_spec, resource_type, model_class) do |binder|
+        binder.trace = true
+        yield binder if block_given?
+      end
     end
     alias add_traced add_traced_route
-
-    def resource_route(resource, name, path_spec, bindings)
-      route = Route.new(path_spec, resource, bindings || {})
-      yield route if block_given?
-      @route_names[name] = route
-      @routes << route
-      route
-    end
-
-    def bundle_typed_resource(resource_type, model_class, route_name)
-      resource_class = Resource.get(resource_type)
-      Application::RouteAdapter.new(route_name, resource_class, model_class) do |adapter|
-        adapter.application = application
-      end
-    end
-
-    def bundle_traced_resource(resource_type, model_class, route_name)
-      resource_class = Resource.get(resource_type)
-      Application::RouteAdapter.new(route_name, resource_class, model_class) do |adapter|
-        adapter.application = application
-        adapter.trace = true
-      end
-    end
-
-    class Route < Webmachine::Dispatcher::Route
-      # Create a complete URL for this route, doing any necessary variable
-      # substitution.
-      # @param [Hash] vars values for the path variables
-      # @return [String] the valid URL for the route
-      def build_path(vars = nil)
-        vars ||= {}
-        "/" + path_spec.map do |segment|
-          case segment
-          when '*',Symbol
-            vars.fetch(segment)
-          when String
-            segment
-          end
-        end.join("/")
-      end
-
-      def build_params(vars = nil)
-        vars ||= {}
-        params = Application::Parameters.new
-        path_set = Hash[path_spec.find_all{|segment| segment.is_a? Symbol}.map{|seg| [seg, true]}]
-        vars.to_hash.each do |key, value|
-          if(path_set.has_key?(key))
-            params.path_info[key] = value
-          elsif(key == '*')
-            params.path_tokens = value
-          else
-            params.query_params[key] = value
-          end
-        end
-        params
-      end
-    end
   end
 end

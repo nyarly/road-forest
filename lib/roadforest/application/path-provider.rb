@@ -25,7 +25,7 @@ module RoadForest
     def model_for(name, vars = nil)
       route = @dispatcher.route_for_name(name)
       params = route.build_params(vars)
-      route.resource.build_model(params)
+      route.resource.build_interface(params)
     end
   end
 end

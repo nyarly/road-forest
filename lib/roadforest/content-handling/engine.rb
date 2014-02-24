@@ -46,18 +46,6 @@ module RoadForest
         end
       end
 
-      def self.default
-        require 'roadforest/content-handling/type-handlers/jsonld'
-        require 'roadforest/content-handling/type-handlers/rdfa'
-        self.new.tap do |engine|
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=1;rdfa=1"
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "application/xhtml+xml;q=1;rdfa=1"
-          engine.add RoadForest::MediaType::Handlers::JSONLD.new, "application/ld+json"
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=0.5"
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "application/xhtml+xml;q=0.5"
-        end
-      end
-
       def initialize
         @renderers = TypeHandlerList.new("provide")
         @parsers = TypeHandlerList.new("accept")

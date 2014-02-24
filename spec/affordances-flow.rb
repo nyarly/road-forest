@@ -24,9 +24,25 @@ describe "The full affordances flow" do
     RoadForest::Application::ServicesHost.new
   end
 
+  let :content_engine do
+    require 'roadforest/content-handling/type-handlers/jsonld'
+    require 'roadforest/content-handling/type-handlers/rdfa'
+    rdfa = RoadForest::MediaType::Handlers::RDFa.new
+    jsonld = RoadForest::MediaType::Handlers::JSONLD.new
+
+    RoadForest::ContentHandling::Engine.new.tap do |engine|
+      engine.add rdfa, "text/html;q=1;rdfa=1"
+      engine.add rdfa, "application/xhtml+xml;q=1;rdfa=1"
+      engine.add jsonld, "application/ld+json"
+      engine.add rdfa, "text/html;q=0.5"
+      engine.add rdfa, "application/xhtml+xml;q=0.5"
+    end
+  end
+
   let :application do
     double("RoadForest::Application").tap do |app|
       app.stub(:services).and_return(service_host)
+      app.stub(:default_content_engine).and_return(content_engine)
     end
   end
 
@@ -329,13 +345,17 @@ describe "The full affordances flow" do
     end
 
     class Blobby < RoadForest::BlobModel
-      add_type TypeHandlers::Handler.new, "image/jpeg"
     end
 
     let :router do
+      jpegs = RoadForest::ContentHandling::Engine.new
+      jpegs.add RoadForest::MediaType::Handlers::Handler.new, "image/jpeg"
+
       RoadForest::Dispatcher.new(application).tap do |router|
         router.add :test, ["a"], :parent, TestModel
-        router.add :blob, ["z"], :leaf, Blobby
+        router.add :blob, ["z"], :leaf, RoadForest::BlobModel do |route|
+          route.content_engine = jpegs
+        end
       end
     end
 

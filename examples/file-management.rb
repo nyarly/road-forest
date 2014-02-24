@@ -17,17 +17,15 @@ module FileManagementExample
 
   class Application < RoadForest::Application
     def setup
-      router.add do |route|
-        route.name = :root
-        route.path = []
-        route.kind = :read_only
-        route.interface = Interface::Navigation
-        route.content_engine = rdf_default
-      end
+      text_plain = RoadForest::ContentHandling::Engine.new
+      text_plain.add RoadForest::MediaType::Handlers::Handler.new, "text/plain"
+
       router.add         :root,              [],                    :read_only,  Models::Navigation
       router.add         :unresolved_needs,  ["unresolved_needs"],  :parent,     Models::UnresolvedNeedsList
       router.add_traced  :need,              ["needs",'*'],         :leaf,       Models::Need
-      router.add         :file_content,      ["files","*"],         :leaf,       Models::NeedContent
+      router.add         :file_content,      ["files","*"],         :leaf,       RoadForest::BlobModel do |route|
+        route.content_engine = text_plain
+      end
     end
 
     module Models
@@ -81,10 +79,6 @@ module FileManagementExample
             end
           end
         end
-      end
-
-      class NeedContent < RoadForest::BlobModel
-        add_type TypeHandlers::Handler.new, "text/plain"
       end
 
       class Need < RoadForest::RDFModel
