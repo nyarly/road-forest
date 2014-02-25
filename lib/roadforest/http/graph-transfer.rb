@@ -1,5 +1,5 @@
 require 'roadforest/http'
-require 'roadforest/content-handling/engine'
+require 'roadforest/content-handling/common-engines'
 
 module RoadForest
   module HTTP
@@ -50,7 +50,7 @@ module RoadForest
       end
 
       def type_handling
-        @type_handling ||= ContentHandling::Engine.default
+        @type_handling || ContentHandling.rdf_engine
       end
 
       def best_type_for(url)

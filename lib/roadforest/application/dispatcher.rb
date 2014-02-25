@@ -24,6 +24,10 @@ module RoadForest
       @path_provider ||= PathProvider.new(self)
     end
 
+    def services
+      @application.services
+    end
+
     # Add a named route to the dispatcher - the 90% case is handled by passing
     # arguments in, but more control is available but manipulating the
     # RouteBinding object used to create the Route and ResourceAdapter
@@ -36,7 +40,6 @@ module RoadForest
       binder.path_spec = path_spec
       binder.resource_type = resource_type
       binder.interface_class = interface_class
-      binder.services = application.services
 
       yield binder if block_given?
 

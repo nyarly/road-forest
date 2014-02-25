@@ -11,9 +11,9 @@ require 'roadforest/blob-model'
 require 'roadforest/application'
 require 'roadforest/rdf/vocabulary'
 require 'roadforest/affordance/augmenter'
+require 'roadforest/content-handling/common-engines'
 require 'roadforest/content-handling/type-handlers/rdfpost'
-require 'roadforest/content-handling/type-handlers/rdfa-writer'
-require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
+require 'roadforest/content-handling/type-handlers/rdfa'
 
 class EX < RDF::Vocabulary("http://example.com/"); end
 
@@ -25,18 +25,7 @@ describe "The full affordances flow" do
   end
 
   let :content_engine do
-    require 'roadforest/content-handling/type-handlers/jsonld'
-    require 'roadforest/content-handling/type-handlers/rdfa'
-    rdfa = RoadForest::MediaType::Handlers::RDFa.new
-    jsonld = RoadForest::MediaType::Handlers::JSONLD.new
-
-    RoadForest::ContentHandling::Engine.new.tap do |engine|
-      engine.add rdfa, "text/html;q=1;rdfa=1"
-      engine.add rdfa, "application/xhtml+xml;q=1;rdfa=1"
-      engine.add jsonld, "application/ld+json"
-      engine.add rdfa, "text/html;q=0.5"
-      engine.add rdfa, "application/xhtml+xml;q=0.5"
-    end
+    RoadForest::ContentHandling.rdf_engine
   end
 
   let :application do
@@ -348,13 +337,10 @@ describe "The full affordances flow" do
     end
 
     let :router do
-      jpegs = RoadForest::ContentHandling::Engine.new
-      jpegs.add RoadForest::MediaType::Handlers::Handler.new, "image/jpeg"
-
       RoadForest::Dispatcher.new(application).tap do |router|
         router.add :test, ["a"], :parent, TestModel
         router.add :blob, ["z"], :leaf, RoadForest::BlobModel do |route|
-          route.content_engine = jpegs
+          route.content_engine = RoadForest::ContentHandling.images_engine
         end
       end
     end

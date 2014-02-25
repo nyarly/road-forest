@@ -20,18 +20,7 @@ describe RoadForest::Affordance::Augmenter do
   end
 
   let :content_engine do
-    require 'roadforest/content-handling/type-handlers/jsonld'
-    require 'roadforest/content-handling/type-handlers/rdfa'
-    rdfa = RoadForest::MediaType::Handlers::RDFa.new
-    jsonld = RoadForest::MediaType::Handlers::JSONLD.new
-
-    RoadForest::ContentHandling::Engine.new.tap do |engine|
-      engine.add rdfa, "text/html;q=1;rdfa=1"
-      engine.add rdfa, "application/xhtml+xml;q=1;rdfa=1"
-      engine.add jsonld, "application/ld+json"
-      engine.add rdfa, "text/html;q=0.5"
-      engine.add rdfa, "application/xhtml+xml;q=0.5"
-    end
+    RoadForest::ContentHandling.rdf_engine
   end
 
   let :application do

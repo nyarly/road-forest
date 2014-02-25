@@ -21,7 +21,7 @@ module RoadForest
       end
 
       def build_interface(params)
-        interface_builder.call(route_name, params, router, services)
+        interface_builder.call(route_name, params, router, router.services)
       end
 
       def trace?
@@ -116,7 +116,6 @@ module RoadForest
               adapter.route_name = route_name
               adapter.interface_builder = interface_builder
               adapter.resource_builder = resource_builder
-              adapter.services = services
               adapter.content_engine = content_engine
               adapter.trace = trace
             end
