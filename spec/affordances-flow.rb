@@ -6,8 +6,7 @@ require 'rdf/xsd'
 require 'rdf/turtle'
 require 'rdf-matchers'
 
-require 'roadforest/model'
-require 'roadforest/blob-model'
+require 'roadforest/interfaces'
 require 'roadforest/application'
 require 'roadforest/rdf/vocabulary'
 require 'roadforest/affordance/augmenter'
@@ -205,13 +204,13 @@ describe "The full affordances flow" do
   #  POST other/route/put -> PUT other/route )
 
   describe "a resource that refers to another resource" do
-    class TestModel < RoadForest::RDFModel
+    class TestInterface < RoadForest::Interface::RDF
     end
 
     let :router do
       RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestModel
-        router.add :target, ["z"], :parent, TestModel
+        router.add :test, ["a"], :parent, TestInterface
+        router.add :target, ["z"], :parent, TestInterface
       end
     end
 
@@ -248,12 +247,12 @@ describe "The full affordances flow" do
   end
 
   describe "a resource that refers to a foreign IRI" do
-    class TestModel < RoadForest::RDFModel
+    class TestInterface < RoadForest::Interface::RDF
     end
 
     let :router do
       RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestModel
+        router.add :test, ["a"], :parent, TestInterface
       end
     end
 
@@ -288,12 +287,12 @@ describe "The full affordances flow" do
   end
 
   describe "a resource that refers to a unserved IRI" do
-    class TestModel < RoadForest::RDFModel
+    class TestInterface < RoadForest::Interface::RDF
     end
 
     let :router do
       RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestModel
+        router.add :test, ["a"], :parent, TestInterface
       end
     end
 
@@ -330,16 +329,16 @@ describe "The full affordances flow" do
   end
 
   describe "a resource that refers to a blob" do
-    class TestModel < RoadForest::RDFModel
+    class TestInterface < RoadForest::Interface::RDF
     end
 
-    class Blobby < RoadForest::BlobModel
+    class Blobby < RoadForest::Interface::Blob
     end
 
     let :router do
       RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestModel
-        router.add :blob, ["z"], :leaf, RoadForest::BlobModel do |route|
+        router.add :test, ["a"], :parent, TestInterface
+        router.add :blob, ["z"], :leaf, RoadForest::Interface::Blob do |route|
           route.content_engine = RoadForest::ContentHandling.images_engine
         end
       end
@@ -378,12 +377,12 @@ describe "The full affordances flow" do
   end
 
   describe "simple updateable resource" do
-    class TestModel < RoadForest::RDFModel
+    class TestInterface < RoadForest::Interface::RDF
     end
 
     let :router do
       RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestModel
+        router.add :test, ["a"], :parent, TestInterface
       end
     end
 

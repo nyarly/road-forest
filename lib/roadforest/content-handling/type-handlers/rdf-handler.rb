@@ -6,9 +6,9 @@ module RoadForest
       class RDFHandler < Handler
         include RDF::Normalization
 
-        def get_output(model)
+        def get_output(interface)
           graph = super
-          root_uri = model.canonical_uri
+          root_uri = interface.canonical_uri
 
           graph.each_statement do |statement|
             original = statement.dup
@@ -28,9 +28,9 @@ module RoadForest
           graph
         end
 
-        def child_for_model(model, data)
-          model.add_graph_child(data)
-          model.processed
+        def child_for_interface(interface, data)
+          interface.add_graph_child(data)
+          interface.processed
         end
       end
     end

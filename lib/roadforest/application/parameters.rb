@@ -1,6 +1,6 @@
 module RoadForest
   class Application
-    #Parameters extracted from a URL, which a model object can use to identify
+    #Parameters extracted from a URL, which a interface object can use to identify
     #the resource being discussed
     class Parameters
       def initialize

@@ -1,4 +1,5 @@
 require 'rdf/vocab/skos'
+require 'roadforest/content-handling/common-engines'
 
 module FileManagementExample
   module Vocabulary
@@ -17,19 +18,16 @@ module FileManagementExample
 
   class Application < RoadForest::Application
     def setup
-      text_plain = RoadForest::ContentHandling::Engine.new
-      text_plain.add RoadForest::MediaType::Handlers::Handler.new, "text/plain"
-
-      router.add         :root,              [],                    :read_only,  Models::Navigation
-      router.add         :unresolved_needs,  ["unresolved_needs"],  :parent,     Models::UnresolvedNeedsList
-      router.add_traced  :need,              ["needs",'*'],         :leaf,       Models::Need
-      router.add         :file_content,      ["files","*"],         :leaf,       RoadForest::BlobModel do |route|
-        route.content_engine = text_plain
+      router.add         :root,              [],                    :read_only,  Interfaces::Navigation
+      router.add         :unresolved_needs,  ["unresolved_needs"],  :parent,     Interfaces::UnresolvedNeedsList
+      router.add_traced  :need,              ["needs",'*'],         :leaf,       Interfaces::Need
+      router.add         :file_content,      ["files","*"],         :leaf,       RoadForest::Interface::Blob do |route|
+        route.content_engine = RoadForest::ContentHandling.plaintext_engine
       end
     end
 
-    module Models
-      class Navigation < RoadForest::RDFModel
+    module Interfaces
+      class Navigation < RoadForest::Interface::RDF
         def exists?
           true
         end
@@ -52,7 +50,7 @@ module FileManagementExample
         end
       end
 
-      class UnresolvedNeedsList < RoadForest::RDFModel
+      class UnresolvedNeedsList < RoadForest::Interface::RDF
         def exists?
           true
         end
@@ -70,7 +68,7 @@ module FileManagementExample
           graph.add_list(:lc, "needs") do |list|
             services.file_records.each do |record|
               if !record.resolved
-                need = copy_model(graph, :need, '*' => [record.name])
+                need = copy_interface(graph, :need, '*' => [record.name])
                 need[:lc, :name]
                 need[:lc, :digest]
 
@@ -81,7 +79,7 @@ module FileManagementExample
         end
       end
 
-      class Need < RoadForest::RDFModel
+      class Need < RoadForest::Interface::RDF
         def data
           @data = services.file_records.find do |record|
             record.name == params.remainder

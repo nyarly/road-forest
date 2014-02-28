@@ -180,6 +180,7 @@ describe RoadForest::RemoteHost do
 
   describe "using JSON-LD" do
     let :server do
+      require 'roadforest/content-handling/type-handlers/jsonld'
       base_server.tap do |server|
         server.graph_transfer.type_handling = RoadForest::ContentHandling::Engine.new.tap do |engine|
           engine.add RoadForest::MediaType::Handlers::JSONLD.new, "application/ld+json"
@@ -196,9 +197,11 @@ describe RoadForest::RemoteHost do
 
   describe "using RDFa" do
     let :server do
+      require 'roadforest/content-handling/type-handlers/rdfa'
       base_server.tap do |server|
         server.graph_transfer.type_handling = RoadForest::ContentHandling::Engine.new.tap do |engine|
-          engine.add RoadForest::MediaType::Handlers::RDFa.new, "text/html;q=1;rdfa=1"
+          rdfa = RoadForest::MediaType::Handlers::RDFa.new
+          engine.add rdfa, "text/html;q=1;rdfa=1"
         end
       end
     end

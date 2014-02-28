@@ -35,7 +35,7 @@ module RoadForest
         end
 
         def delete_resource
-          @model.delete(params)
+          @interface.delete(params)
         end
       end
     end

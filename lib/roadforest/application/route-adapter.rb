@@ -14,7 +14,7 @@ module RoadForest
 
       def new(request, response)
         resource = resource_builder.call(request, response)
-        resource.model = build_interface(resource.params)
+        resource.interface = build_interface(resource.params)
         resource.content_engine = content_engine || router.default_content_engine
         resource.trace = trace?
         resource

@@ -52,8 +52,8 @@ module RoadForest
     alias add add_route
 
     # @deprecated Just use add_route
-    def add_untraced_route(name = nil, path_spec = nil, resource_type = nil, model_class = nil)
-      add_route(name, path_spec, resource_type, model_class) do |binder|
+    def add_untraced_route(name = nil, path_spec = nil, resource_type = nil, interface_class = nil)
+      add_route(name, path_spec, resource_type, interface_class) do |binder|
         binder.trace = false
         yield binder if block_given?
       end
@@ -61,8 +61,8 @@ module RoadForest
     alias add_untraced add_untraced_route
 
     # @deprecated Just use add_route
-    def add_traced_route(name, path_spec, resource_type, model_class, bindings = nil, &block)
-      add_route(name, path_spec, resource_type, model_class) do |binder|
+    def add_traced_route(name, path_spec, resource_type, interface_class, bindings = nil, &block)
+      add_route(name, path_spec, resource_type, interface_class) do |binder|
         binder.trace = true
         yield binder if block_given?
       end

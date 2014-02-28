@@ -1,14 +1,14 @@
 require 'roadforest/affordance/augmenter'
-require 'roadforest/model'
+require 'roadforest/interfaces'
 require 'roadforest/application'
 
 describe RoadForest::Affordance::Augmenter do
-  let :test_model do
-    Class.new(RoadForest::RDFModel)
+  let :test_interface do
+    Class.new(RoadForest::Interface::RDF)
   end
 
-  let :other_test_model do
-    Class.new(RoadForest::RDFModel)
+  let :other_test_interface do
+    Class.new(RoadForest::Interface::RDF)
   end
 
   Af = RoadForest::RDF::Af
@@ -32,8 +32,8 @@ describe RoadForest::Affordance::Augmenter do
 
   let :router do
     RoadForest::Dispatcher.new(application).tap do |router|
-      router.add :test, ["a"], :parent, test_model
-      router.add :nest, ["a", "b", :id], :leaf, other_test_model
+      router.add :test, ["a"], :parent, test_interface
+      router.add :nest, ["a", "b", :id], :leaf, other_test_interface
     end
   end
 

@@ -15,7 +15,7 @@ module RoadForest
 
         register :read_only
 
-        attr_accessor :model, :trace, :content_engine
+        attr_accessor :interface, :trace, :content_engine
 
         ### RoadForest interface
 
@@ -43,17 +43,17 @@ module RoadForest
           response.body = body
         end
 
-        def retrieve_model
-          absolutize(@model.canonical_host, @model.retrieve)
+        def retrieve_interface
+          absolutize(@interface.canonical_host, @interface.retrieve)
         end
-        alias retreive_model retrieve_model
+        alias retreive_interface retrieve_interface
 
         #      def known_methods
         #        super + ["PATCH"]
         #      end
 
-        def model_supports(action)
-          @model.respond_to?(action)
+        def interface_supports(action)
+          @interface.respond_to?(action)
         end
         ### Webmachine interface
 
@@ -63,7 +63,7 @@ module RoadForest
 
         #Overridden rather than metaprogram content type methods
         def send(*args)
-          if args.length == 1 and not model.nil?
+          if args.length == 1 and not interface.nil?
             content_engine.fetch(args.first).call(self)
           else
             super
@@ -73,7 +73,7 @@ module RoadForest
         end
 
         def method(name)
-          if model.nil?
+          if interface.nil?
             super
           else
             content_engine.fetch(name).method(:call)
@@ -89,11 +89,11 @@ module RoadForest
         end
 
         def is_authorized?(header)
-          @authorization = @model.authorization(request.method, header)
+          @authorization = @interface.authorization(request.method, header)
           if(@authorization == :public || @authorization == :granted)
             return true
           end
-          @model.authentication_challenge
+          @interface.authentication_challenge
         end
 
         #XXX Add cache-control headers here
@@ -101,19 +101,19 @@ module RoadForest
         end
 
         def resource_exists?
-          @model.exists?
+          @interface.exists?
         end
 
         def generate_etag
-          @model.etag
+          @interface.etag
         end
 
         def last_modified
-          @model.last_modified
+          @interface.last_modified
         end
 
         def expires
-          @model.expires
+          @interface.expires
         end
       end
     end

@@ -22,7 +22,7 @@ module RoadForest
       Webmachine::Request.new(method, url, headers, body)
     end
 
-    def model_for(name, vars = nil)
+    def interface_for(name, vars = nil)
       route = @dispatcher.route_for_name(name)
       params = route.build_params(vars)
       route.resource.build_interface(params)
