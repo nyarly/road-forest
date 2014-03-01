@@ -1,3 +1,4 @@
+require 'roadforest/rdf/graph-focus'
 require 'roadforest/rdf/source-rigor'
 require 'roadforest/rdf/graph-store'
 require 'roadforest/rdf/document'

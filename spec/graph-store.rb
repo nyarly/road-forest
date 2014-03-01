@@ -3,16 +3,8 @@ require 'rdf/rdfa'
 require 'roadforest/rdf/document'
 require 'roadforest/rdf/graph-store'
 require 'roadforest/rdf/graph-focus'
-require 'roadforest/rdf/source-rigor'
 
 describe RoadForest::RDF do
-  let :source_rigor do
-    RoadForest::RDF::SourceRigor.new.tap do |skept|
-      skept.policy_list(:may_subject)
-      skept.investigator_list(:null)
-    end
-  end
-
   let :graph_store do
     RoadForest::RDF::GraphStore.new
   end
@@ -24,7 +16,6 @@ describe RoadForest::RDF do
       store = RoadForest::RDF::GraphStore.new
       access = RoadForest::RDF::WriteManager.new
       access.source_graph = store
-      access.rigor = source_rigor
       step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
 
       step[[:foaf, :givenname]] = "Lester"
@@ -39,7 +30,6 @@ describe RoadForest::RDF do
       store = RoadForest::RDF::GraphStore.new
       access = RoadForest::RDF::WriteManager.new
       access.source_graph = store
-      access.rigor = source_rigor
       step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
 
       step[[:foaf, :givenname]] = "Foster"
@@ -65,7 +55,6 @@ describe RoadForest::RDF do
     let :step do
       access = RoadForest::RDF::WriteManager.new
       access.source_graph = graph_store
-      access.rigor = source_rigor
       RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
     end
 
@@ -113,7 +102,6 @@ describe RoadForest::RDF do
 
     let :access do
       RoadForest::RDF::WriteManager.new.tap do |access|
-        access.rigor = source_rigor
         access.source_graph = graph_store
       end
     end

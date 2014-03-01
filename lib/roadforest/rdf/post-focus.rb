@@ -14,7 +14,6 @@ module RoadForest::RDF
     def post_to
       graph = ::RDF::Graph.new
       access = WriteManager.new
-      access.rigor = access_manager.rigor
       access.source_graph = graph
       focus = GraphFocus.new(access, subject)
 

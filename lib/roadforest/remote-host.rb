@@ -110,7 +110,7 @@ module RoadForest
     def getting(&block)
 
       graph = build_graph_store
-      access = RDF::ReadOnlyManager.new
+      access = RDF::RetrieveManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       reader = RDF::GraphFocus.new(access, url)
