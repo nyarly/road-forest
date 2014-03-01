@@ -13,5 +13,5 @@ class RoadForest::RDF::SourceRigor
     end
   end
 end
-require 'roadforest/rdf/source-rigor/null-investigator'
-require 'roadforest/rdf/source-rigor/http-investigator'
+require 'roadforest/graph/source-rigor/null-investigator'
+require 'roadforest/graph/source-rigor/http-investigator'

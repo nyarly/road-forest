@@ -1,4 +1,4 @@
-require 'roadforest/rdf/graph-store'
+require 'roadforest/graph/graph-store'
 require 'roadforest/remote-host'
 require 'roadforest/test-support/http-client'
 module RoadForest::TestSupport

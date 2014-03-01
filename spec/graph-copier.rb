@@ -1,5 +1,5 @@
 require 'roadforest/test-support/matchers'
-require 'roadforest/rdf/graph-copier'
+require 'roadforest/graph/graph-copier'
 
 describe RoadForest::RDF::GraphFocus, "with a CopyManager" do
   class TestVoc < ::RDF::Vocabulary("http://test.com/");end

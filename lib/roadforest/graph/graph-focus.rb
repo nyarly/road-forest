@@ -1,10 +1,10 @@
 require 'rdf'
 require 'rdf/model/node'
 require 'roadforest/rdf'
-require 'roadforest/rdf/focus-list'
-require 'roadforest/rdf/normalization'
-require 'roadforest/rdf/resource-query'
-require 'roadforest/rdf/access-manager'
+require 'roadforest/graph/focus-list'
+require 'roadforest/graph/normalization'
+require 'roadforest/graph/resource-query'
+require 'roadforest/graph/access-manager'
 
 module RoadForest::RDF
   class NullFocus < ::BasicObject

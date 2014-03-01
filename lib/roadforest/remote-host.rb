@@ -1,11 +1,11 @@
-require 'roadforest/rdf/source-rigor'
-require 'roadforest/rdf/source-rigor/credence-annealer'
-require 'roadforest/rdf/graph-store'
+require 'roadforest/graph/source-rigor'
+require 'roadforest/graph/source-rigor/credence-annealer'
+require 'roadforest/graph/graph-store'
 require 'roadforest/http/user-agent'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
-require 'roadforest/rdf/access-manager'
-require 'roadforest/rdf/graph-focus'
+require 'roadforest/graph/access-manager'
+require 'roadforest/graph/graph-focus'
 
 module RoadForest
   class RemoteHost
@@ -89,7 +89,7 @@ module RoadForest
     end
 
     def posting(&block)
-      require 'roadforest/rdf/post-focus'
+      require 'roadforest/graph/post-focus'
 
       graph = build_graph_store
       access = RDF::PostManager.new

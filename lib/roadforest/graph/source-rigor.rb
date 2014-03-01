@@ -2,8 +2,8 @@ require 'roadforest'
 
 module RoadForest::RDF
   class SourceRigor
-    require 'roadforest/rdf/source-rigor/investigator'
-    require 'roadforest/rdf/source-rigor/credence'
+    require 'roadforest/graph/source-rigor/investigator'
+    require 'roadforest/graph/source-rigor/credence'
 
     class << self
       def simple

@@ -1,5 +1,5 @@
 require 'roadforest/utility/class-registry'
-require 'roadforest/rdf/vocabulary'
+require 'roadforest/graph/vocabulary'
 
 module RoadForest
   module AffordanceClient

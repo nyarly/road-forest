@@ -1,8 +1,8 @@
 require 'rdf'
 require 'rdf/rdfa'
-require 'roadforest/rdf/document'
-require 'roadforest/rdf/graph-store'
-require 'roadforest/rdf/graph-focus'
+require 'roadforest/graph/document'
+require 'roadforest/graph/graph-store'
+require 'roadforest/graph/graph-focus'
 
 describe RoadForest::RDF do
   let :graph_store do

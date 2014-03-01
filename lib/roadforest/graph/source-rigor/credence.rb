@@ -1,8 +1,8 @@
 class RoadForest::RDF::SourceRigor
   module Credence
-    require 'roadforest/rdf/source-rigor/credence/role-if-available'
-    require 'roadforest/rdf/source-rigor/credence/any'
-    require 'roadforest/rdf/source-rigor/credence/none-if-role-absent'
+    require 'roadforest/graph/source-rigor/credence/role-if-available'
+    require 'roadforest/graph/source-rigor/credence/any'
+    require 'roadforest/graph/source-rigor/credence/none-if-role-absent'
 
     def self.policies
       @policies ||= {

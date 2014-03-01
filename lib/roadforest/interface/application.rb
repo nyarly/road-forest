@@ -1,7 +1,7 @@
-require 'roadforest/rdf/graph-store'
-require 'roadforest/rdf/etagging'
-require 'roadforest/rdf/access-manager'
-require 'roadforest/rdf/graph-focus'
+require 'roadforest/graph/graph-store'
+require 'roadforest/graph/etagging'
+require 'roadforest/graph/access-manager'
+require 'roadforest/graph/graph-focus'
 
 module RoadForest
   module Interface

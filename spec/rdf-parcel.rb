@@ -1,5 +1,5 @@
 require 'roadforest/test-support/matchers'
-require 'roadforest/rdf/parcel'
+require 'roadforest/graph/parcel'
 
 describe RoadForest::RDF::Parcel do
   let :literal do

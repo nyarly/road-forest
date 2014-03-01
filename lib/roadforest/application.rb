@@ -8,7 +8,7 @@ require 'roadforest/application/path-provider'
 require 'roadforest/application/services-host'
 require 'roadforest/resource/rdf'
 require 'roadforest/content-handling/common-engines'
-require 'roadforest/rdf/normalization'
+require 'roadforest/graph/normalization'
 require 'roadforest/authorization'
 
 module RoadForest

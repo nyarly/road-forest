@@ -8,7 +8,7 @@ require 'rdf-matchers'
 
 require 'roadforest/interfaces'
 require 'roadforest/application'
-require 'roadforest/rdf/vocabulary'
+require 'roadforest/graph/vocabulary'
 require 'roadforest/affordance/augmenter'
 require 'roadforest/content-handling/common-engines'
 require 'roadforest/content-handling/type-handlers/rdfpost'

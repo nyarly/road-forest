@@ -1,7 +1,7 @@
 require 'rdf'
 
-require 'roadforest/rdf/resource-query'
-require 'roadforest/rdf/resource-pattern'
+require 'roadforest/graph/resource-query'
+require 'roadforest/graph/resource-pattern'
 
 module RoadForest::RDF
   class FocusList < ::RDF::List

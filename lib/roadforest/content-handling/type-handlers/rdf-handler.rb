@@ -1,5 +1,5 @@
 require 'roadforest/content-handling/type-handler'
-require 'roadforest/rdf/normalization'
+require 'roadforest/graph/normalization'
 module RoadForest
   module MediaType
     module Handlers

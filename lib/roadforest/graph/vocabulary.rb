@@ -3,7 +3,7 @@ require 'rdf'
 
 module RoadForest::RDF
   module Vocabulary
-    class RF < ::RDF::Vocabulary("http://lrdesign.com/rdf/roadforest#")
+    class RF < ::RDF::Vocabulary("http://lrdesign.com/graph/roadforest#")
       property :Impulse
       property :impulse
       property :begunAt

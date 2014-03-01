@@ -1,4 +1,4 @@
-require 'roadforest/rdf/normalization'
+require 'roadforest/graph/normalization'
 
 describe RoadForest::RDF::Normalization do
   include described_class

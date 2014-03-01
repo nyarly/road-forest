@@ -1,7 +1,7 @@
 require 'rdf/query/pattern'
 require 'roadforest/rdf'
-require 'roadforest/rdf/graph-store'
-require 'roadforest/rdf/investigation'
+require 'roadforest/graph/graph-store'
+require 'roadforest/graph/investigation'
 
 module RoadForest::RDF
   class ResourcePattern < ::RDF::Query::Pattern

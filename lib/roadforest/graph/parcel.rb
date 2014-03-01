@@ -1,5 +1,5 @@
 require 'roadforest/rdf'
-require 'roadforest/rdf/normalization'
+require 'roadforest/graph/normalization'
 
 module RoadForest::RDF
   class Parcel

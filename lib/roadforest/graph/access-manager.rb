@@ -1,41 +1,10 @@
 require 'rdf'
-require 'roadforest/rdf/resource-query'
-require 'roadforest/rdf/resource-pattern'
-require 'roadforest/rdf/normalization'
-require 'roadforest/rdf/parcel'
+require 'roadforest/graph/resource-query'
+require 'roadforest/graph/resource-pattern'
+require 'roadforest/graph/normalization'
+require 'roadforest/graph/parcel'
 
 module RoadForest::RDF
-  module Rigorous
-    attr_accessor :rigor
-
-    def dup
-      other = self.class.allocate
-      other.resource = self.resource
-      other.rigor = self.rigor
-      other.source_graph = self.source_graph
-
-      return other
-    end
-
-    def build_query
-      ResourceQuery.new([], {}) do |query|
-        query.subject_context = resource
-        query.source_rigor = rigor
-        yield query
-      end
-    end
-
-    def query_execute(query, &block)
-      query = ResourceQuery.from(query, resource, rigor)
-      execute_search(query, &block)
-    end
-
-    def query_pattern(pattern, &block)
-      pattern = ResourcePattern.from(pattern, {:context_roles => {:subject => resource}, :source_rigor => rigor})
-      execute_search(pattern, &block)
-    end
-  end
-
   class ReadOnlyManager
     include ::RDF::Countable
     include ::RDF::Enumerable
@@ -86,10 +55,6 @@ module RoadForest::RDF
     end
   end
 
-  class RetrieveManager < ReadOnlyManager
-    include Rigorous
-  end
-
   class WriteManager < ReadOnlyManager
     def insert(statement)
       statement[3] = resource
@@ -101,10 +66,6 @@ module RoadForest::RDF
       statement.context = resource
       destination_graph.delete(statement)
     end
-  end
-
-  class PostManager < WriteManager
-    include Rigorous
   end
 
   class SplitManager < WriteManager
@@ -130,6 +91,45 @@ module RoadForest::RDF
         yield statement
       end
     end
+  end
+
+  module Rigorous
+    attr_accessor :rigor
+
+    def dup
+      other = self.class.allocate
+      other.resource = self.resource
+      other.rigor = self.rigor
+      other.source_graph = self.source_graph
+
+      return other
+    end
+
+    def build_query
+      ResourceQuery.new([], {}) do |query|
+        query.subject_context = resource
+        query.source_rigor = rigor
+        yield query
+      end
+    end
+
+    def query_execute(query, &block)
+      query = ResourceQuery.from(query, resource, rigor)
+      execute_search(query, &block)
+    end
+
+    def query_pattern(pattern, &block)
+      pattern = ResourcePattern.from(pattern, {:context_roles => {:subject => resource}, :source_rigor => rigor})
+      execute_search(pattern, &block)
+    end
+  end
+
+  class RetrieveManager < ReadOnlyManager
+    include Rigorous
+  end
+
+  class PostManager < WriteManager
+    include Rigorous
   end
 
   class UpdateManager < SplitManager

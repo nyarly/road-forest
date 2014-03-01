@@ -1,4 +1,4 @@
-require 'roadforest/rdf/source-rigor/investigator'
+require 'roadforest/graph/source-rigor/investigator'
 module RoadForest
   class RDF::SourceRigor
     class HTTPInvestigator < Investigator

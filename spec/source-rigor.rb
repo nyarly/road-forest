@@ -1,5 +1,5 @@
-require 'roadforest/rdf/source-rigor'
-require 'roadforest/rdf/graph-store'
+require 'roadforest/graph/source-rigor'
+require 'roadforest/graph/graph-store'
 
 describe RoadForest::RDF::SourceRigor do
   describe "credence policy" do
