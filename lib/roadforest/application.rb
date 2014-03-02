@@ -13,7 +13,7 @@ require 'roadforest/authorization'
 
 module RoadForest
   class Application
-    include RDF::Normalization
+    include Graph::Normalization
 
     def initialize(canonical_host, services = nil, configuration = nil, dispatcher = nil)
       @canonical_host = normalize_resource(canonical_host)

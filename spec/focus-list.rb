@@ -2,19 +2,19 @@ require 'rdf'
 require 'roadforest/graph/focus-list'
 require 'roadforest/graph/graph-focus'
 
-describe RoadForest::RDF::FocusList do
+describe RoadForest::Graph::FocusList do
   let :graph do
     RDF::Graph.new
   end
 
   let :access do
-    RoadForest::RDF::WriteManager.new.tap do |access|
+    RoadForest::Graph::WriteManager.new.tap do |access|
       access.source_graph = graph
     end
   end
 
   let :focus do
-    RoadForest::RDF::GraphFocus.new(access, "urn:root")
+    RoadForest::Graph::GraphFocus.new(access, "urn:root")
   end
 
   let :list do

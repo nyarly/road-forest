@@ -1,7 +1,7 @@
 require 'stringio'
 require 'roadforest'
 
-module RoadForest::RDF
+module RoadForest::Graph
   #Wrapper for text to be parsed into RDF
   class Document
     attr_accessor :content_type, :code, :source, :root_url, :body, :body_string

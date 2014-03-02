@@ -9,7 +9,7 @@ require 'roadforest/graph/graph-focus'
 
 module RoadForest
   class RemoteHost
-    include RDF::Normalization
+    include Graph::Normalization
 
     def initialize(well_known_url)
       self.url = well_known_url
@@ -21,7 +21,7 @@ module RoadForest
     end
 
     def build_graph_store
-      RDF::GraphStore.new
+      Graph::GraphStore.new
     end
 
     attr_writer :http_client
@@ -48,7 +48,7 @@ module RoadForest
     def source_rigor
       @source_rigor ||=
         begin
-          rigor = RDF::SourceRigor.http
+          rigor = Graph::SourceRigor.http
           rigor.graph_transfer = graph_transfer
           rigor
         end
@@ -60,7 +60,7 @@ module RoadForest
 
     def anneal(focus)
       graph = build_graph_store
-      annealer = RDF::SourceRigor::CredenceAnnealer.new(graph)
+      annealer = Graph::SourceRigor::CredenceAnnealer.new(graph)
       annealer.resolve do
         yield focus
       end
@@ -69,12 +69,12 @@ module RoadForest
     def putting(&block)
 
       graph = build_graph_store
-      access = RDF::UpdateManager.new
+      access = Graph::UpdateManager.new
       access.rigor = source_rigor
       access.source_graph = graph
-      updater = RDF::GraphFocus.new(access, url)
+      updater = Graph::GraphFocus.new(access, url)
 
-      annealer = RDF::SourceRigor::CredenceAnnealer.new(graph)
+      annealer = Graph::SourceRigor::CredenceAnnealer.new(graph)
 
       annealer.resolve do
         access.target_graph = ::RDF::Repository.new
@@ -92,10 +92,10 @@ module RoadForest
       require 'roadforest/graph/post-focus'
 
       graph = build_graph_store
-      access = RDF::PostManager.new
+      access = Graph::PostManager.new
       access.rigor = source_rigor
       access.source_graph = graph
-      poster = RDF::PostFocus.new(access, url)
+      poster = Graph::PostFocus.new(access, url)
 
       graphs = {}
       poster.graphs = graphs
@@ -110,10 +110,10 @@ module RoadForest
     def getting(&block)
 
       graph = build_graph_store
-      access = RDF::RetrieveManager.new
+      access = Graph::RetrieveManager.new
       access.rigor = source_rigor
       access.source_graph = graph
-      reader = RDF::GraphFocus.new(access, url)
+      reader = Graph::GraphFocus.new(access, url)
 
       anneal(reader, &block)
     end

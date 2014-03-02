@@ -1,15 +1,15 @@
 require 'roadforest/graph/source-rigor'
 require 'roadforest/graph/graph-store'
 
-describe RoadForest::RDF::SourceRigor do
+describe RoadForest::Graph::SourceRigor do
   describe "credence policy" do
     describe ":gossip" do
       let :graph_store do
-        RoadForest::RDF::GraphStore.new
+        RoadForest::Graph::GraphStore.new
       end
 
       let :source_rigor do
-        RoadForest::RDF::SourceRigor.new.tap do |source_rigor|
+        RoadForest::Graph::SourceRigor.new.tap do |source_rigor|
           source_rigor.investigator_list(:null)
           source_rigor.policy_list(:may_subject, :any)
         end
@@ -28,7 +28,7 @@ describe RoadForest::RDF::SourceRigor do
       end
 
       let :query do
-        RoadForest::RDF::ResourceQuery.new([], {}) do |query|
+        RoadForest::Graph::ResourceQuery.new([], {}) do |query|
           query.subject_context = subject
           query.source_rigor = source_rigor
           query.pattern( [subject, property, :value])

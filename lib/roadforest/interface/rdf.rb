@@ -3,7 +3,7 @@ require 'roadforest/interface/application'
 module RoadForest
   module Interface
     class RDF < Application
-      include RoadForest::RDF::Etagging
+      include RoadForest::Graph::Etagging
 
       def update(graph)
         graph_update(start_focus(graph))
@@ -30,9 +30,9 @@ module RoadForest
       end
 
       def start_focus(graph, resource_url=nil)
-        access = RoadForest::RDF::WriteManager.new
+        access = RoadForest::Graph::WriteManager.new
         access.source_graph = graph
-        focus = RoadForest::RDF::GraphFocus.new(access, resource_url || my_url)
+        focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
 
         yield focus if block_given?
         return focus
@@ -44,10 +44,10 @@ module RoadForest
         url = url_for(route_name, params)
         source_interface = interface_for(route_name, params)
 
-        access = RoadForest::RDF::CopyManager.new
+        access = RoadForest::Graph::CopyManager.new
         access.source_graph = source_interface.current_graph
         access.target_graph = node.access_manager.destination_graph
-        copier = RoadForest::RDF::GraphFocus.new(access, url)
+        copier = RoadForest::Graph::GraphFocus.new(access, url)
 
         yield copier if block_given?
         copier

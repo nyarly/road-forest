@@ -4,7 +4,7 @@ require 'roadforest/graph/resource-pattern'
 require 'roadforest/graph/normalization'
 require 'roadforest/graph/parcel'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class ReadOnlyManager
     include ::RDF::Countable
     include ::RDF::Enumerable

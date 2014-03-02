@@ -2,7 +2,7 @@ require 'rdf'
 require 'roadforest/graph/graph-focus'
 
 module RoadForest
-  module RDF
+  module Graph
     class GraphCopier < GraphFocus
       def query_value(query)
         #This isn't the most efficient way to do this (the query essentially

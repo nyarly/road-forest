@@ -4,7 +4,7 @@ require 'roadforest/graph/graph-store'
 require 'roadforest/graph/document'
 require 'rdf/rdfa'
 
-describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
+describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
   class Voc < ::RDF::Vocabulary("http:/pred.org/"); end
 
   let :context_node do
@@ -39,14 +39,14 @@ describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
   end
 
   let :document do
-    RoadForest::RDF::Document.new.tap do |doc|
+    RoadForest::Graph::Document.new.tap do |doc|
       doc.source = context_node.to_s
       doc.body_string = body_graph.dump(:rdfa)
     end
   end
 
   let :source_graph do
-    RoadForest::RDF::GraphStore.new.tap do |graph|
+    RoadForest::Graph::GraphStore.new.tap do |graph|
       graph.insert_document(document)
     end
   end
@@ -56,14 +56,14 @@ describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
   end
 
   let :source_rigor do
-    ::RoadForest::RDF::SourceRigor.new.tap do |skept|
+    ::RoadForest::Graph::SourceRigor.new.tap do |skept|
       skept.policy_list(:may_subject, :any)
       skept.investigator_list(:null)
     end
   end
 
   let :access do
-    RoadForest::RDF::UpdateManager.new.tap do |access|
+    RoadForest::Graph::UpdateManager.new.tap do |access|
       access.source_graph = source_graph
       access.target_graph = target_graph
       access.rigor = source_rigor
@@ -71,7 +71,7 @@ describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
   end
 
   subject :updater do
-    RoadForest::RDF::GraphFocus.new(access, context_node)
+    RoadForest::Graph::GraphFocus.new(access, context_node)
   end
 
   it "should make relevant prefixes available" do
@@ -86,7 +86,7 @@ describe RoadForest::RDF::GraphFocus, "with UpdateManager" do
 
     resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
 
-    resource_graph.query(:object => RoadForest::RDF::Vocabulary::RF[:Impulse]).should be_empty
+    resource_graph.query(:object => RoadForest::Graph::Vocabulary::RF[:Impulse]).should be_empty
     resource_graph.query(simple_statement).should be_empty
 
     resource_graph.query(blank_node_statement).should_not be_empty

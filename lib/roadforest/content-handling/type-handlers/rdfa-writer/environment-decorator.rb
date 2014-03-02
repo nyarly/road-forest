@@ -3,7 +3,7 @@ require 'roadforest/graph/vocabulary'
 
 module RoadForest
   module AffordanceClient
-    Af = RDF::Af
+    Af = Graph::Af
     def all_affordances
       @all_affordances ||=
         [

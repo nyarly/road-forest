@@ -1,6 +1,6 @@
 require 'roadforest/graph/source-rigor/investigator'
 module RoadForest
-  class RDF::SourceRigor
+  class Graph::SourceRigor
     class HTTPInvestigator < Investigator
       register :http
 

@@ -1,6 +1,6 @@
 require 'roadforest/utility/class-registry'
 
-class RoadForest::RDF::SourceRigor
+class RoadForest::Graph::SourceRigor
   class NotCredible < StandardError; end
   class NoCredibleResults < StandardError; end
 

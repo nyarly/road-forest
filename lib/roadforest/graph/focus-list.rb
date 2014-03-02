@@ -3,7 +3,7 @@ require 'rdf'
 require 'roadforest/graph/resource-query'
 require 'roadforest/graph/resource-pattern'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class FocusList < ::RDF::List
 
     attr_accessor :root_url, :base_node

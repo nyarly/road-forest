@@ -1,6 +1,6 @@
 require 'roadforest'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class SourceRigor
     require 'roadforest/graph/source-rigor/investigator'
     require 'roadforest/graph/source-rigor/credence'

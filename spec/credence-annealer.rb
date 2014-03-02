@@ -2,13 +2,13 @@ require 'roadforest/graph/source-rigor/credence-annealer'
 require 'roadforest/graph/graph-store'
 require 'timeout'
 
-describe RoadForest::RDF::SourceRigor::CredenceAnnealer do
+describe RoadForest::Graph::SourceRigor::CredenceAnnealer do
   let :graph do
-    RoadForest::RDF::GraphStore.new
+    RoadForest::Graph::GraphStore.new
   end
 
   subject :annealer do
-    RoadForest::RDF::SourceRigor::CredenceAnnealer.new(graph)
+    RoadForest::Graph::SourceRigor::CredenceAnnealer.new(graph)
   end
 
   it "should run it's block at least once" do

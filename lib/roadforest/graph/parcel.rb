@@ -1,7 +1,7 @@
 require 'roadforest/rdf'
 require 'roadforest/graph/normalization'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class Parcel
     include Normalization
 

@@ -1,7 +1,7 @@
 require 'addressable/uri'
 require 'rdf'
 
-module RoadForest::RDF
+module RoadForest::Graph
   module Normalization
     Vocabs = {}
     Vocabs["rdf"] = RDF

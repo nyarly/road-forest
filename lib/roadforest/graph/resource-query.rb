@@ -1,7 +1,7 @@
 require 'roadforest/rdf'
 require 'rdf/query'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class ResourceQuery < ::RDF::Query
     def initialize(patterns = [], options = {}, &block)
       @subject_context = options[:subject_context]

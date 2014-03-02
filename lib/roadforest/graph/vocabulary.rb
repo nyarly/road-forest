@@ -1,7 +1,7 @@
 require 'roadforest/rdf'
 require 'rdf'
 
-module RoadForest::RDF
+module RoadForest::Graph
   module Vocabulary
     class RF < ::RDF::Vocabulary("http://lrdesign.com/graph/roadforest#")
       property :Impulse

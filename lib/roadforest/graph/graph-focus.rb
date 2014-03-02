@@ -6,7 +6,7 @@ require 'roadforest/graph/normalization'
 require 'roadforest/graph/resource-query'
 require 'roadforest/graph/access-manager'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class NullFocus < ::BasicObject
     def initialize(focus, pattern, callsite)
       @focus, @pattern, @callsite = focus, pattern, callsite

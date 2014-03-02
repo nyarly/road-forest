@@ -1,4 +1,4 @@
-class RoadForest::RDF::SourceRigor
+class RoadForest::Graph::SourceRigor
   module Credence
     require 'roadforest/graph/source-rigor/credence/role-if-available'
     require 'roadforest/graph/source-rigor/credence/any'

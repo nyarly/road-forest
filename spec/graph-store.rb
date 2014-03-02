@@ -4,19 +4,19 @@ require 'roadforest/graph/document'
 require 'roadforest/graph/graph-store'
 require 'roadforest/graph/graph-focus'
 
-describe RoadForest::RDF do
+describe RoadForest::Graph do
   let :graph_store do
-    RoadForest::RDF::GraphStore.new
+    RoadForest::Graph::GraphStore.new
   end
 
   #merging graphs
 
-  describe RoadForest::RDF::GraphStore do
+  describe RoadForest::Graph::GraphStore do
     let :root_body do
-      store = RoadForest::RDF::GraphStore.new
-      access = RoadForest::RDF::WriteManager.new
+      store = RoadForest::Graph::GraphStore.new
+      access = RoadForest::Graph::WriteManager.new
       access.source_graph = store
-      step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+      step = RoadForest::Graph::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
 
       step[[:foaf, :givenname]] = "Lester"
       step[[:dc, :date]] = Time.now
@@ -27,10 +27,10 @@ describe RoadForest::RDF do
     end
 
     let :second_body do
-      store = RoadForest::RDF::GraphStore.new
-      access = RoadForest::RDF::WriteManager.new
+      store = RoadForest::Graph::GraphStore.new
+      access = RoadForest::Graph::WriteManager.new
       access.source_graph = store
-      step = RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+      step = RoadForest::Graph::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
 
       step[[:foaf, :givenname]] = "Foster"
       step[[:dc, :date]] = Time.now
@@ -39,23 +39,23 @@ describe RoadForest::RDF do
     end
 
     let :first_doc do
-      RoadForest::RDF::Document.new.tap do |doc|
+      RoadForest::Graph::Document.new.tap do |doc|
         doc.source = "http://lrdesign.com/test-rdf"
         doc.body_string = root_body
       end
     end
 
     let :second_doc do
-      RoadForest::RDF::Document.new.tap do |doc|
+      RoadForest::Graph::Document.new.tap do |doc|
         doc.source = "http://lrdesign.com/test-rdf"
         doc.body_string = second_body
       end
     end
 
     let :step do
-      access = RoadForest::RDF::WriteManager.new
+      access = RoadForest::Graph::WriteManager.new
       access.source_graph = graph_store
-      RoadForest::RDF::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
+      RoadForest::Graph::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
     end
 
     before :each do
@@ -75,7 +75,7 @@ describe RoadForest::RDF do
     end
   end
 
-  describe RoadForest::RDF::GraphFocus do
+  describe RoadForest::Graph::GraphFocus do
     let :main_subject do
       RDF::URI.new("http://test.com/main")
     end
@@ -101,13 +101,13 @@ describe RoadForest::RDF do
     end
 
     let :access do
-      RoadForest::RDF::WriteManager.new.tap do |access|
+      RoadForest::Graph::WriteManager.new.tap do |access|
         access.source_graph = graph_store
       end
     end
 
     let :step do
-      RoadForest::RDF::GraphFocus.new(access, main_subject)
+      RoadForest::Graph::GraphFocus.new(access, main_subject)
     end
 
     it "should enumerate forward properties" do

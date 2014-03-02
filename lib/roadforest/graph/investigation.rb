@@ -1,6 +1,6 @@
 require 'roadforest/rdf'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class Investigation
     attr_accessor :context_roles, :queryable, :results, :source_rigor
 

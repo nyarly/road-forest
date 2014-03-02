@@ -1,7 +1,7 @@
 require 'roadforest/test-support/matchers'
 require 'roadforest/graph/parcel'
 
-describe RoadForest::RDF::Parcel do
+describe RoadForest::Graph::Parcel do
   let :literal do
     42
   end
@@ -59,7 +59,7 @@ describe RoadForest::RDF::Parcel do
   end
 
   let :parceller do
-    RoadForest::RDF::Parcel.new.tap do |parceller|
+    RoadForest::Graph::Parcel.new.tap do |parceller|
       parceller.graph = source_graph
     end
   end

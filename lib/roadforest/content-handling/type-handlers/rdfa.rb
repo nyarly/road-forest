@@ -12,7 +12,7 @@ module RoadForest
       #image/svg+xml
       #application/xhtml+xml
       class RDFa < RDFHandler
-        include RDF::Normalization
+        include Graph::Normalization
 
         attr_writer :valise, :tilt_cache
 

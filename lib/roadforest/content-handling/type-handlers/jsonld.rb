@@ -5,7 +5,7 @@ module RoadForest
     module Handlers
       #application/ld+json
       class JSONLD < RDFHandler
-        include RDF::Normalization
+        include Graph::Normalization
 
         def local_to_network(base_uri, rdf)
           raise "Invalid base uri: #{base_uri}" if base_uri.nil?

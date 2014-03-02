@@ -3,7 +3,7 @@ require 'roadforest/rdf'
 require 'roadforest/graph/graph-store'
 require 'roadforest/graph/investigation'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class ResourcePattern < ::RDF::Query::Pattern
     def self.from(pattern, options)
       pattern = case pattern
@@ -19,7 +19,7 @@ module RoadForest::RDF
                   options ||= {}
                   self.new(options.merge(pattern))
                 else
-                  raise ArgumentError, "expected RoadForest::RDF::ResourcePattern, RDF::Query::Pattern, RDF::Statement, Hash, or Array, but got #{pattern.inspect}"
+                  raise ArgumentError, "expected RoadForest::Graph::ResourcePattern, RDF::Query::Pattern, RDF::Statement, Hash, or Array, but got #{pattern.inspect}"
                 end
 
       unless options.nil?
@@ -35,7 +35,7 @@ module RoadForest::RDF
     attr_accessor :context_roles, :source_rigor
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
-      unless queryable.is_a? RoadForest::RDF::GraphStore
+      unless queryable.is_a? RoadForest::Graph::GraphStore
         return super(queryable, bindings || {}, &block)
       end
 

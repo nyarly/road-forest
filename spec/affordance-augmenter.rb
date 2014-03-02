@@ -11,7 +11,7 @@ describe RoadForest::Affordance::Augmenter do
     Class.new(RoadForest::Interface::RDF)
   end
 
-  Af = RoadForest::RDF::Af
+  Af = RoadForest::Graph::Af
 
   class EX < RDF::Vocabulary("http://example.com/"); end
 

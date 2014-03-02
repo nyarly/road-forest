@@ -1,6 +1,6 @@
 require 'rdf'
 
 module RoadForest
-  module RDF
+  module Graph
   end
 end

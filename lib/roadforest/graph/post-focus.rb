@@ -1,6 +1,6 @@
 require 'roadforest/graph/graph-focus'
 
-module RoadForest::RDF
+module RoadForest::Graph
   class PostFocus < GraphFocus
 
     attr_accessor :graphs

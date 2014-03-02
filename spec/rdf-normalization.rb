@@ -1,6 +1,6 @@
 require 'roadforest/graph/normalization'
 
-describe RoadForest::RDF::Normalization do
+describe RoadForest::Graph::Normalization do
   include described_class
 
   it "should match http://test.com and http://test.com/" do

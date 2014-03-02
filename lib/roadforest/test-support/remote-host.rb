@@ -9,7 +9,7 @@ module RoadForest::TestSupport
     end
 
     def build_graph_store
-      RoadForest::RDF::GraphStore.new
+      RoadForest::Graph::GraphStore.new
     end
 
     def http_client

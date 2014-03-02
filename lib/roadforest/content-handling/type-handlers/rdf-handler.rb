@@ -4,7 +4,7 @@ module RoadForest
   module MediaType
     module Handlers
       class RDFHandler < Handler
-        include RDF::Normalization
+        include Graph::Normalization
 
         def get_output(interface)
           graph = super

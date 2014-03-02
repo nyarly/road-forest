@@ -1,6 +1,6 @@
 require 'roadforest/rdf'
 
-module RoadForest::RDF
+module RoadForest::Graph
   module Etagging
     def etag_from(graph)
       require 'openssl'

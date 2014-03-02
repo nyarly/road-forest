@@ -4,7 +4,7 @@ require 'rdf'
 
 module RoadForest
   module Affordance
-    Af = RDF::Af
+    Af = Graph::Af
 
     class Augmenter
       attr_accessor :router

@@ -1,7 +1,7 @@
 require 'roadforest/test-support/matchers'
 require 'roadforest/graph/graph-copier'
 
-describe RoadForest::RDF::GraphFocus, "with a CopyManager" do
+describe RoadForest::Graph::GraphFocus, "with a CopyManager" do
   class TestVoc < ::RDF::Vocabulary("http://test.com/");end
 
   let :start_subject do
@@ -33,14 +33,14 @@ describe RoadForest::RDF::GraphFocus, "with a CopyManager" do
   end
 
   let :access do
-    RoadForest::RDF::CopyManager.new.tap do |access|
+    RoadForest::Graph::CopyManager.new.tap do |access|
       access.source_graph = source_graph
       access.target_graph = target_graph
     end
   end
 
   let :copier do
-    RoadForest::RDF::GraphFocus.new(access, start_subject)
+    RoadForest::Graph::GraphFocus.new(access, start_subject)
   end
 
   #copier needs URL accessor

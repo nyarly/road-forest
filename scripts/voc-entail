@@ -7,7 +7,7 @@ require 'erb'
 
 class VocEntail
   RDFS = ::RDF::RDFS
-  Af = ::RoadForest::RDF::Af
+  Af = ::RoadForest::Graph::Af
 
   def subclass_of(klass)
     ::RDF::Query.new { pattern [ :subclass, RDF::RDFS.subClassOf, klass ] }

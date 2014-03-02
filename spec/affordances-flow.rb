@@ -17,7 +17,7 @@ require 'roadforest/content-handling/type-handlers/rdfa'
 class EX < RDF::Vocabulary("http://example.com/"); end
 
 describe "The full affordances flow" do
-  Aff = RoadForest::RDF::Af
+  Aff = RoadForest::Graph::Af
 
   let :service_host do
     RoadForest::Application::ServicesHost.new
