@@ -1,8 +1,8 @@
-require 'roadforest/affordance/augmenter'
+require 'roadforest/augment/affordance'
 require 'roadforest/interfaces'
 require 'roadforest/application'
 
-describe RoadForest::Affordance::Augmenter do
+describe RoadForest::Augment::Affordance do
   let :test_interface do
     Class.new(RoadForest::Interface::RDF)
   end
@@ -38,7 +38,7 @@ describe RoadForest::Affordance::Augmenter do
   end
 
   let :augmenter do
-    described_class.new.tap do |augmenter|
+    RoadForest::Augment::Augmenter.new.tap do |augmenter|
       augmenter.router = router
       augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
     end

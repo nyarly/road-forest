@@ -1,0 +1,1 @@
+require 'roadforest/augment/affordance'

@@ -9,7 +9,7 @@ require 'rdf-matchers'
 require 'roadforest/interfaces'
 require 'roadforest/application'
 require 'roadforest/graph/vocabulary'
-require 'roadforest/affordance/augmenter'
+require 'roadforest/augmentations'
 require 'roadforest/content-handling/common-engines'
 require 'roadforest/content-handling/type-handlers/rdfpost'
 require 'roadforest/content-handling/type-handlers/rdfa'
@@ -39,7 +39,7 @@ describe "The full affordances flow" do
   end
 
   let :augmenter do
-    RoadForest::Affordance::Augmenter.new.tap do |augmenter|
+    RoadForest::Augment::Augmenter.new.tap do |augmenter|
       augmenter.router = router
       augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
     end
