@@ -3,7 +3,6 @@ require 'rdf/model/node'
 require 'roadforest/rdf'
 require 'roadforest/graph/focus-list'
 require 'roadforest/graph/normalization'
-require 'roadforest/graph/resource-query'
 require 'roadforest/graph/access-manager'
 
 module RoadForest::Graph

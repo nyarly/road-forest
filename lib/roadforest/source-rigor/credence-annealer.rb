@@ -1,6 +1,6 @@
 require 'roadforest/rdf'
 
-class RoadForest::Graph::SourceRigor
+module RoadForest::SourceRigor
   class CredenceAnnealer
     def initialize(graph)
       @graph = graph

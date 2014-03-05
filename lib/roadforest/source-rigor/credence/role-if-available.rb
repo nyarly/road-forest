@@ -1,4 +1,4 @@
-class RoadForest::Graph::SourceRigor
+module RoadForest::SourceRigor
   module Credence
     #If there are any results for the subject context, they're good
     class RoleIfAvailable

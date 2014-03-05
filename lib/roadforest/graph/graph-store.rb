@@ -3,8 +3,8 @@ require 'roadforest/debug'
 require 'roadforest/graph/vocabulary'
 require 'roadforest/graph/normalization'
 
-require 'roadforest/graph/resource-query'
-require 'roadforest/graph/resource-pattern'
+require 'roadforest/source-rigor/resource-query'
+require 'roadforest/source-rigor/resource-pattern'
 
 module RoadForest::Graph
   class GraphStore
@@ -183,7 +183,7 @@ module RoadForest::Graph
     def query_execute(query, &block)
       #XXX Weird edge case of GM getting queried with a vanilla RDF::Query...
       #needs tests, thought
-      query = ResourceQuery.from(query)
+      query = RoadForest::SourceRigor::ResourceQuery.from(query)
       query.execute(self).filter do |solution|
         solution.respond_to?(:context) and not solution.context.nil?
       end.each(&block)
@@ -191,7 +191,7 @@ module RoadForest::Graph
 
     def query_pattern(pattern, &block)
       case pattern
-      when ResourcePattern
+      when RoadForest::SourceRigor::ResourcePattern
         pattern.execute(@repository, {}, :context_roles => {:local => local_context_node}) do |statement|
           next if statement.context.nil?
           yield statement if block_given?

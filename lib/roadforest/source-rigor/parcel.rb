@@ -1,9 +1,9 @@
 require 'roadforest/rdf'
 require 'roadforest/graph/normalization'
 
-module RoadForest::Graph
-  class Parcel
-    include Normalization
+module RoadForest
+  class SourceRigor::Parcel
+    include Graph::Normalization
 
     attr_accessor :graph
 

@@ -1,4 +1,4 @@
-class RoadForest::Graph::SourceRigor
+module RoadForest::SourceRigor
   module Credence
     class Any
       def credible(contexts, results)

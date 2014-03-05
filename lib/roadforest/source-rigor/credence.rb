@@ -1,9 +1,5 @@
-class RoadForest::Graph::SourceRigor
+module RoadForest::SourceRigor
   module Credence
-    require 'roadforest/graph/source-rigor/credence/role-if-available'
-    require 'roadforest/graph/source-rigor/credence/any'
-    require 'roadforest/graph/source-rigor/credence/none-if-role-absent'
-
     def self.policies
       @policies ||= {
         :any => Any.new,
@@ -27,3 +23,7 @@ class RoadForest::Graph::SourceRigor
     end
   end
 end
+
+require 'roadforest/source-rigor/credence/role-if-available'
+require 'roadforest/source-rigor/credence/any'
+require 'roadforest/source-rigor/credence/none-if-role-absent'

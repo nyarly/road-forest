@@ -1,5 +1,5 @@
 require 'roadforest/graph/graph-focus'
-require 'roadforest/graph/source-rigor'
+require 'roadforest/source-rigor'
 require 'roadforest/graph/graph-store'
 require 'roadforest/graph/document'
 require 'rdf/rdfa'
@@ -56,14 +56,14 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
   end
 
   let :source_rigor do
-    ::RoadForest::Graph::SourceRigor.new.tap do |skept|
+    ::RoadForest::SourceRigor::Engine.new.tap do |skept|
       skept.policy_list(:may_subject, :any)
       skept.investigator_list(:null)
     end
   end
 
   let :access do
-    RoadForest::Graph::UpdateManager.new.tap do |access|
+    RoadForest::SourceRigor::UpdateManager.new.tap do |access|
       access.source_graph = source_graph
       access.target_graph = target_graph
       access.rigor = source_rigor

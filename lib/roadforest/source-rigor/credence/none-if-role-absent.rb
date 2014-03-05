@@ -1,4 +1,4 @@
-class RoadForest::Graph::SourceRigor
+module RoadForest::SourceRigor
   module Credence
     #Unless we have results for the subject context, nothing is valid
     class NoneIfRoleAbsent

@@ -1,11 +1,11 @@
-require 'roadforest/graph/source-rigor'
-require 'roadforest/graph/source-rigor/credence-annealer'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor'
+require 'roadforest/source-rigor/credence-annealer'
+require 'roadforest/source-rigor/rigorous-access'
+require 'roadforest/graph/graph-store' #XXX
+require 'roadforest/graph/graph-focus'
 require 'roadforest/http/user-agent'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
-require 'roadforest/graph/access-manager'
-require 'roadforest/graph/graph-focus'
 
 module RoadForest
   class RemoteHost
@@ -48,7 +48,7 @@ module RoadForest
     def source_rigor
       @source_rigor ||=
         begin
-          rigor = Graph::SourceRigor.http
+          rigor = SourceRigor.http
           rigor.graph_transfer = graph_transfer
           rigor
         end
@@ -60,7 +60,7 @@ module RoadForest
 
     def anneal(focus)
       graph = build_graph_store
-      annealer = Graph::SourceRigor::CredenceAnnealer.new(graph)
+      annealer = SourceRigor::CredenceAnnealer.new(graph)
       annealer.resolve do
         yield focus
       end
@@ -69,12 +69,12 @@ module RoadForest
     def putting(&block)
 
       graph = build_graph_store
-      access = Graph::UpdateManager.new
+      access = SourceRigor::UpdateManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       updater = Graph::GraphFocus.new(access, url)
 
-      annealer = Graph::SourceRigor::CredenceAnnealer.new(graph)
+      annealer = SourceRigor::CredenceAnnealer.new(graph)
 
       annealer.resolve do
         access.target_graph = ::RDF::Repository.new
@@ -92,7 +92,7 @@ module RoadForest
       require 'roadforest/graph/post-focus'
 
       graph = build_graph_store
-      access = Graph::PostManager.new
+      access = SourceRigor::PostManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       poster = Graph::PostFocus.new(access, url)
@@ -110,7 +110,7 @@ module RoadForest
     def getting(&block)
 
       graph = build_graph_store
-      access = Graph::RetrieveManager.new
+      access = SourceRigor::RetrieveManager.new
       access.rigor = source_rigor
       access.source_graph = graph
       reader = Graph::GraphFocus.new(access, url)

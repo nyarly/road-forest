@@ -1,5 +1,6 @@
-require 'roadforest/graph/source-rigor/investigator'
-class RoadForest::Graph::SourceRigor
+require 'roadforest/source-rigor/investigator'
+
+module RoadForest::SourceRigor
   class NullInvestigator < Investigator
     register :null
 

@@ -1,17 +1,9 @@
 require 'rdf'
 
-require 'roadforest/graph/resource-query'
-require 'roadforest/graph/resource-pattern'
-
 module RoadForest::Graph
   class FocusList < ::RDF::List
 
     attr_accessor :root_url, :base_node
-
-    #XXX Can delete?
-    def source_rigor
-      graph.rigor
-    end
 
     alias car first
     alias cdr rest
