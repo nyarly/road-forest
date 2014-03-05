@@ -1,5 +1,5 @@
 require 'rdf/query/pattern'
-require 'roadforest/rdf'
+require 'roadforest/graph'
 require 'roadforest/graph/graph-store'
 require 'roadforest/source-rigor/investigation'
 

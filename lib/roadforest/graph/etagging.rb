@@ -1,4 +1,4 @@
-require 'roadforest/rdf'
+require 'roadforest/graph'
 
 module RoadForest::Graph
   module Etagging

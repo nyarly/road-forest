@@ -1,6 +1,6 @@
 require 'rdf'
 require 'rdf/model/node'
-require 'roadforest/rdf'
+require 'roadforest/graph'
 require 'roadforest/graph/focus-list'
 require 'roadforest/graph/normalization'
 require 'roadforest/graph/access-manager'

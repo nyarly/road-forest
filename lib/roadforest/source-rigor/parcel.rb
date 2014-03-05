@@ -1,4 +1,4 @@
-require 'roadforest/rdf'
+require 'roadforest/graph'
 require 'roadforest/graph/normalization'
 
 module RoadForest

@@ -1,4 +1,4 @@
-require 'roadforest/rdf'
+require 'roadforest/graph'
 require 'rdf'
 
 module RoadForest::Graph
