@@ -11,8 +11,8 @@ require 'roadforest/application'
 require 'roadforest/graph/vocabulary'
 require 'roadforest/augmentations'
 require 'roadforest/content-handling/common-engines'
-require 'roadforest/content-handling/type-handlers/rdfpost'
-require 'roadforest/content-handling/type-handlers/rdfa'
+require 'roadforest/type-handlers/rdfpost'
+require 'roadforest/type-handlers/rdfa'
 
 class EX < RDF::Vocabulary("http://example.com/"); end
 
@@ -96,13 +96,13 @@ describe "The full affordances flow" do
         nil
       end
 
-    templates = RoadForest::MediaType::RDFaWriter::TemplateHandler.new
+    templates = RoadForest::TypeHandlers::RDFaWriter::TemplateHandler.new
     templates.valise = @valise
     templates.template_cache = @tilt_cache
     templates.style_name = options[:haml]
     templates.haml_options = options[:haml_options]
 
-    engine = RoadForest::MediaType::RDFaWriter::RenderEngine.new(graph, options[:debug]) do |engine|
+    engine = RoadForest::TypeHandlers::RDFaWriter::RenderEngine.new(graph, options[:debug]) do |engine|
       engine.template_handler = templates
       engine.base_uri = base_uri
       engine.lang = options[:lang]
@@ -176,7 +176,7 @@ describe "The full affordances flow" do
     subject :received_graph do
       RDF::Repository.new.tap do |graph|
         list = URI::decode_www_form(post_data)
-        RoadForest::MediaType::Handlers::RDFPost::Reader.new(list).each_statement do |stmt|
+        RoadForest::TypeHandlers::RDFPost::Reader.new(list).each_statement do |stmt|
           graph.insert(stmt)
         end
       end

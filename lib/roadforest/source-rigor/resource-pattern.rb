@@ -1,6 +1,6 @@
 require 'rdf/query/pattern'
 require 'roadforest/graph'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'roadforest/source-rigor/investigation'
 
 module RoadForest::SourceRigor
@@ -35,7 +35,7 @@ module RoadForest::SourceRigor
     attr_accessor :context_roles, :source_rigor
 
     def execute(queryable, bindings = nil, query_context_roles = nil, &block)
-      unless queryable.is_a? RoadForest::Graph::GraphStore
+      unless queryable.is_a? RoadForest::SourceRigor::GraphStore
         return super(queryable, bindings || {}, &block)
       end
 

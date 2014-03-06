@@ -1,0 +1,71 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/0302.html
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/turtle, text/rdf+turtle, text/turtle, application/x-turtle, application/n-triples,
+        text/plain;q=0.5, text/html;q=0.5, application/xhtml+xml, image/svg+xml, application/ld+json,
+        application/x-ld+json, application/n-quads, text/x-nquads, */*;q=0.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 06 Mar 2014 02:07:02 GMT
+      Server:
+      - Apache/2.2.22 (Ubuntu)
+      X-Powered-By:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.17
+      Cache-Control:
+      - public, must-revalidate, max-age=3600
+      Etag:
+      - '"eaf7514da8170a2a2d82805db1163ad136936ad3"'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Digest:
+      - eaf7514da8170a2a2d82805db1163ad136936ad3
+      Age:
+      - '0'
+      X-Rack-Cache:
+      - miss, ignore, store
+      Status:
+      - '200'
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '265'
+      Keep-Alive:
+      - timeout=5, max=100
+      Connection:
+      - close
+      Content-Type:
+      - text/html;charset=utf-8
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KICA8dGl0bGU+VGVzdCAw
+        MzAyOiB2YXJpb3VzIHR5cGVzIG9mIHRva2VucyBpbiBAdHlwZW9mPC90aXRs
+        ZT4KPC9oZWFkPgo8Ym9keT4KICA8ZGl2IHZvY2FiPSJodHRwOi8vc2NoZW1h
+        Lm9yZy8iIHJlc291cmNlPSJodHRwOi8vb3BlbnNwcmluZy5uZXQvc2NvciNt
+        ZSIgdHlwZW9mPSJQZXJzb24gZm9hZjpQZXJzb24gaHR0cDovL3B1cmwub3Jn
+        L2RjL3Rlcm1zL0FnZW50Ij4KICAgIDxhIHByb3BlcnR5PSJob21lcGFnZSIg
+        aHJlZj0iaHR0cDovL29wZW5zcHJpbmcubmV0LyI+PHNwYW4gcHJvcGVydHk9
+        Im5hbWUiPlN0w6lwaGFuZSBDb3Jsb3NxdWV0PC9zcGFuPjwvYT4KICA8L2Rp
+        dj4KPC9ib2R5Pgo8L2h0bWw+
+    http_version: 
+  recorded_at: Thu, 06 Mar 2014 02:05:55 GMT
+recorded_with: VCR 2.8.0

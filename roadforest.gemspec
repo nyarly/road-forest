@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name		= "roadforest"
-  spec.version		= "0.2"
+  spec.version		= "0.5"
   author_list = {
     "Judson Lester" => 'nyarly@gmail.com'
   }
@@ -23,72 +23,68 @@ Gem::Specification.new do |spec|
   # Do this: y$jj@"
   # !!find lib bin doc spec spec_help -not -regex '.*\.sw.' -type f 2>/dev/null
   spec.files    = %w[
-    lib/roadforest/rdf/graph-store.rb
-    lib/roadforest/rdf/normalization.rb
-    lib/roadforest/rdf/focus-list.rb
-    lib/roadforest/rdf/graph-copier.rb
-    lib/roadforest/rdf/access-manager.rb
-    lib/roadforest/rdf/source-rigor.rb
-    lib/roadforest/rdf/graph-focus.rb
-    lib/roadforest/rdf/etagging.rb
-    lib/roadforest/rdf/source-rigor/null-investigator.rb
-    lib/roadforest/rdf/source-rigor/credence.rb
-    lib/roadforest/rdf/source-rigor/credence/any.rb
-    lib/roadforest/rdf/source-rigor/credence/role-if-available.rb
-    lib/roadforest/rdf/source-rigor/credence/none-if-role-absent.rb
-    lib/roadforest/rdf/source-rigor/http-investigator.rb
-    lib/roadforest/rdf/source-rigor/investigator.rb
-    lib/roadforest/rdf/source-rigor/credence-annealer.rb
-    lib/roadforest/rdf/post-focus.rb
-    lib/roadforest/rdf/investigation.rb
-    lib/roadforest/rdf/vocabulary.rb
-    lib/roadforest/rdf/document.rb
-    lib/roadforest/rdf/resource-pattern.rb
-    lib/roadforest/rdf/parcel.rb
-    lib/roadforest/rdf/resource-query.rb
+    lib/roadforest.rb
+    lib/roadforest-client.rb
+    lib/roadforest-common.rb
+    lib/roadforest-testing.rb
+    lib/roadforest-server.rb
+
     lib/roadforest/http/message.rb
     lib/roadforest/http/graph-response.rb
+    lib/roadforest/http/keychain.rb
     lib/roadforest/http/adapters/excon.rb
+    lib/roadforest/http/user-agent.rb
     lib/roadforest/http/graph-transfer.rb
-    lib/roadforest/resource/rdf/list.rb
-    lib/roadforest/resource/rdf/parent-item.rb
-    lib/roadforest/resource/rdf/read-only.rb
-    lib/roadforest/resource/rdf/leaf-item.rb
-    lib/roadforest/resource/http/form-parsing.rb
+    lib/roadforest/graph/graph-store.rb
+    lib/roadforest/graph/normalization.rb
+    lib/roadforest/graph/focus-list.rb
+    lib/roadforest/graph/graph-copier.rb
+    lib/roadforest/graph/graph-focus.rb
+    lib/roadforest/graph/etagging.rb
+    lib/roadforest/graph/post-focus.rb
+    lib/roadforest/graph/vocabulary.rb
+    lib/roadforest/graph/document.rb
+    lib/roadforest/graph/access-manager.rb
+    lib/roadforest/graph.rb
     lib/roadforest/resource/role/writable.rb
     lib/roadforest/resource/role/has-children.rb
-    lib/roadforest/resource/rdf.rb
+    lib/roadforest/resource/list.rb
+    lib/roadforest/resource/parent-item.rb
+    lib/roadforest/resource/read-only.rb
+    lib/roadforest/resource/leaf-item.rb
     lib/roadforest/test-support/http-client.rb
     lib/roadforest/test-support/trace-formatter.rb
     lib/roadforest/test-support/matchers.rb
     lib/roadforest/test-support/dispatcher-facade.rb
     lib/roadforest/test-support/remote-host.rb
+    lib/roadforest/authorization.rb
     lib/roadforest/server.rb
     lib/roadforest/application/services-host.rb
     lib/roadforest/application/path-provider.rb
     lib/roadforest/application/parameters.rb
     lib/roadforest/application/dispatcher.rb
     lib/roadforest/application/route-adapter.rb
-    lib/roadforest/model.rb
-    lib/roadforest/models.rb
+    lib/roadforest/resource.rb
+    lib/roadforest/source-rigor.rb
+    lib/roadforest/interfaces.rb
     lib/roadforest/test-support.rb
-    lib/roadforest/rdf.rb
-    lib/roadforest/blob-model.rb
-    lib/roadforest/utility/class-registry.rb
-    lib/roadforest/application.rb
-    lib/roadforest/remote-host.rb
-    lib/roadforest/authorization.rb
     lib/roadforest/debug.rb
-    lib/roadforest/http/user-agent.rb
-    lib/roadforest/http/keychain.rb
-    lib/roadforest/http.rb
-    lib/roadforest.rb
-    lib/roadforest/affordance/augmenter.rb
-    lib/roadforest/content-handling/engine.rb
-    lib/roadforest/content-handling/media-type.rb
-    lib/roadforest/content-handling/handler-wrap.rb
-    lib/roadforest/content-handling/type-handler.rb
-    lib/roadforest/content-handling/type-handlers/jsonld.rb
+    lib/roadforest/source-rigor/null-investigator.rb
+    lib/roadforest/source-rigor/rigorous-access.rb
+    lib/roadforest/source-rigor/investigation.rb
+    lib/roadforest/source-rigor/credence.rb
+    lib/roadforest/source-rigor/engine.rb
+    lib/roadforest/source-rigor/credence/any.rb
+    lib/roadforest/source-rigor/credence/role-if-available.rb
+    lib/roadforest/source-rigor/credence/none-if-role-absent.rb
+    lib/roadforest/source-rigor/resource-pattern.rb
+    lib/roadforest/source-rigor/http-investigator.rb
+    lib/roadforest/source-rigor/investigator.rb
+    lib/roadforest/source-rigor/parcel.rb
+    lib/roadforest/source-rigor/credence-annealer.rb
+    lib/roadforest/source-rigor/resource-query.rb
+    lib/roadforest/augmentations.rb
+    lib/roadforest/utility/class-registry.rb
     lib/roadforest/content-handling/type-handlers/rdf-handler.rb
     lib/roadforest/content-handling/type-handlers/rdfa.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer.rb
@@ -98,37 +94,62 @@ Gem::Specification.new do |spec|
     lib/roadforest/content-handling/type-handlers/rdfa-writer/render-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/property-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/document-environment.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
     lib/roadforest/content-handling/type-handlers/rdfa-writer/environment-decorator.rb
+    lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
     lib/roadforest/content-handling/type-handlers/jsonld.rb
-    lib/roadforest/templates/affordance-doc.haml
-    lib/roadforest/templates/affordance-property-values.haml
-    lib/roadforest/templates/affordance-subject.haml
-    lib/roadforest/templates/affordance-uri-object.haml
-    lib/roadforest/templates/rdfpost-curie.haml
+    lib/roadforest/content-handling/media-type.rb
+    lib/roadforest/content-handling/handler-wrap.rb
+    lib/roadforest/content-handling/common-engines.rb
+    lib/roadforest/content-handling/engine.rb
+    lib/roadforest/content-handling/type-handler.rb
+    lib/roadforest/augment/augmenter.rb
+    lib/roadforest/augment/augmentation.rb
+    lib/roadforest/augment/affordance.rb
+    lib/roadforest/http.rb
+    lib/roadforest/interface/rdf.rb
+    lib/roadforest/interface/blob.rb
+    lib/roadforest/interface/application.rb
+    lib/roadforest/application.rb
+    lib/roadforest/remote-host.rb
     lib/roadforest/templates/min/subject.haml
     lib/roadforest/templates/min/doc.haml
+    lib/roadforest/templates/min/property-values.haml
     lib/roadforest/templates/base/subject.haml
+    lib/roadforest/templates/base/property-value.haml
     lib/roadforest/templates/base/doc.haml
+    lib/roadforest/templates/base/property-values.haml
+    lib/roadforest/templates/rdfpost-curie.haml
     lib/roadforest/templates/distiller/subject.haml
     lib/roadforest/templates/distiller/nil-object.haml
+    lib/roadforest/templates/distiller/property-value.haml
     lib/roadforest/templates/distiller/doc.haml
+    lib/roadforest/templates/distiller/property-values.haml
     lib/roadforest/templates/uri-object.haml
     lib/roadforest/templates/xml-literal-object.haml
+    lib/roadforest/templates/affordance-doc.haml
     lib/roadforest/templates/object.haml
     lib/roadforest/templates/node-object.haml
     lib/roadforest/templates/nil-object.haml
-    examples/file-management.rb
+    lib/roadforest/templates/affordance-property-values.haml
+    lib/roadforest/templates/affordance-subject.haml
+    lib/roadforest/templates/affordance-uri-object.haml
     spec/graph-store.rb
+    spec/authorization.rb
     spec/focus-list.rb
     spec/graph-copier.rb
+    spec/rdfa-handler.rb
     spec/rdf-parcel.rb
+    spec/affordances-flow.rb
     spec/media-types.rb
+    spec/source-rigor.rb
+    spec/.ctrlp-root
+    spec/keychain.rb
     spec/rdf-normalization.rb
-    spec/excon-adapter.rb
     spec/update-focus.rb
     spec/client.rb
-    spec/form-parsing.rb
+    spec/excon-adapter.rb
+    spec/rdfpost.rb
+    spec/affordance-augmenter.rb
     spec/credence-annealer.rb
     spec/full-integration.rb
   ]

@@ -1,1 +1,6 @@
 require 'roadforest-common'
+require 'roadforest/application'
+require 'roadforest/augmentations'
+require 'roadforest/authorization'
+require 'roadforest/interfaces'
+require 'roadforest/resource'

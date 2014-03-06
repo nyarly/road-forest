@@ -4,13 +4,13 @@ require 'rdf/turtle'
 require 'rdf-matchers'
 require 'rdf'
 
-require 'roadforest/content-handling/type-handlers/rdfa-writer'
-require 'roadforest/content-handling/type-handlers/rdfa-writer/render-engine'
+require 'roadforest/type-handlers/rdfa-writer'
+require 'roadforest/type-handlers/rdfa-writer/render-engine'
 require 'cgi'
 
 class EX < RDF::Vocabulary("http://example.com/"); end
 
-describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
+describe RoadForest::TypeHandlers::RDFaWriter, :vcr => {} do
   # Heuristically detect the input stream
   def detect_format(stream)
     # Got to look into the file to see
@@ -57,13 +57,13 @@ describe RoadForest::MediaType::RDFaWriter, :vcr => {} do
         nil
       end
 
-    templates = RoadForest::MediaType::RDFaWriter::TemplateHandler.new
+    templates = RoadForest::TypeHandlers::RDFaWriter::TemplateHandler.new
     templates.valise = @valise
     templates.template_cache = @tilt_cache
     templates.style_name = options[:haml]
     templates.haml_options = options[:haml_options]
 
-    engine = RoadForest::MediaType::RDFaWriter::RenderEngine.new(@graph, options[:debug]) do |engine|
+    engine = RoadForest::TypeHandlers::RDFaWriter::RenderEngine.new(@graph, options[:debug]) do |engine|
       #engine.decoration_set.names.clear
       engine.template_handler = templates
       engine.base_uri = base_uri

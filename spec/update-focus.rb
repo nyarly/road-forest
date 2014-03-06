@@ -1,6 +1,6 @@
 require 'roadforest/graph/graph-focus'
 require 'roadforest/source-rigor'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'roadforest/graph/document'
 require 'rdf/rdfa'
 
@@ -46,7 +46,7 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
   end
 
   let :source_graph do
-    RoadForest::Graph::GraphStore.new.tap do |graph|
+    RoadForest::SourceRigor::GraphStore.new.tap do |graph|
       graph.insert_document(document)
     end
   end

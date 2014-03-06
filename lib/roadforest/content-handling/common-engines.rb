@@ -6,10 +6,10 @@ module RoadForest
       def rdf_engine
         @rdf_engine ||=
           begin
-            require 'roadforest/content-handling/type-handlers/jsonld'
-            require 'roadforest/content-handling/type-handlers/rdfa'
-            rdfa = RoadForest::MediaType::Handlers::RDFa.new
-            jsonld = RoadForest::MediaType::Handlers::JSONLD.new
+            require 'roadforest/type-handlers/jsonld'
+            require 'roadforest/type-handlers/rdfa'
+            rdfa = RoadForest::TypeHandlers::RDFa.new
+            jsonld = RoadForest::TypeHandlers::JSONLD.new
 
             ContentHandling::Engine.new.tap do |engine|
               engine.add rdfa, "text/html;q=1;rdfa=1"
@@ -24,8 +24,8 @@ module RoadForest
       def plaintext_engine
         @plaintext_engine ||=
           begin
-            require 'roadforest/content-handling/type-handler'
-            text = RoadForest::MediaType::Handlers::Handler.new
+            require 'roadforest/type-handlers/handler'
+            text = RoadForest::TypeHandlers::Handler.new
 
             ContentHandling::Engine.new.tap do |engine|
               engine.add text, "text/plain"
@@ -37,8 +37,8 @@ module RoadForest
       def images_engine
         @image_engine ||=
           begin
-            require 'roadforest/content-handling/type-handler'
-            data = RoadForest::MediaType::Handlers::Handler.new
+            require 'roadforest/type-handlers/handler'
+            data = RoadForest::TypeHandlers::Handler.new
 
             RoadForest::ContentHandling::Engine.new.tap do |engine|
               engine.add data, "image/jpeg"
@@ -52,8 +52,8 @@ module RoadForest
       def graphics_engine
         @graphics_engine ||=
           begin
-            require 'roadforest/content-handling/type-handler'
-            data = RoadForest::MediaType::Handlers::Handler.new
+            require 'roadforest/type-handlers/handler'
+            data = RoadForest::TypeHandlers::Handler.new
 
             RoadForest::ContentHandling::Engine.new.tap do |engine|
               engine.add data, "image/png"

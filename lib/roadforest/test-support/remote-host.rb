@@ -1,4 +1,4 @@
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'roadforest/remote-host'
 require 'roadforest/test-support/http-client'
 module RoadForest::TestSupport
@@ -9,7 +9,7 @@ module RoadForest::TestSupport
     end
 
     def build_graph_store
-      RoadForest::Graph::GraphStore.new
+      RoadForest::SourceRigor::GraphStore.new
     end
 
     def http_client

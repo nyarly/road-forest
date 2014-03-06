@@ -1,10 +1,10 @@
 require 'roadforest/source-rigor/credence-annealer'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'timeout'
 
 describe RoadForest::SourceRigor::CredenceAnnealer do
   let :graph do
-    RoadForest::Graph::GraphStore.new
+    RoadForest::SourceRigor::GraphStore.new
   end
 
   subject :annealer do

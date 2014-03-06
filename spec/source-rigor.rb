@@ -1,11 +1,11 @@
 require 'roadforest/source-rigor'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 
 describe RoadForest::SourceRigor do
   describe "credence policy" do
     describe ":gossip" do
       let :graph_store do
-        RoadForest::Graph::GraphStore.new
+        RoadForest::SourceRigor::GraphStore.new
       end
 
       let :source_rigor do

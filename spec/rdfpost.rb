@@ -1,9 +1,9 @@
 require 'rdf/turtle'
-require 'roadforest/content-handling/type-handlers/rdfpost'
+require 'roadforest/type-handlers/rdfpost'
 
-describe RoadForest::MediaType::Handlers::RDFPost do
+describe RoadForest::TypeHandlers::RDFPost do
   let :handler do
-    RoadForest::MediaType::Handlers::RDFPost.new
+    RoadForest::TypeHandlers::RDFPost.new
   end
 
   shared_examples "a parsed form submission" do

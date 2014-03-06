@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    roadforest (0.2)
+    roadforest (0.5)
       addressable (~> 2.2.8)
       excon (~> 0.25)
       json-ld (~> 1.0.8)

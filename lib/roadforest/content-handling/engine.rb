@@ -62,14 +62,14 @@ module RoadForest
 
       def add_parser(object, type)
         type = MediaType.parse(type)
-        wrapper = RoadForest::MediaType::Handlers::Wrap::Parse.new(type, object)
+        wrapper = RoadForest::ContentHandling::Wrap::Parse.new(type, object)
         parsers.add(wrapper)
       end
       alias accept add_parser
 
       def add_renderer(object, type)
         type = MediaType.parse(type)
-        wrapper = RoadForest::MediaType::Handlers::Wrap::Render.new(type, object)
+        wrapper = RoadForest::ContentHandling::Wrap::Render.new(type, object)
         renderers.add(wrapper)
       end
       alias provide add_renderer

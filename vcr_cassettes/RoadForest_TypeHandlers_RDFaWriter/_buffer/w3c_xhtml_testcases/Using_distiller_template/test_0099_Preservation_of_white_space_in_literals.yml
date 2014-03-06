@@ -1,0 +1,71 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/0099.html
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/turtle, text/rdf+turtle, text/turtle, application/x-turtle, application/n-triples,
+        text/plain;q=0.5, text/html;q=0.5, application/xhtml+xml, image/svg+xml, application/ld+json,
+        application/x-ld+json, application/n-quads, text/x-nquads, */*;q=0.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 06 Mar 2014 02:06:30 GMT
+      Server:
+      - Apache/2.2.22 (Ubuntu)
+      X-Powered-By:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.17
+      Cache-Control:
+      - public, must-revalidate, max-age=3600
+      Etag:
+      - '"dbef8e97da2968172226f168ad840eedd2a2bab9"'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Digest:
+      - dbef8e97da2968172226f168ad840eedd2a2bab9
+      Age:
+      - '0'
+      X-Rack-Cache:
+      - miss, ignore, store
+      Status:
+      - '200'
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '381'
+      Keep-Alive:
+      - timeout=5, max=100
+      Connection:
+      - close
+      Content-Type:
+      - text/html;charset=utf-8
+    body:
+      encoding: UTF-8
+      string: "<!DOCTYPE html>\n<html prefix=\"example: http://www.example.org/\">\n
+        \  <head>\n      <title>Test 0099</title>\n   </head>\n   <body>\n\t\t<p about=\"http://www.cwi.nl/~steven/\"
+        property=\"example:likes\">\n    We put thirty spokes together and call it
+        a wheel;\n    But it is on the space where there is nothing that the usefulness
+        of the wheel depends.\n    We turn clay to make a vessel;\n    But it is on
+        the space where there is nothing that the usefulness of the vessel depends.\n
+        \   We pierce doors and windows to make a house;\n    And it is on these spaces
+        where there is nothing that the usefulness of the house depends.\n    Therefore
+        just as we take advantage of what is, we should recognize the usefulness of
+        what is not.\n\n    Lao Tzu: Tao Te Ching</p>\n\t</body>\n</html>"
+    http_version: 
+  recorded_at: Thu, 06 Mar 2014 02:05:19 GMT
+recorded_with: VCR 2.8.0

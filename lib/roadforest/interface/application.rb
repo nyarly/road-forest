@@ -1,4 +1,4 @@
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'roadforest/graph/etagging'
 require 'roadforest/graph/access-manager'
 require 'roadforest/graph/graph-focus'

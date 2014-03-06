@@ -1,19 +1,19 @@
 require 'rdf'
 require 'rdf/rdfa'
 require 'roadforest/graph/document'
-require 'roadforest/graph/graph-store'
+require 'roadforest/source-rigor/graph-store'
 require 'roadforest/graph/graph-focus'
 
 describe RoadForest::Graph do
   let :graph_store do
-    RoadForest::Graph::GraphStore.new
+    RoadForest::SourceRigor::GraphStore.new
   end
 
   #merging graphs
 
-  describe RoadForest::Graph::GraphStore do
+  describe RoadForest::SourceRigor::GraphStore do
     let :root_body do
-      store = RoadForest::Graph::GraphStore.new
+      store = RoadForest::SourceRigor::GraphStore.new
       access = RoadForest::Graph::WriteManager.new
       access.source_graph = store
       step = RoadForest::Graph::GraphFocus.new(access, "http://lrdesign.com/test-rdf")
@@ -27,7 +27,7 @@ describe RoadForest::Graph do
     end
 
     let :second_body do
-      store = RoadForest::Graph::GraphStore.new
+      store = RoadForest::SourceRigor::GraphStore.new
       access = RoadForest::Graph::WriteManager.new
       access.source_graph = store
       step = RoadForest::Graph::GraphFocus.new(access, "http://lrdesign.com/test-rdf")

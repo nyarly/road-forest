@@ -1,7 +1,7 @@
 require 'roadforest/source-rigor'
 require 'roadforest/source-rigor/credence-annealer'
 require 'roadforest/source-rigor/rigorous-access'
-require 'roadforest/graph/graph-store' #XXX
+require 'roadforest/source-rigor/graph-store' #XXX
 require 'roadforest/graph/graph-focus'
 require 'roadforest/http/user-agent'
 require 'roadforest/http/graph-transfer'
@@ -21,7 +21,7 @@ module RoadForest
     end
 
     def build_graph_store
-      Graph::GraphStore.new
+      SourceRigor::GraphStore.new
     end
 
     attr_writer :http_client

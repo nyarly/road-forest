@@ -1,0 +1,88 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/0296.html
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/turtle, text/rdf+turtle, text/turtle, application/x-turtle, application/n-triples,
+        text/plain;q=0.5, text/html;q=0.5, application/xhtml+xml, image/svg+xml, application/ld+json,
+        application/x-ld+json, application/n-quads, text/x-nquads, */*;q=0.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 06 Mar 2014 02:05:03 GMT
+      Server:
+      - Apache/2.2.22 (Ubuntu)
+      X-Powered-By:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.17
+      Cache-Control:
+      - public, must-revalidate, max-age=3600
+      Etag:
+      - '"f49c42e8972b13e0fe03b4f55c92c87f0c19b446"'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Digest:
+      - f49c42e8972b13e0fe03b4f55c92c87f0c19b446
+      Age:
+      - '0'
+      X-Rack-Cache:
+      - miss, ignore, store
+      Status:
+      - '200'
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '317'
+      Keep-Alive:
+      - timeout=5, max=100
+      Connection:
+      - close
+      Content-Type:
+      - text/html;charset=utf-8
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KICA8dGl0bGU+VGVzdCAw
+        Mjk2PC90aXRsZT4KPC9oZWFkPgo8Ym9keT4KICA8ZGl2IHZvY2FiPSJodHRw
+        Oi8veG1sbnMuY29tL2ZvYWYvMC4xLyIgcmVzb3VyY2U9Imh0dHA6Ly9leGFt
+        cGxlLmNvbS9ncmVnZy8jbWUiIHR5cGVvZj0iUGVyc29uIj4KICAgIDxhIHBy
+        b3BlcnR5PSJob21lcGFnZSIgaHJlZj0iaHR0cDovL2V4YW1wbGUuY29tL2dy
+        ZWdnLyI+PHNwYW4gcHJvcGVydHk9Im5hbWUiPkdyZWdnPC9zcGFuPjwvYT4K
+        ICAgIEtub3dzCiAgICA8dWw+CiAgICAgIDxsaSBwcm9wZXJ0eT0ia25vd3Mi
+        IHJlc291cmNlPSJodHRwOi8vZXhhbXBsZS5jb20vbmlrbGFzLyNtZSIgdHlw
+        ZW9mPSJQZXJzb24iPgogICAgICAgIDxhIHByb3BlcnR5PSJob21lcGFnZSIg
+        aHJlZj0iaHR0cDovL2V4YW1wbGUuY29tL25pa2xhcy8iPjxzcGFuIHByb3Bl
+        cnR5PSJuYW1lIj5OaWtsYXM8L3NwYW4+PC9hPgogICAgICA8L2xpPgogICAg
+        ICA8bGkgcHJvcGVydHk9Imtub3dzIiByZXNvdXJjZT0iaHR0cDovL2V4YW1w
+        bGUuY29tL3N0w6lwaGFuZS8jbWUiIHR5cGVvZj0iUGVyc29uIj4KICAgICAg
+        ICA8YSBwcm9wZXJ0eT0iaG9tZXBhZ2UiIGhyZWY9Imh0dHA6Ly9leGFtcGxl
+        LmNvbS9zdMOpcGhhbmUvIj48c3BhbiBwcm9wZXJ0eT0ibmFtZSI+U3TDqXBo
+        YW5lPC9zcGFuPjwvYT4KICAgICAgPC9saT4KICAgICAgPGxpIHByb3BlcnR5
+        PSJrbm93cyIgcmVzb3VyY2U9Imh0dHA6Ly9leGFtcGxlLmNvbS9pdmFuLyNt
+        ZSIgdHlwZW9mPSJQZXJzb24iPgogICAgICAgIDxhIHByb3BlcnR5PSJob21l
+        cGFnZSIgaHJlZj0iaHR0cDovL2V4YW1wbGUuY29tL2l2YW4vIj48c3BhbiBw
+        cm9wZXJ0eT0ibmFtZSI+SXZhbjwvc3Bhbj48L2E+CiAgICAgIDwvbGk+CiAg
+        ICAgIDxsaSBwcm9wZXJ0eT0ia25vd3MiIHJlc291cmNlPSJodHRwOi8vZXhh
+        bXBsZS5jb20vbWFudS8jbWUiIHR5cGVvZj0iUGVyc29uIj4KICAgICAgICA8
+        YSBwcm9wZXJ0eT0iaG9tZXBhZ2UiIGhyZWY9Imh0dHA6Ly9leGFtcGxlLmNv
+        bS9tYW51LyI+PHNwYW4gcHJvcGVydHk9Im5hbWUiPk1hbnU8L3NwYW4+PC9h
+        PgogICAgICA8L2xpPgogICAgPC91bD4KICA8L2Rpdj4KPC9ib2R5Pgo8L2h0
+        bWw+
+    http_version: 
+  recorded_at: Thu, 06 Mar 2014 02:03:52 GMT
+recorded_with: VCR 2.8.0
