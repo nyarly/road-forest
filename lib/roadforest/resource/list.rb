@@ -1,4 +1,4 @@
-require 'roadforest/resource/rdf/read-only'
+require 'roadforest/resource/read-only'
 require 'roadforest/resource/role/has-children'
 module RoadForest
   module Resource

@@ -1,4 +1,4 @@
-require 'roadforest/resource/rdf/read-only'
+require 'roadforest/resource/read-only'
 require 'roadforest/resource/role/writable'
 
 module RoadForest

@@ -1,6 +1,6 @@
 require 'webmachine'
 require 'roadforest/application/route-adapter'
-require 'roadforest/resource/rdf'
+require 'roadforest/resource'
 
 module RoadForest
   class Dispatcher < Webmachine::Dispatcher

@@ -6,7 +6,7 @@ end
 require 'roadforest/application/dispatcher'
 require 'roadforest/application/path-provider'
 require 'roadforest/application/services-host'
-require 'roadforest/resource/rdf'
+require 'roadforest/resource'
 require 'roadforest/content-handling/common-engines'
 require 'roadforest/graph/normalization'
 require 'roadforest/authorization'
