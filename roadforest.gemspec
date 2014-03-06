@@ -23,19 +23,13 @@ Gem::Specification.new do |spec|
   # Do this: y$jj@"
   # !!find lib bin doc spec spec_help -not -regex '.*\.sw.' -type f 2>/dev/null
   spec.files    = %w[
-    lib/roadforest.rb
     lib/roadforest-client.rb
-    lib/roadforest-common.rb
-    lib/roadforest-testing.rb
-    lib/roadforest-server.rb
-
     lib/roadforest/http/message.rb
     lib/roadforest/http/graph-response.rb
     lib/roadforest/http/keychain.rb
     lib/roadforest/http/adapters/excon.rb
     lib/roadforest/http/user-agent.rb
     lib/roadforest/http/graph-transfer.rb
-    lib/roadforest/graph/graph-store.rb
     lib/roadforest/graph/normalization.rb
     lib/roadforest/graph/focus-list.rb
     lib/roadforest/graph/graph-copier.rb
@@ -67,8 +61,22 @@ Gem::Specification.new do |spec|
     lib/roadforest/resource.rb
     lib/roadforest/source-rigor.rb
     lib/roadforest/interfaces.rb
+    lib/roadforest/type-handlers/rdf-handler.rb
+    lib/roadforest/type-handlers/rdfa.rb
+    lib/roadforest/type-handlers/handler.rb
+    lib/roadforest/type-handlers/rdfa-writer.rb
+    lib/roadforest/type-handlers/rdfpost.rb
+    lib/roadforest/type-handlers/rdfa-writer/render-engine.rb
+    lib/roadforest/type-handlers/rdfa-writer/subject-environment.rb
+    lib/roadforest/type-handlers/rdfa-writer/render-environment.rb
+    lib/roadforest/type-handlers/rdfa-writer/property-environment.rb
+    lib/roadforest/type-handlers/rdfa-writer/document-environment.rb
+    lib/roadforest/type-handlers/rdfa-writer/environment-decorator.rb
+    lib/roadforest/type-handlers/rdfa-writer/object-environment.rb
+    lib/roadforest/type-handlers/jsonld.rb
     lib/roadforest/test-support.rb
     lib/roadforest/debug.rb
+    lib/roadforest/source-rigor/graph-store.rb
     lib/roadforest/source-rigor/null-investigator.rb
     lib/roadforest/source-rigor/rigorous-access.rb
     lib/roadforest/source-rigor/investigation.rb
@@ -85,23 +93,10 @@ Gem::Specification.new do |spec|
     lib/roadforest/source-rigor/resource-query.rb
     lib/roadforest/augmentations.rb
     lib/roadforest/utility/class-registry.rb
-    lib/roadforest/content-handling/type-handlers/rdf-handler.rb
-    lib/roadforest/content-handling/type-handlers/rdfa.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer.rb
-    lib/roadforest/content-handling/type-handlers/rdfpost.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/render-engine.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/subject-environment.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/render-environment.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/property-environment.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/document-environment.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/environment-decorator.rb
-    lib/roadforest/content-handling/type-handlers/rdfa-writer/object-environment.rb
-    lib/roadforest/content-handling/type-handlers/jsonld.rb
     lib/roadforest/content-handling/media-type.rb
     lib/roadforest/content-handling/handler-wrap.rb
     lib/roadforest/content-handling/common-engines.rb
     lib/roadforest/content-handling/engine.rb
-    lib/roadforest/content-handling/type-handler.rb
     lib/roadforest/augment/augmenter.rb
     lib/roadforest/augment/augmentation.rb
     lib/roadforest/augment/affordance.rb
@@ -133,6 +128,11 @@ Gem::Specification.new do |spec|
     lib/roadforest/templates/affordance-property-values.haml
     lib/roadforest/templates/affordance-subject.haml
     lib/roadforest/templates/affordance-uri-object.haml
+    lib/roadforest.rb
+    lib/roadforest-common.rb
+    lib/roadforest-testing.rb
+    lib/roadforest-server.rb
+
     spec/graph-store.rb
     spec/authorization.rb
     spec/focus-list.rb
