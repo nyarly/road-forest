@@ -1,7 +1,6 @@
 require 'rdf/xsd'
 #require 'rdf/spec/writer'
 require 'rdf/turtle'
-require 'rdf-matchers'
 require 'rdf'
 
 require 'roadforest/type-handlers/rdfa-writer'

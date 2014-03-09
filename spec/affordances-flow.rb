@@ -4,7 +4,6 @@ require 'mechanize'
 require 'rdf'
 require 'rdf/xsd'
 require 'rdf/turtle'
-require 'rdf-matchers'
 
 require 'roadforest/interfaces'
 require 'roadforest/application'
