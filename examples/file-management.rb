@@ -1,5 +1,5 @@
+require 'roadforest-server'
 require 'rdf/vocab/skos'
-require 'roadforest/content-handling/common-engines'
 
 module FileManagementExample
   module Vocabulary

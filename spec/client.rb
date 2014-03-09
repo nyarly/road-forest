@@ -1,6 +1,4 @@
-require 'roadforest/server'
-require 'roadforest/test-support'
-
+require 'roadforest-client'
 require 'examples/file-management'
 
 describe RoadForest::RemoteHost do

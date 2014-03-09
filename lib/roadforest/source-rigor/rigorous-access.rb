@@ -1,3 +1,4 @@
+require 'roadforest/graph/access-manager'
 require 'roadforest/source-rigor/resource-query'
 require 'roadforest/source-rigor/resource-pattern'
 require 'roadforest/source-rigor/parcel'

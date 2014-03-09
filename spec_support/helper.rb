@@ -1,5 +1,5 @@
 require 'cadre/rspec'
-require 'roadforest/test-support/matchers'
+require 'roadforest-testing'
 require 'vcr'
 
 RSpec.configure do |config|

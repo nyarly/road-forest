@@ -3,6 +3,8 @@ require 'webmachine/headers'
 require 'webmachine/request'
 require 'webmachine/response'
 require 'webmachine/decision/flow'
+require 'webmachine/decision/fsm'
+
 module RoadForest
   module TestSupport
     class DispatcherFacade < BasicObject

@@ -27,9 +27,9 @@ describe "RoadForest integration", :integration => true do
     @server_logs = "integration-tests.log"
 
     @server_pid = fork do
-      require 'roadforest/server'
       require 'examples/file-management'
       require 'logger'
+
       RoadForest.serve(
         FileManagementExample::Application.new("http://localhost:#{@server_port}"),
         FileManagementExample::ServicesHost.new.tap do |host|
@@ -48,7 +48,7 @@ describe "RoadForest integration", :integration => true do
       end
     end
 
-    require 'roadforest/remote-host'
+    require 'roadforest-client'
 
     %w{EXIT TERM}.each do |signal|
       trap(signal) do
