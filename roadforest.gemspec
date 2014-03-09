@@ -97,6 +97,7 @@ Gem::Specification.new do |spec|
     lib/roadforest/content-handling/handler-wrap.rb
     lib/roadforest/content-handling/common-engines.rb
     lib/roadforest/content-handling/engine.rb
+    lib/roadforest/content-handling.rb
     lib/roadforest/augment/augmenter.rb
     lib/roadforest/augment/augmentation.rb
     lib/roadforest/augment/affordance.rb
@@ -152,6 +153,8 @@ Gem::Specification.new do |spec|
     spec/affordance-augmenter.rb
     spec/credence-annealer.rb
     spec/full-integration.rb
+
+    examples/file-management.rb
   ]
 
   spec.test_file        = "spec_support/gem_test_suite.rb"
