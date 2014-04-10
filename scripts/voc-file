@@ -1,8 +1,9 @@
 #!/bin/env ruby
 require 'rdf/cli/vocab-loader'
 
+# For example: ```bundle exec scripts/voc-file --source path.ttl --prefix
+# http://judsonlester.info/rdf-vocab/path# --class-name
+# "RoadForest::Vocab::Path"```
+
 loader = RDF::VocabularyLoader.new
-puts "\n#{__FILE__}:#{__LINE__} => #{loader.inspect}"
-puts "\n#{__FILE__}:#{__LINE__} => #{ARGV.inspect}"
-puts "\n#{__FILE__}:#{__LINE__} => #{loader.method(:go).source_location.inspect}"
 loader.go(ARGV)

@@ -1,0 +1,114 @@
+@base <http://judsonlester.info/rdf-vocab/path> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<#Step> a rdfs:Class ;
+  rdfs:comment "Base class for path steps" .
+
+<#RepeatingStep> a rdfs:Class ;
+  rdfs:subClassOf <#Step> ;
+  rdfs:comment "A step that repeats - the subject of a matching step become the subject of a new match" .
+
+<#MultipleStep> a rdfs:Class ;
+  rdfs:subClassOf <#Step> ;
+  rdfs:comment "A step that may appear more than once on a subject" .
+
+<#Root> a rdfs:Class ;
+  rdfs:comment "The starting point of a path pattern" .
+
+<#Target> a rdfs:Class ;
+  rdfs:comment "A target for the pattern" .
+
+<#Literal> a rdfs:Class ;
+  rdfs:subClassOf <#Target> .
+
+<#forward> a rdf:Property ;
+  rdfs:domain <#Step> , <#Root> ;
+  rdfs:range <#Step> ;
+  rdfs:comment """Indicates that the subject of the matched statement matches the
+                  subject, and the predicate of the matched statement matches the
+                  predicate.""" .
+
+<#reverse> a rdf:Property ;
+  rdfs:domain <#Step> , <#Root> ;
+  rdfs:range <#Step> ;
+  rdfs:comment """Indicates that the subject of the matched statement matches the
+                  predicate, and the predicate of the matched statement matches the
+                  subject.""" .
+
+<#predicate> a rdf:Property ;
+  rdfs:domain <#Step> ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment "The property of a statement that matches this step" .
+
+<#minRepeat> a rdf:Property ;
+  rdfs:domain <#RepeatingStep> ;
+  rdfs:range rdfs:Literal ; #specify integer?
+  rdfs:comment """Limits the number of times a repeating step may repeat - otherwise
+                  a repeating step is assumed allow 0 repetions.""" .
+
+<#maxRepeat> a rdf:Property ;
+  rdfs:domain <#RepeatingStep> ;
+  rdfs:range rdfs:Literal ; #specify integer?
+  rdfs:comment """Limits the number of times a repeating step may repeat - otherwise
+                  a repeating step is assumed to have no limit to repetitions.""" .
+
+<#minMulti> a rdf:Property ;
+  rdfs:domain <#FanStep> ;
+  rdfs:range rdfs:Literal ; #specify integer?
+  rdfs:comment """Limits the number of times a repeating step may repeat - otherwise
+                  a repeating step is assumed allow 0 repetions.""" .
+
+<#maxMulti> a rdf:Property ;
+  rdfs:domain <#FanStep> ;
+  rdfs:range rdfs:Literal ; #specify integer?
+  rdfs:comment """Limits the number of times a repeating step may repeat - otherwise
+                  a repeating step is assumed to have no limit to repetitions.""" .
+
+<#name> a rdf:Property ;
+  rdfs:domain <#Target> ;
+  rdfs:range rdfs:Literal .
+
+<#label> a rdf:Property ;
+  rdfs:domain <#Target> ;
+  rdfs:range rdfs:Literal .
+
+<#type> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Class .
+
+<#constraint> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Literal ;
+  rdfs:comment "Description of constraints on values that can match this Literal." .
+
+<#order> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment """The subject resource describes the order in which to consider values of this
+                  Literal.""" .
+
+<#after> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment """Constrains the matching of this literal to values that come after the subject
+                  value in some order.""" .
+
+<#before> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment """Constrains the matching of this literal to values that come before the subject
+                  value in some order.""" .
+
+<#defaultValue> a rdf:Property ;
+  rdfs:domain <#Literal> ;
+  rdfs:range rdfs:Resource .
+
+<#numeric> a rdf:Value ;
+  rdfs:comment """An order value which simply means that values for the Literal in
+                  question should be considered in normal numeric order. Application to
+                  non-numeric values is undefined.""" .
+
+<#alpha> a rdf:Value ;
+  rdfs:comment """Literals considered in alphabetic order are sorted in natural alphabetic
+                  order in the natural language of the literal. e.g. In English, A > a > B > b""" .

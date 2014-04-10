@@ -1,6 +1,7 @@
-@base <http://judsonlester.info/affordance> .
+@base <http://judsonlester.info/rdf-vocab/affordance> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix path: <http://judsonlester.info/rdf-vocab/path> .
 
 <#Affordance> a rdfs:Class ;
   rdfs:comment "Base class for all affordances" .
@@ -66,7 +67,8 @@
 <#controlName> a rdf:Property ;
   rdfs:domain <#Control> ;
   rdfs:range rdfs:Literal ;
-  rdfs:comment "Valid values are limited per application. Examples include 'Media-Type', 'Encoding' or 'EntityTag'" .
+  rdfs:comment """Valid values are limited per application. Examples include
+                  'Media-Type', 'Encoding' or 'EntityTag'""" .
 
 <#controlValue> a rdf:Property ;
   rdfs:domain <#Control> ;
@@ -86,11 +88,8 @@
 
 <#target> a rdf:Property ;
   rdfs:domain <#Affordance> ;
-  rdfs:range rdfs:Resource ;
-  rdfs:comment """Could be a templated URL, or a URL resource. If not a template,
-  but the Affordance has one or more uriVariable properties, the implication is
-  that the target resource should be used as the basis of a URI template by
-  appending (?name,other,...) to the URI.""" .
+  rdfs:range rdfs:Resource , <#ResourceTemplate> ;
+  rdfs:comment """The URL to which data is to be transmitted by this affordance."""
 
 # Payload
 
@@ -106,54 +105,11 @@
 
 <#var> a rdf:Property ;
   rdfs:domain <#ResourceTemplate> ;
-  rdfs:range <#LiteralTemplate> , rdf:List ;
+  rdfs:range path:Literal , rdf:List ;
   rdfs:comment """When the object is list, the members of the list should be
-    Parameters, the the list order implies the order in which the parameters
+    path:Literal , and the the list order implies the order in which the parameters
     should be used""" .
-
-<#LiteralTemplate> a rdfs:Class .
-
-<#name> a rdf:Property ;
-  rdfs:domain <#LiteralTemplate> ;
-  rdfs:range rdfs:Literal .
-
-<#label> a rdf:Property ;
-  rdfs:domain <#LiteralTemplate> ;
-  rdfs:range rdfs:Literal .
-
-<#range> a rdf:Property ;
-  rdfs:domain <#LiteralTemplate> ;
-  rdfs:range rdfs:Class .
-
-<#defaultValue> a rdf:Property ;
-  rdfs:domain <#LiteralTemplate> ;
-  rdfs:domain rdfs:Resource .
-
-#Omittable vs required values?
-
-<#subjectTemplate> a rdf:Property ;
-  rdfs:domain rdf:Statement ;
-  rdfs:range <#ResourceTemplate> ;
-  rdfs:comment """Used to indicate that a resource template can be used as the
-  subject in a statement""" .
-
-<#predicateTemplate> a rdf:Property ;
-  rdfs:domain rdf:Statement ;
-  rdfs:range <#ResourceTemplate> ;
-  rdfs:comment """Used to indicate that a resource template can be used as the
-  property in a statement""" .
-
-<#objectTemplate> a rdf:Property ;
-  rdfs:domain rdf:Statement ;
-  rdfs:range <#ResourceTemplate> , <#LiteralTemplate> ;
-  rdfs:comment """Used to indicate that a resource or literal template can be
-  used
-  as the property in a statement""" .
 
 <#payload> a rdf:Property ;
   rdfs:domain <#Affordance> ;
-  rdfs:range rdfs:Resource .
-
-<#statement> a rdf:Property ;
-  rdfs:domain rdfs:Resource ;
-  rdfs:range rdf:Statement .
+  rdfs:range path:Root .
