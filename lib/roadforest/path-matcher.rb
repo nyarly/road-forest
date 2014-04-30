@@ -25,30 +25,26 @@ module RoadForest
       end
     end
 
-    class Edge
+    class MatchStep
       attr_accessor :parent
       attr_accessor :stem
       attr_accessor :repeats
       attr_accessor :pattern
       attr_accessor :graph
-
       attr_accessor :graph_term
       attr_accessor :pattern_step
-      attr_accessor :edge_kind
-      attr_accessor :predicate
 
-      attr_reader :accepting_count, :rejecting_count
       attr_reader :children
-
-      alias child_nodes children
 
       def initialize
         @children = nil
-        @accepting_count = 0
-        @rejecting_count = 0
+        reset
         yield self
         @stem ||= {}
         @repeats ||= {}
+      end
+
+      def reset
       end
 
       def pretty_print_instance_variables
@@ -57,21 +53,39 @@ module RoadForest
         end
       end
 
+      def immediate_match
+        {}
+      end
+
+      def open
+        if excluded?
+          return []
+        end
+
+        @children ||= build_children
+
+        return children
+      end
+
       def matched_statements
         return {} unless accepting?
         @matched_statements ||=
           begin
-            if rejecting?
-              {}
-            else
-              child_nodes.map do |node|
-                node.matched_statements
-              end.inject({}) do |set, matched|
-                set.merge(matched)
-              end
+            children.map do |child|
+              child.matched_statements
+            end.inject(immediate_match) do |set, matched|
+              set.merge(matched)
             end
           end
       end
+    end
+
+    class Edge < MatchStep
+      attr_accessor :predicate
+
+      attr_reader :accepting_count, :rejecting_count
+
+      alias child_nodes children
 
       def step_count
         repeats.fetch(pattern_step, 0) + 1
@@ -81,8 +95,26 @@ module RoadForest
         1
       end
 
-      def node_excluded?
+      def excluded?
         step_count > step_maximum
+      end
+
+      def reset
+        @accepting_count = 0
+        @rejecting_count = 0
+      end
+
+      def min_fan
+        1
+      end
+
+      def max_fan
+        1
+      end
+
+      def notify_resolved(child)
+        @accepting_count += 1 if child.accepting?
+        @rejecting_count += 1 if child.rejecting?
       end
 
       def resolved?
@@ -92,19 +124,11 @@ module RoadForest
             if rejecting?
               true
             else
-              not child_nodes.any? do |node|
+              not children.any? do |node|
                 not node.resolved?
               end
             end
           end
-      end
-
-      def min_fan
-        1
-      end
-
-      def max_fan
-        1
       end
 
       def rejecting?
@@ -117,37 +141,8 @@ module RoadForest
         resolved? and not rejecting?
       end
 
-
-      def notify_resolved(child)
-        @accepting_count += 1 if child.accepting?
-        @rejecting_count += 1 if child.rejecting?
-      end
-
       def available_count
         child_nodes.length - rejecting_count
-      end
-
-      def pattern_hash
-        term = case edge_kind
-               when Graph::Path.forward
-                 :subject
-               when Graph::Path.reverse
-                 :object
-               else
-                 raise "Invalid Edge type: #{edge_kind.inspect}"
-               end
-        { :predicate => predicate, term => graph_term }
-      end
-
-      def graph_node(statement)
-        case edge_kind
-        when Graph::Path.forward
-          statement.subject
-        when Graph::Path.reverse
-          statement.object
-        else
-          raise "Invalid Edge type: #{edge_kind.inspect}"
-        end
       end
 
       def build_children
@@ -166,65 +161,57 @@ module RoadForest
           end
         end
       end
+    end
 
-      def open
-        if node_excluded?
-          return []
+    class ForwardEdge < Edge
+      def self.edge_query_pattern(pattern_node)
+        RDF::Query.new do
+          pattern [ pattern_node, Graph::Path.forward, :next ]
+          pattern [ :next, Graph::Path.predicate, :predicate ]
         end
+      end
 
-        @children ||= build_children
+      def pattern_hash
+        { :predicate => predicate, :subject => graph_term }
+      end
 
-        return child_nodes
+      def graph_node(statement)
+        statement.subject
       end
     end
 
-    class Node
-      attr_accessor :parent
-      attr_accessor :stem #the path of statements from the root
-      attr_accessor :repeats #the depth first count of repetitions of pattern nodes
-      attr_accessor :pattern
-      attr_accessor :graph
-
-      attr_accessor :pattern_step #the node in the pattern graph
-      attr_accessor :graph_term #the node in the matched graph
-      attr_accessor :statement #the RDF statement that got here from parent
-
-      attr_reader :children
-
-      alias child_edges children
-
-      def initialize
-        @children = nil
-        yield self if block_given?
-        @stem ||= {}
-        @repeats ||= {}
-      end
-
-      def pretty_print_instance_variables
-        instance_variables.reject do |var|
-          var == :@parent
+    class ReverseEdge < Edge
+      def self.edge_query_pattern(pattern_node)
+        RDF::Query.new do
+          pattern [ pattern_node, Graph::Path.reverse, :next ]
+          pattern [ :next, Graph::Path.predicate, :predicate ]
         end
       end
 
-      def matched_statements
-        return {} unless resolved?
-        @matched_statements ||=
-          begin
-            if rejecting?
-              {}
-            else
-              statements = statement.nil? ? {} : { statement => true }
-              child_edges.map do |edge|
-                edge.matched_statements
-              end.inject(statements) do |hash, graph|
-                hash.merge(graph)
-              end
-            end
-          end
+      def pattern_hash
+        { :predicate => predicate, :object => graph_term }
       end
 
-      def statement_excluded?
+      def graph_node(statement)
+        statement.object
+      end
+    end
+
+    class Node < MatchStep
+      attr_accessor :statement #the RDF statement that got here from parent
+
+      alias child_edges children
+
+      def immediate_match
+        statement.nil? ? {} : { statement => true }
+      end
+
+      def excluded?
         stem.has_key?(statement)
+      end
+
+      def notify_resolved(child)
+
       end
 
       def resolved?
@@ -232,13 +219,9 @@ module RoadForest
         @resolved ||= accepting? or rejecting?
       end
 
-      def notify_resolved(child)
-
-      end
-
       def accepting?
         @accepting ||=
-          if statement_excluded?
+          if excluded?
             false
           elsif children.nil?
             false
@@ -252,7 +235,7 @@ module RoadForest
       def rejecting?
         @rejecting ||=
           begin
-            if statement_excluded?
+            if excluded?
               true
             elsif children.nil?
               false
@@ -264,24 +247,15 @@ module RoadForest
           end
       end
 
-      def edge_query_pattern(direction)
-        pattern_node = pattern_step
-        RDF::Query.new do
-          pattern [ pattern_node, direction, :next ]
-          pattern [ :next, Graph::Path.predicate, :predicate ]
-        end
-      end
-
-      def find_child_edges(path_relation)
-        pattern.query(edge_query_pattern(path_relation)).each_with_object([]) do |solution, edges|
-          edges << Edge.new do |edge|
+      def find_child_edges(klass)
+        pattern.query(klass.edge_query_pattern(pattern_step)).each_with_object([]) do |solution, edges|
+          edges << klass.new do |edge|
             edge.pattern = pattern
             edge.graph = graph
             edge.parent = self
             edge.stem = stem.merge(self.statement => true)
             edge.repeats = self.repeats
 
-            edge.edge_kind = path_relation
             edge.pattern_step = solution[:next]
             edge.predicate = solution[:predicate]
           end
@@ -289,21 +263,11 @@ module RoadForest
       end
 
       def build_children
-        edges = [Graph::Path.forward, Graph::Path.reverse ].map do |direction|
-          find_child_edges(direction)
+        edges = [ForwardEdge, ReverseEdge ].map do |klass|
+          find_child_edges(klass)
         end.inject do |edges, direction_list|
           edges + direction_list
         end
-      end
-
-      def open
-        if statement_excluded?
-          return []
-        end
-
-        @children ||= build_children
-
-        return children
       end
     end
 
@@ -360,7 +324,8 @@ module RoadForest
       matching = next_matching_node
       unless matching.nil?
         require 'pp'
-        add_matching_nodes(matching.open)
+        matching.open
+        add_matching_nodes(matching.children)
         puts "\n#{__FILE__}:#{__LINE__} => #{matching.pretty_inspect}"
 
         check_complete(matching)

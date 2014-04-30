@@ -64,13 +64,11 @@ describe "Path matching" do
     end
   end
 
-  describe RoadForest::PathMatcher::Edge do
+  describe RoadForest::PathMatcher::ForwardEdge do
     let :edge do
-      RoadForest::PathMatcher::Edge.new do |edge|
+      RoadForest::PathMatcher::ForwardEdge.new do |edge|
         edge.pattern = pattern
         edge.graph = match_against
-
-        edge.edge_kind = RoadForest::Graph::Path.forward
       end
     end
 
