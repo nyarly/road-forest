@@ -11,12 +11,15 @@ describe "Path matching" do
   end
 
   let :pattern do
+    root = ::RDF::Node.new(:root)
+    seg1 = ::RDF::Node.new(:seg1)
+    seg2 = ::RDF::Node.new(:seg2)
     ::RDF::Graph.new.tap do |graph|
-      graph << [ :root, RDF::RDFS.class, path.Root ]
-      graph << [ :root, path.forward, :seg1 ]
-      graph << [ :seg1, path.predicate, voc.one ]
-      graph << [ :seg1, path.forward, :seg2 ]
-      graph << [ :seg2, path.predicate, voc.two ]
+      graph << [ root, RDF::RDFS.class, path.Root ]
+      graph << [ root, path.forward, seg1 ]
+      graph << [ seg1, path.predicate, voc.one ]
+      graph << [ seg1, path.forward, seg2 ]
+      graph << [ seg2, path.predicate, voc.two ]
     end
   end
 
