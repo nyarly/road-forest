@@ -45,6 +45,46 @@ describe "Path matching" do
     matcher.match(root_node, match_against)
   end
 
+  describe RoadForest::PathMatcher::Node do
+    let :node do
+      RoadForest::PathMatcher::Node.new do |node|
+        node.pattern = pattern
+        node.graph = match_against
+      end
+    end
+
+    it "should not generate child edges when checked for resolution" do
+      expect do
+        node.resolved?.should be_false
+        node.rejecting?.should be_false
+        node.accepting?.should be_false
+      end.not_to change{node.child_edges}
+
+      node.child_edges.should be_nil
+    end
+  end
+
+  describe RoadForest::PathMatcher::Edge do
+    let :edge do
+      RoadForest::PathMatcher::Edge.new do |edge|
+        edge.pattern = pattern
+        edge.graph = match_against
+
+        edge.edge_kind = RoadForest::Graph::Path.forward
+      end
+    end
+
+    it "should not generate child edges when checked for resolution" do
+      expect do
+        edge.resolved?.should be_false
+        edge.rejecting?.should be_false
+        edge.accepting?.should be_false
+      end.not_to change{edge.child_nodes}
+
+      edge.child_nodes.should be_nil
+    end
+  end
+
   it "should extract the subgraph" do
     subgraph = match.graph
     subgraph.should be_equivalent_to(match_against)
