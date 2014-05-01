@@ -11,8 +11,12 @@ module RoadForest
         @matcher = matcher
       end
 
+      def success?
+        @matcher.completed_child.accepting?
+      end
+
       def graph
-        if @matcher.completed_child.accepting?
+        if success?
           statements = @matcher.completed_child.matched_statements.keys
           ::RDF::Graph.new.tap do |graph|
             statements.each do |stmt|
@@ -84,8 +88,19 @@ module RoadForest
       attr_accessor :predicate
 
       attr_reader :accepting_count, :rejecting_count
+      attr_accessor :min_multi, :max_multi
 
       alias child_nodes children
+
+      def self.edge_query_pattern(pattern_node)
+        path_direction = self.path_direction
+        RDF::Query.new do
+          pattern [ pattern_node, path_direction, :next ]
+          pattern [ :next, Graph::Path.predicate, :predicate ]
+          pattern [ :next, Graph::Path.minMulti,  :min_multi ], :optional => true
+          pattern [ :next, Graph::Path.maxMulti,  :max_multi ], :optional => true
+        end
+      end
 
       def step_count
         repeats.fetch(pattern_step, 0) + 1
@@ -102,14 +117,6 @@ module RoadForest
       def reset
         @accepting_count = 0
         @rejecting_count = 0
-      end
-
-      def min_fan
-        1
-      end
-
-      def max_fan
-        1
       end
 
       def notify_resolved(child)
@@ -133,7 +140,7 @@ module RoadForest
 
       def rejecting?
         return false if children.nil?
-        accepting_count > max_fan or available_count < min_fan
+        accepting_count > max_multi or available_count < min_multi
       end
 
       def accepting?
@@ -164,11 +171,8 @@ module RoadForest
     end
 
     class ForwardEdge < Edge
-      def self.edge_query_pattern(pattern_node)
-        RDF::Query.new do
-          pattern [ pattern_node, Graph::Path.forward, :next ]
-          pattern [ :next, Graph::Path.predicate, :predicate ]
-        end
+      def self.path_direction
+        Graph::Path.forward
       end
 
       def pattern_hash
@@ -181,11 +185,8 @@ module RoadForest
     end
 
     class ReverseEdge < Edge
-      def self.edge_query_pattern(pattern_node)
-        RDF::Query.new do
-          pattern [ pattern_node, Graph::Path.reverse, :next ]
-          pattern [ :next, Graph::Path.predicate, :predicate ]
-        end
+      def self.path_direction
+        Graph::Path.reverse
       end
 
       def pattern_hash
@@ -248,8 +249,8 @@ module RoadForest
       end
 
       def find_child_edges(klass)
-        pattern.query(klass.edge_query_pattern(pattern_step)).each_with_object([]) do |solution, edges|
-          edges << klass.new do |edge|
+        pattern.query(klass.edge_query_pattern(pattern_step)).map do |solution|
+          klass.new do |edge|
             edge.pattern = pattern
             edge.graph = graph
             edge.parent = self
@@ -258,6 +259,13 @@ module RoadForest
 
             edge.pattern_step = solution[:next]
             edge.predicate = solution[:predicate]
+            edge.min_multi = 1
+            edge.max_multi = 1
+
+            unless solution[:min_multi].nil? and solution[:max_multi].nil?
+              edge.min_multi = solution[:min_multi].nil? ? 0 : solution[:min_multi].object
+              edge.max_multi = solution[:max_multi].nil? ? nil : solution[:max_multi].object
+            end
           end
         end
       end
@@ -323,10 +331,10 @@ module RoadForest
     def search_iteration
       matching = next_matching_node
       unless matching.nil?
-        require 'pp'
         matching.open
         add_matching_nodes(matching.children)
-        puts "\n#{__FILE__}:#{__LINE__} => #{matching.pretty_inspect}"
+        #require 'pp'; puts "\n#{__FILE__}:#{__LINE__} =>
+        ##{matching.pretty_inspect}"
 
         check_complete(matching)
       end

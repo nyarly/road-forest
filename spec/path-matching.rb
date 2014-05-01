@@ -10,6 +10,17 @@ describe "Path matching" do
     ::RDF::Vocabulary.new("http://example.com/voc#")
   end
 
+  let :root_node do
+    ::RDF::Node.new(:start)
+  end
+
+  def match(pattern, match_against, root_node)
+    matcher = RoadForest::PathMatcher.new.tap do |matcher|
+      matcher.pattern = pattern
+    end
+    matcher.match(root_node, match_against)
+  end
+
   let :pattern do
     root = ::RDF::Node.new(:root)
     seg1 = ::RDF::Node.new(:seg1)
@@ -23,26 +34,11 @@ describe "Path matching" do
     end
   end
 
-  let :root_node do
-    ::RDF::Node.new(:start)
-  end
-
   let :match_against do
     ::RDF::Graph.new.tap do |graph|
       graph << [root_node, voc.one, :middle ]
       graph << [:middle, voc.two, :end ]
     end
-
-  end
-
-  let :matcher do
-    RoadForest::PathMatcher.new.tap do |matcher|
-      matcher.pattern = pattern
-    end
-  end
-
-  let :match do
-    matcher.match(root_node, match_against)
   end
 
   describe RoadForest::PathMatcher::Node do
@@ -84,8 +80,61 @@ describe "Path matching" do
   end
 
   it "should extract the subgraph" do
-    subgraph = match.graph
+    subgraph = match(pattern, match_against, root_node).graph
     subgraph.should be_equivalent_to(match_against)
+  end
+
+  describe "multiple" do
+    let :pattern do
+      root = ::RDF::Node.new(:root)
+      seg1 = ::RDF::Node.new(:seg1)
+      seg2 = ::RDF::Node.new(:seg2)
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, path.forward, seg1 ]
+        graph << [ seg1, path.predicate, voc.one ]
+        graph << [ seg1, path.minMulti, 2 ]
+        graph << [ seg1, path.maxMulti, 5 ]
+      end
+    end
+
+    let :match_against do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [root_node, voc.one, :one ]
+        graph << [root_node, voc.one, :two ]
+        graph << [root_node, voc.one, :three ]
+      end
+    end
+
+    let :only_one do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [root_node, voc.one, :one ]
+      end
+    end
+
+    let :cripes_six do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [root_node, voc.one, :one ]
+        graph << [root_node, voc.one, :two ]
+        graph << [root_node, voc.one, :three ]
+        graph << [root_node, voc.one, :four ]
+        graph << [root_node, voc.one, :five ]
+        graph << [root_node, voc.one, :six ]
+      end
+    end
+
+    it "should extract the subgraph" do
+      subgraph = match(pattern, match_against, root_node).graph
+      subgraph.should be_equivalent_to(match_against)
+    end
+
+    it "should not match too few fanout" do
+      match(pattern, only_one, root_node).success?.should be_false
+    end
+
+    it "should not match too many fanout" do
+      match(pattern, cripes_six, root_node).success?.should be_false
+    end
   end
 
   #ambiguous matches
