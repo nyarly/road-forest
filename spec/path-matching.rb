@@ -35,9 +35,10 @@ describe "Path matching" do
   end
 
   let :match_against do
+    middle = ::RDF::Node.new(:middle)
     ::RDF::Graph.new.tap do |graph|
-      graph << [root_node, voc.one, :middle ]
-      graph << [:middle, voc.two, :end ]
+      graph << [root_node, voc.one, middle ]
+      graph << [middle, voc.two, :end ]
     end
   end
 
@@ -84,6 +85,57 @@ describe "Path matching" do
     subgraph.should be_equivalent_to(match_against)
   end
 
+  it "should succeed" do
+    match(pattern, match_against, root_node).should be_successful
+  end
+
+  describe "repeats" do
+    def match_against(depth)
+      ::RDF::List.new(root_node, ::RDF::Graph.new, (1..depth).to_a)
+    end
+
+    let :pattern do
+      root = ::RDF::Node.new(:root)
+      lit1 = ::RDF::Node.new(:lit1)
+
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, path.forward, lit1 ]
+        graph << [ lit1, path.predicate, ::RDF.first ]
+        graph << [ lit1, path.type, RDF.Integer ]
+        graph << [ root, path.forward, root ]
+        graph << [ root, path.predicate, ::RDF.rest ]
+        graph << [ root, path.minRepeat, 2 ]
+        graph << [ root, path.maxRepeat, 4 ]
+      end
+    end
+
+    it "should reject unless min repeats present" do
+      list = match_against(2)
+      root = list.subject
+      graph = list.graph
+      match(pattern, graph, root).should_not be_successful
+    end
+
+    it "should match a mid-sized graph" do
+      list = match_against(4)
+      root = list.subject
+      graph = list.graph
+      matching = match(pattern, graph, root)
+      matching.should be_successful
+      matching.graph.query(:predicate => ::RDF.rest).to_a.length.should == 3
+    end
+
+    it "should match up to the number of repeats" do
+      list = match_against(5)
+      root = list.subject
+      graph = list.graph
+      matching = match(pattern, graph, root)
+      matching.should be_successful
+      matching.graph.query(:predicate => ::RDF.rest).to_a.length.should == 4
+    end
+  end
+
   describe "multiple" do
     let :pattern do
       root = ::RDF::Node.new(:root)
@@ -95,6 +147,17 @@ describe "Path matching" do
         graph << [ seg1, path.predicate, voc.one ]
         graph << [ seg1, path.minMulti, 2 ]
         graph << [ seg1, path.maxMulti, 5 ]
+      end
+    end
+
+    let :unbounded_pattern do
+      root = ::RDF::Node.new(:root)
+      seg1 = ::RDF::Node.new(:seg1)
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, path.forward, seg1 ]
+        graph << [ seg1, path.predicate, voc.one ]
+        graph << [ seg1, path.minMulti, 0 ]
       end
     end
 
@@ -135,16 +198,19 @@ describe "Path matching" do
     it "should not match too many fanout" do
       match(pattern, cripes_six, root_node).success?.should be_false
     end
+
+    it "should handle no limits" do
+      match(unbounded_pattern, only_one, root_node).success?.should be_true
+      match(unbounded_pattern, cripes_six, root_node).success?.should be_true
+    end
   end
 
+  #exact value matches
   #ambiguous matches
   #missing root node
   #path unmatched
   #debugging list of matching attempts
   #
-  describe "on an rdf:List" do
-  end
-
   describe "on a binary tree" do
   end
 end

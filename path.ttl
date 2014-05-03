@@ -17,6 +17,7 @@
   rdfs:comment "The starting point of a path pattern" .
 
 <#Target> a rdfs:Class ;
+  rdfs:subClassOf <#Step> ;
   rdfs:comment "A target for the pattern" .
 
 <#Literal> a rdfs:Class ;
@@ -75,7 +76,12 @@
 
 <#type> a rdf:Property ;
   rdfs:domain <#Literal> ;
-  rdfs:range rdfs:Class .
+  rdfs:range rdfs:DataType .
+
+<#is> a rdf:Property ;
+  rdfs:domain <#Target> ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment """The target of this step has exactly this value.""" .
 
 <#constraint> a rdf:Property ;
   rdfs:domain <#Literal> ;

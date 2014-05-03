@@ -6,6 +6,10 @@ class RDF::Repository
   include RDF::Isomorphic
 end
 
+class RDF::Graph
+  include RDF::Isomorphic
+end
+
 module RoadForest
   module Testing
     module HelperMethods
@@ -72,7 +76,7 @@ module RoadForest
         "be equivalent to an expected graph" #graphs tend to be too long to use
       end
 
-      def failure_message_for_should(actual)
+      def failure_message_for_should
         info = @info.respond_to?(:about) ? @info.about : @info.inspect
         if @expected.is_a?(RDF::Graph) && @actual.size != @expected.size
           "Graph entry count differs:\nexpected: #{@expected.size}\nactual:   #{@actual.size}"

@@ -14,6 +14,8 @@ module RoadForest
       def success?
         @matcher.completed_child.accepting?
       end
+      alias successful? success?
+      alias succeed? success?
 
       def graph
         if success?
@@ -33,6 +35,7 @@ module RoadForest
       attr_accessor :parent
       attr_accessor :stem
       attr_accessor :repeats
+      attr_accessor :satified
       attr_accessor :pattern
       attr_accessor :graph
       attr_accessor :graph_term
@@ -44,6 +47,7 @@ module RoadForest
         @children = nil
         reset
         yield self
+        @satisfied ||= {}
         @stem ||= {}
         @repeats ||= {}
       end
@@ -63,7 +67,7 @@ module RoadForest
 
       def open
         if excluded?
-          return []
+          return @children = []
         end
 
         @children ||= build_children
@@ -88,7 +92,7 @@ module RoadForest
       attr_accessor :predicate
 
       attr_reader :accepting_count, :rejecting_count
-      attr_accessor :min_multi, :max_multi
+      attr_accessor :min_multi, :max_multi, :min_repeat, :max_repeat
 
       alias child_nodes children
 
@@ -99,24 +103,42 @@ module RoadForest
           pattern [ :next, Graph::Path.predicate, :predicate ]
           pattern [ :next, Graph::Path.minMulti,  :min_multi ], :optional => true
           pattern [ :next, Graph::Path.maxMulti,  :max_multi ], :optional => true
+          pattern [ :next, Graph::Path.minRepeat,  :min_repeat ], :optional => true
+          pattern [ :next, Graph::Path.maxRepeat,  :max_repeat ], :optional => true
         end
       end
 
-      def step_count
-        repeats.fetch(pattern_step, 0) + 1
+      def to_s
+        state = case
+                when !resolved?
+                  "?"
+                when accepting?
+                  "A"
+                when rejecting?
+                  "R"
+                end
+        "<#{self.class.name.sub(/.*::/,'')} #{predicate}*#{min_multi}-#{max_multi} #{min_repeat}-#{max_repeat}:#{step_count} #{state} >"
       end
 
-      def step_maximum
-        1
+      def step_count
+        repeats.fetch(pattern_step, 0)
       end
 
       def excluded?
-        step_count > step_maximum
+        step_count >= max_repeat
+      end
+
+      def satisfied?
+        step_count >= min_repeat
       end
 
       def reset
         @accepting_count = 0
         @rejecting_count = 0
+        @min_multi = 1
+        @max_multi = 1
+        @min_repeat = 1
+        @max_repeat = 1
       end
 
       def notify_resolved(child)
@@ -140,7 +162,9 @@ module RoadForest
 
       def rejecting?
         return false if children.nil?
-        accepting_count > max_multi or available_count < min_multi
+        return false if excluded?
+        return false if satisfied?
+        (not max_multi.nil? and accepting_count > max_multi) or available_count < min_multi
       end
 
       def accepting?
@@ -164,7 +188,7 @@ module RoadForest
             node.pattern_step = pattern_step
             node.statement = statement
             node.stem = stem
-            node.repeats = self.repeats.merge({self.pattern_step => step_count})
+            node.repeats = self.repeats.merge({self.pattern_step => step_count + 1})
           end
         end
       end
@@ -180,7 +204,7 @@ module RoadForest
       end
 
       def graph_node(statement)
-        statement.subject
+        statement.object
       end
     end
 
@@ -194,7 +218,7 @@ module RoadForest
       end
 
       def graph_node(statement)
-        statement.object
+        statement.subject
       end
     end
 
@@ -202,6 +226,18 @@ module RoadForest
       attr_accessor :statement #the RDF statement that got here from parent
 
       alias child_edges children
+
+      def to_s
+        state = case
+                when !resolved?
+                  "?"
+                when accepting?
+                  "A"
+                when rejecting?
+                  "R"
+                end
+        "[#{self.class.name.sub(/.*::/,'')} #{statement} #{graph_term}/#{pattern_step} #{state} ]"
+      end
 
       def immediate_match
         statement.nil? ? {} : { statement => true }
@@ -256,15 +292,17 @@ module RoadForest
             edge.parent = self
             edge.stem = stem.merge(self.statement => true)
             edge.repeats = self.repeats
+            edge.graph_term = graph_term
 
             edge.pattern_step = solution[:next]
             edge.predicate = solution[:predicate]
-            edge.min_multi = 1
-            edge.max_multi = 1
-
             unless solution[:min_multi].nil? and solution[:max_multi].nil?
               edge.min_multi = solution[:min_multi].nil? ? 0 : solution[:min_multi].object
               edge.max_multi = solution[:max_multi].nil? ? nil : solution[:max_multi].object
+            end
+            unless solution[:min_repeat].nil? and solution[:max_repeat].nil?
+              edge.min_repeat = solution[:max_repeat].nil? ? 0 : solution[:min_repeat].object
+              edge.max_repeat = solution[:max_repeat].nil? ? nil : solution[:max_repeat].object
             end
           end
         end
@@ -332,9 +370,8 @@ module RoadForest
       matching = next_matching_node
       unless matching.nil?
         matching.open
+        require 'pp'; puts "\n#{__FILE__}:#{__LINE__} => #{matching.pretty_inspect}"
         add_matching_nodes(matching.children)
-        #require 'pp'; puts "\n#{__FILE__}:#{__LINE__} =>
-        ##{matching.pretty_inspect}"
 
         check_complete(matching)
       end
@@ -354,6 +391,7 @@ module RoadForest
 
     def check_complete(matching)
       while matching.resolved?
+        puts "\n#{__FILE__}:#{__LINE__} => #{matching.to_s}"
         matching.parent.notify_resolved(matching)
         matching = matching.parent
       end
