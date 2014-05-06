@@ -89,6 +89,39 @@ describe "Path matching" do
     match(pattern, match_against, root_node).should be_successful
   end
 
+  describe "literal constraints" do
+    let :match_against do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root_node, voc.one, 3 ]
+        graph << [ root_node, voc.one, 4 ]
+      end
+    end
+
+    let :pattern do
+      root = ::RDF::Node.new(:root)
+      lit1 = ::RDF::Node.new(:lit1)
+
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, path.forward, lit1 ]
+        graph << [ lit1, path.predicate, voc.one ]
+        graph << [ lit1, path.type, RDF.Integer ]
+        graph << [ lit1, path.is, 3 ]
+      end
+    end
+
+    it "should succeed" do
+      match(pattern, match_against, root_node).should be_successful
+    end
+
+    it "should only have the matching item" do
+      graph = match(pattern, match_against, root_node).graph
+      v = voc
+      graph.should match_query { pattern [ :start, v.one, 3 ] }
+      graph.should_not match_query { pattern [ :start, v.one, 4 ] }
+    end
+  end
+
   describe "repeats" do
     def match_against(depth)
       ::RDF::List.new(root_node, ::RDF::Graph.new, (1..depth).to_a)

@@ -41,6 +41,8 @@ module RoadForest
       attr_accessor :graph_term
       attr_accessor :pattern_step
 
+      attr_accessor :exact_value, :before, :after, :order
+
       attr_reader :children
 
       def initialize
@@ -99,12 +101,16 @@ module RoadForest
       def self.edge_query_pattern(pattern_node)
         path_direction = self.path_direction
         RDF::Query.new do
-          pattern [ pattern_node, path_direction, :next ]
-          pattern [ :next, Graph::Path.predicate, :predicate ]
-          pattern [ :next, Graph::Path.minMulti,  :min_multi ], :optional => true
-          pattern [ :next, Graph::Path.maxMulti,  :max_multi ], :optional => true
-          pattern [ :next, Graph::Path.minRepeat,  :min_repeat ], :optional => true
-          pattern [ :next, Graph::Path.maxRepeat,  :max_repeat ], :optional => true
+          pattern  [  pattern_node, path_direction, :next ]
+          pattern  [  :next,  Graph::Path.predicate,  :predicate   ]
+          pattern  [  :next,  Graph::Path.minMulti,   :min_multi   ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.maxMulti,   :max_multi   ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.minRepeat,  :min_repeat  ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.maxRepeat,  :max_repeat  ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.is,         :exact_value ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.after,      :after       ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.before,     :before      ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.order,      :order       ],  :optional  =>  true
         end
       end
 
@@ -189,6 +195,9 @@ module RoadForest
             node.statement = statement
             node.stem = stem
             node.repeats = self.repeats.merge({self.pattern_step => step_count + 1})
+            node.before = before
+            node.after = after
+            node.order = order
           end
         end
       end
@@ -200,7 +209,7 @@ module RoadForest
       end
 
       def pattern_hash
-        { :predicate => predicate, :subject => graph_term }
+        { :subject => graph_term, :predicate => predicate, :object => exact_value}
       end
 
       def graph_node(statement)
@@ -214,7 +223,7 @@ module RoadForest
       end
 
       def pattern_hash
-        { :predicate => predicate, :object => graph_term }
+        { :subject => exact_value, :predicate => predicate, :object => graph_term }
       end
 
       def graph_node(statement)
@@ -251,8 +260,15 @@ module RoadForest
 
       end
 
+      def reject_value?
+        return false if before.nil? and after.nil?
+        return true if not (before.nil? or before > graph_term)
+        return true if not (after.nil? and after < graph_term)
+
+        return false
+      end
+
       def resolved?
-        return false if @children.nil?
         @resolved ||= accepting? or rejecting?
       end
 
@@ -261,6 +277,8 @@ module RoadForest
           if excluded?
             false
           elsif children.nil?
+            false
+          elsif reject_value?
             false
           else
             child_edges.all? do |edge|
@@ -276,6 +294,8 @@ module RoadForest
               true
             elsif children.nil?
               false
+            elsif reject_value?
+              true
             else
               child_edges.any? do |edge|
                 edge.rejecting?
@@ -304,6 +324,11 @@ module RoadForest
               edge.min_repeat = solution[:max_repeat].nil? ? 0 : solution[:min_repeat].object
               edge.max_repeat = solution[:max_repeat].nil? ? nil : solution[:max_repeat].object
             end
+
+            edge.exact_value = solution[:exact_value]
+            edge.after = solution[:after]
+            edge.before = solution[:before]
+            edge.order = solution[:order]
           end
         end
       end
@@ -370,7 +395,6 @@ module RoadForest
       matching = next_matching_node
       unless matching.nil?
         matching.open
-        require 'pp'; puts "\n#{__FILE__}:#{__LINE__} => #{matching.pretty_inspect}"
         add_matching_nodes(matching.children)
 
         check_complete(matching)
@@ -391,7 +415,6 @@ module RoadForest
 
     def check_complete(matching)
       while matching.resolved?
-        puts "\n#{__FILE__}:#{__LINE__} => #{matching.to_s}"
         matching.parent.notify_resolved(matching)
         matching = matching.parent
       end
