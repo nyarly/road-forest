@@ -37,9 +37,11 @@ Gem::Specification.new do |spec|
     lib/roadforest/graph/etagging.rb
     lib/roadforest/graph/post-focus.rb
     lib/roadforest/graph/vocabulary.rb
+    lib/roadforest/graph/path-vocabulary.rb
     lib/roadforest/graph/document.rb
     lib/roadforest/graph/access-manager.rb
     lib/roadforest/graph.rb
+    lib/roadforest/path-matcher.rb
     lib/roadforest/resource/role/writable.rb
     lib/roadforest/resource/role/has-children.rb
     lib/roadforest/resource/list.rb
