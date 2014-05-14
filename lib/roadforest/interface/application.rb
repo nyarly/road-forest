@@ -124,6 +124,14 @@ module RoadForest
         nil
       end
 
+      def update_payload
+        nil
+      end
+
+      def create_payload
+        nil
+      end
+
       def update(data)
         raise NotImplementedError
       end

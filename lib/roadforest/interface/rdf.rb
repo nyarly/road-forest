@@ -5,6 +5,17 @@ module RoadForest
     class RDF < Application
       include RoadForest::Graph::Etagging
 
+      Payload = Struct.new(:root, :graph)
+
+      # Utility method, useful for overriding #update_payload and
+      # #create_payload
+      def payload_pair
+        root_node = ::RDF::Node.new
+        graph = ::RDF::Graph.new
+        yield root_node, graph
+        return Payload.new(root_node, graph)
+      end
+
       def update(graph)
         graph_update(start_focus(graph))
       end

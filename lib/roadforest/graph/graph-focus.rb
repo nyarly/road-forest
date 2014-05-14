@@ -63,6 +63,10 @@ module RoadForest::Graph
       self.subject = subject unless subject.nil?
     end
 
+    def reset
+      access_manager.reset
+    end
+
     def root_url
       @access_manager.resource
     end

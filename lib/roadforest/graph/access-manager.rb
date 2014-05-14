@@ -14,6 +14,9 @@ module RoadForest::Graph
       @resource = normalize_context(resource)
     end
 
+    def reset
+    end
+
     def dup
       other = self.class.allocate
       other.resource = self.resource
@@ -54,13 +57,11 @@ module RoadForest::Graph
 
   class WriteManager < ReadOnlyManager
     def insert(statement)
-      statement[3] = resource
       destination_graph.insert(statement)
     end
 
     def delete(statement)
       statement = RDF::Query::Pattern.from(statement)
-      statement.context = resource
       destination_graph.delete(statement)
     end
   end
@@ -70,6 +71,10 @@ module RoadForest::Graph
 
     alias destination_graph target_graph
 
+    def reset
+      @target_graph = ::RDF::Repository.new
+    end
+
     def dup
       other = super
       other.target_graph = self.target_graph
@@ -78,6 +83,13 @@ module RoadForest::Graph
 
     def relevant_prefixes
       super.merge(relevant_prefixes_for_graph(destination_graph))
+    end
+
+    def each_target
+      destination_graph.each_context do |context|
+        graph = ::RDF::Graph.new(context, :data => target_graph)
+        yield(context, graph)
+      end
     end
   end
 

@@ -50,27 +50,65 @@ module RoadForest
         end
       end
 
-      class Update < Augmentation
-        register_for_subjects
+      class PayloadAugmentation < Augmentation
+        def get_payload(resource)
+
+        end
+
+        def applicable?(resource)
+
+        end
+
+        def affordance_type
+
+        end
 
         def apply(term)
-          if term.resource.allowed_methods.include?("PUT")
+          resource = term.resource
+          if applicable?(resource)
             node = ::RDF::Node.new
-            yield [node, ::RDF.type, Af.Update]
+            yield [node, ::RDF.type, affordance_type]
             yield [node, Af.target, term.uri]
+            payload = get_payload(resource)
+            unless payload.nil?
+              yield [node, Af.payload, payload.root]
+              payload.graph.each_statement do |stmt|
+                yield stmt
+              end
+            end
           end
         end
       end
 
-      class Create < Augmentation
+      class Update < PayloadAugmentation
         register_for_subjects
 
-        def apply(term)
-          if term.resource.allowed_methods.include?("POST")
-            node = ::RDF::Node.new
-            yield [node, ::RDF.type, Af.Create]
-            yield [node, Af.target, term.uri]
-          end
+        def get_payload(resource)
+          resource.interface.update_payload
+        end
+
+        def applicable?(resource)
+          resource.allowed_methods.include?("PUT")
+        end
+
+        def affordance_type
+          Af.Update
+        end
+      end
+
+      class Create < PayloadAugmentation
+        register_for_subjects
+
+        def get_payload(resource)
+          resource.interface.create_payload
+        end
+
+        def applicable?(resource)
+          resource.allowed_methods.include?("POST")
+        end
+
+        def affordance_type
+          Af.Create
         end
       end
     end

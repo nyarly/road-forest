@@ -4,7 +4,24 @@ require 'roadforest/application'
 
 describe RoadForest::Augment::Affordance do
   let :test_interface do
-    Class.new(RoadForest::Interface::RDF)
+    Class.new(RoadForest::Interface::RDF) do |klass|
+      def update_payload
+        payload_pair do |root_node, graph|
+          seg1 = ::RDF::Node.new
+          graph << [ root_node, Path.forward, seg1 ]
+          graph << [ seg1, Path.predicate, EX.b ]
+        end
+      end
+
+      def create_payload
+        payload_pair do |root_node, graph|
+          seg1 = ::RDF::Node.new
+          graph << [ root_node, Path.forward, seg1 ]
+          graph << [ seg1, Path.predicate, EX.val ]
+          graph << [ seg1, Path.type, ::RDF.Integer ]
+        end
+      end
+    end
   end
 
   let :other_test_interface do
@@ -12,6 +29,7 @@ describe RoadForest::Augment::Affordance do
   end
 
   Af = RoadForest::Graph::Af
+  Path = RoadForest::Graph::Path
 
   class EX < RDF::Vocabulary("http://example.com/"); end
 
@@ -59,6 +77,9 @@ describe RoadForest::Augment::Affordance do
       subject.should match_query {
         pattern [:node, RDF.type, Af.Update]
         pattern [:node, Af.target, EX.a]
+        pattern [:node, Af.payload, :payload_root ]
+        pattern [:payload_root, Path.forward, :seg1 ]
+        pattern [:seg1, Path.predicate, EX.b ]
       }
     end
 
@@ -66,10 +87,24 @@ describe RoadForest::Augment::Affordance do
       subject.should match_query {
         pattern [:node, RDF.type, Af.Create]
         pattern [:node, Af.target, EX.a]
+        pattern [:node, Af.payload, :payload_root ]
+        pattern [:payload_root, Path.forward, :seg1 ]
+        pattern [:seg1, Path.predicate, EX.val ]
       }
     end
 
-    it "should add Delete affordance"
-    it "should add Navigable affordance to child"
+    it "should add Remove affordance" do
+      subject.should match_query {
+        pattern [:node, RDF.type, Af.Remove ]
+        pattern [:node, Af.target, EX.a ]
+      }
+    end
+
+    it "should add Navigate affordance to child" do
+      subject.should match_query {
+        pattern [:node, RDF.type, Af.Navigate ]
+        pattern [:node, Af.target, EX["a/b/1"] ]
+      }
+    end
   end
 end

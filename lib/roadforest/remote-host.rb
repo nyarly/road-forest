@@ -3,6 +3,7 @@ require 'roadforest/source-rigor/credence-annealer'
 require 'roadforest/source-rigor/rigorous-access'
 require 'roadforest/source-rigor/graph-store' #XXX
 require 'roadforest/graph/graph-focus'
+require 'roadforest/graph/post-focus'
 require 'roadforest/http/user-agent'
 require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
@@ -59,63 +60,46 @@ module RoadForest
     end
 
     def anneal(focus)
-      graph = build_graph_store
+      graph = focus.access_manager.source_graph
       annealer = SourceRigor::CredenceAnnealer.new(graph)
       annealer.resolve do
+        focus.reset
         yield focus
       end
     end
 
-    def putting(&block)
-
+    def transaction(manager_class, focus_class, &block)
       graph = build_graph_store
-      access = SourceRigor::UpdateManager.new
+      access = manager_class.new
       access.rigor = source_rigor
       access.source_graph = graph
-      updater = Graph::GraphFocus.new(access, url)
+      focus = focus_class.new(access, url)
 
-      annealer = SourceRigor::CredenceAnnealer.new(graph)
+      anneal(focus, &block)
 
-      annealer.resolve do
-        access.target_graph = ::RDF::Repository.new
-        yield updater
-      end
+      return focus
+    end
 
-      target_graph = access.target_graph
-      target_graph.each_context do |context|
-        graph = ::RDF::Graph.new(context, :data => target_graph)
+    def putting(&block)
+      update = transaction(SourceRigor::UpdateManager, Graph::GraphFocus, &block)
+
+      access = update.access_manager
+
+      access.each_target do |context, graph|
         graph_transfer.put(context, graph)
       end
     end
 
     def posting(&block)
-      require 'roadforest/graph/post-focus'
+      poster = transaction(SourceRigor::PostManager, Graph::PostFocus, &block)
 
-      graph = build_graph_store
-      access = SourceRigor::PostManager.new
-      access.rigor = source_rigor
-      access.source_graph = graph
-      poster = Graph::PostFocus.new(access, url)
-
-      graphs = {}
-      poster.graphs = graphs
-
-      anneal(poster, &block)
-
-      graphs.each_pair do |url, graph|
+      poster.graphs.each_pair do |url, graph|
         graph_transfer.post(url, graph)
       end
     end
 
     def getting(&block)
-
-      graph = build_graph_store
-      access = SourceRigor::RetrieveManager.new
-      access.rigor = source_rigor
-      access.source_graph = graph
-      reader = Graph::GraphFocus.new(access, url)
-
-      anneal(reader, &block)
+      transaction(SourceRigor::RetrieveManager, Graph::GraphFocus, &block)
     end
 
     def put_file(destination, type, io)

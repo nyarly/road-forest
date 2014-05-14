@@ -71,12 +71,15 @@ module RoadForest
 
       def insert(statement)
         copy_context
+        statement[3] = resource
         super
       end
 
       def delete(statement)
         copy_context
-        super
+        statement = RDF::Query::Pattern.from(statement)
+        statement.context = resource
+        super(statement)
       end
 
       def parceller

@@ -5,6 +5,11 @@ module RoadForest::Graph
 
     attr_accessor :graphs
 
+    def initialize(access_manager, subject = nil)
+      super
+      @graphs = {}
+    end
+
     def dup
       other = super
       other.graphs = graphs

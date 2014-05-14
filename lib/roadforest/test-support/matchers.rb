@@ -180,13 +180,18 @@ module RoadForest
         not solutions.empty?
       end
 
+      def indent(string)
+        string.split("\n").map{|line| "  " + line}.join("\n")
+      end
+
       def failure_message_for_should
-        "expected #{@query.patterns.inspect} to return solutions on \n#{@actual.dump(:nquads)}\n but didn't"
+        require 'pp'
+        "expected: \n#{indent(@query.patterns.pretty_inspect)} \nto return solutions on \n\n#{indent(@actual.dump(:nquads))}\n but didn't"
       end
 
       def failure_message_for_should_not
-        "expected #{@query.patterns.inspect} not to return solutions on \n#{@actual.dump(:nquads)}\n but does"
-      end
+        require 'pp'
+        "expected: \n#{indent(@query.patterns.pretty_inspect)} \nnot to return solutions on \n\n#{indent(@actual.dump(:nquads))}\n but does" end
     end
 
     class ListEquivalence

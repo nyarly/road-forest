@@ -9,6 +9,7 @@ gem 'perftools.rb'
 gem 'vcr'
 gem 'webmock'
 gem 'linkeddata'
+gem "equivalent-xml"
 
 group :test do
   gem 'rdf-isomorphic'
