@@ -72,7 +72,8 @@ module RoadForest::Graph
     alias destination_graph target_graph
 
     def reset
-      @target_graph = ::RDF::Repository.new
+      @target_graph ||= ::RDF::Repository.new
+      @target_graph.clear
     end
 
     def dup

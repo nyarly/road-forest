@@ -122,8 +122,6 @@ module RoadForest
     end
 
     def insert_statement(statement)
-      #puts "\n#{__FILE__}:#{__LINE__} => #{[self.object_id,
-      #statement].inspect}"
       repository.insert(statement)
 
       repository.delete([statement.context, expand_curie([:rf, "impulse"]), nil])

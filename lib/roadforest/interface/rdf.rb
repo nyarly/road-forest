@@ -81,6 +81,7 @@ module RoadForest
         graph = ::RDF::Graph.new
         focus = start_focus(graph, my_url)
         fill_graph(focus)
+        puts "\n#{__FILE__}:#{__LINE__} => \n#{graph.dump(:ntriples)}"
         self.response_data = graph
       end
     end

@@ -19,8 +19,16 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
     ::RDF::Statement.from [ context_node, Voc[:a], 7 ]
   end
 
+  let :simple_pattern do
+    ::RDF::Query::Pattern.from(simple_statement.to_hash.merge(:context => :context))
+  end
+
   let :blank_node_statement do
     ::RDF::Statement.from [ context_node, Voc[:b], blank_node ]
+  end
+
+  let :blank_node_pattern do
+    ::RDF::Query::Pattern.from(blank_node_statement.to_hash.merge(:object => nil, :context => :context))
   end
 
   let :context_statements do
@@ -67,6 +75,7 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
       access.source_graph = source_graph
       access.target_graph = target_graph
       access.rigor = source_rigor
+      access.reset
     end
   end
 
@@ -84,35 +93,29 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
   it "should copy entire context when resource is written" do
     updater[Voc[:a]] = 17
 
-    resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
+    target_graph.query(:object => RoadForest::Graph::Vocabulary::RF[:Impulse]).should be_empty
+    target_graph.query([context_node, Voc[:a], 17, :context]).should_not be_empty
+    target_graph.query(simple_pattern).should be_empty
 
-    resource_graph.query(:object => RoadForest::Graph::Vocabulary::RF[:Impulse]).should be_empty
-    resource_graph.query(simple_statement).should be_empty
-
-    resource_graph.query(blank_node_statement).should_not be_empty
-    resource_graph.query([context_node, Voc[:a], 17]).should_not be_empty
+    target_graph.query(blank_node_pattern).should_not be_empty
   end
 
   it "should copy entire context when blank node is written to" do
     updater[Voc[:b]][Voc[:c]] = "jagular" #they drop from trees
 
-    resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
-
-    resource_graph.query(blank_node_statement).should_not be_empty
-    resource_graph.query(simple_statement).should_not be_empty
-    resource_graph.query([nil, Voc[:c], "jagular", context_node]).should_not be_empty
+    target_graph.query(blank_node_pattern).should_not be_empty
+    target_graph.query(simple_pattern).should_not be_empty
+    target_graph.query([nil, Voc[:c], "jagular", :context]).should_not be_empty
   end
 
   it "should trigger (only one) Store query just by writing" do
     updater[Voc[:d]] = 14
     updater[Voc[:e]] = "fourteen"
 
-    resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
-
-    resource_graph.query(blank_node_statement).should_not be_empty
-    resource_graph.query(simple_statement).should_not be_empty
-    resource_graph.query([context_node, Voc[:d], 14]).should_not be_empty
-    resource_graph.query([context_node, Voc[:e], "fourteen"]).should_not be_empty
+    target_graph.query(blank_node_pattern).should_not be_empty
+    target_graph.query(simple_pattern).should_not be_empty
+    target_graph.query([context_node, Voc[:d], 14, :context]).should_not be_empty
+    target_graph.query([context_node, Voc[:e], "fourteen", :context]).should_not be_empty
   end
 
   it "should return statements that have been written" do
@@ -120,38 +123,31 @@ describe RoadForest::Graph::GraphFocus, "with UpdateManager" do
     updater[Voc[:a]].should == 17
   end
 
-  it "should not copy contexts simply because they're read from" do
-    updater[Voc[:a]].should == 7
-    target_graph.should be_empty
-  end
-
   it "should add a list to the target graph" do
-    list_focus = updater.add_node(Voc[:list])
+    list_focus = updater.add_list(Voc[:list])
     nodes = []
-    list_focus.as_list.append_node do |node|
+    list_focus.append_node do |node|
       nodes << node
       node[Voc[:d]] = 107
     end
 
-    list_focus.as_list.append_node do |node|
+    list_focus.append_node do |node|
       nodes << node
       node[Voc[:d]] = 109
     end
 
-    list_focus.as_list.append_node do |node|
+    list_focus.append_node do |node|
       nodes << node
       node[Voc[:d]] = 113
     end
-
-    resource_graph = ::RDF::Graph.new(context_node, :data => target_graph)
 
     list = ::RDF::List.new(list_focus.subject, target_graph)
 
     list[0].should == nodes[0].subject
     list[1].should == nodes[1].subject
     list[2].should == nodes[2].subject
-    resource_graph.query([nodes[0].subject, Voc[:d], 107]).should_not be_empty
-    resource_graph.query([nodes[1].subject, Voc[:d], 109]).should_not be_empty
-    resource_graph.query([nodes[2].subject, Voc[:d], 113]).should_not be_empty
+    target_graph.query([nodes[0].subject, Voc[:d], 107, :context]).should_not be_empty
+    target_graph.query([nodes[1].subject, Voc[:d], 109, :context]).should_not be_empty
+    target_graph.query([nodes[2].subject, Voc[:d], 113, :context]).should_not be_empty
   end
 end

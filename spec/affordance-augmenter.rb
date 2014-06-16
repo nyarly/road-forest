@@ -18,7 +18,7 @@ describe RoadForest::Augment::Affordance do
           seg1 = ::RDF::Node.new
           graph << [ root_node, Path.forward, seg1 ]
           graph << [ seg1, Path.predicate, EX.val ]
-          graph << [ seg1, Path.type, ::RDF.Integer ]
+          graph << [ seg1, Path.type, ::RDF::XSD.integer ]
         end
       end
     end

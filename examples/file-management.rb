@@ -3,7 +3,9 @@ require 'rdf/vocab/skos'
 
 module FileManagementExample
   module Vocabulary
-    class LC < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/logical-construct#"); end
+    class LC < ::RDF::Vocabulary("http://lrdesign.com/vocabularies/logical-construct#")
+      property :name
+    end
   end
 
   class ServicesHost < ::RoadForest::Application::ServicesHost
@@ -46,7 +48,7 @@ module FileManagementExample
 
         def fill_graph(graph)
           graph[:rdf, "type"] = [:skos, "ConceptScheme"]
-          nav_entry(graph, "Unresolved", path_for(:unresolved_needs))
+          nav_entry(graph, "Unresolved", url_for(:unresolved_needs))
         end
       end
 
@@ -73,6 +75,7 @@ module FileManagementExample
                 need[:lc, :digest]
 
                 list.append(need.subject)
+                puts "\n#{__FILE__}:#{__LINE__} => #{list.inspect}"
               end
             end
           end
@@ -94,7 +97,7 @@ module FileManagementExample
         def fill_graph(graph)
           graph[[:lc, "resolved"]] = data.resolved
           graph[[:lc, "name"]] = data.name
-          graph[[:lc, "contents"]] = path_for(:file_content)
+          graph[[:lc, "contents"]] = url_for(:file_content)
         end
       end
     end

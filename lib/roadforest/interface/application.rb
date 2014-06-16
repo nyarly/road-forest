@@ -27,7 +27,7 @@ module RoadForest
       end
 
       def url_for(route_name, params = nil)
-        Addressable::URI.parse(canonical_host.to_s).join(path_for(route_name, params))
+        ::RDF::URI.new(Addressable::URI.parse(canonical_host.to_s).join(path_for(route_name, params)))
       end
 
       def interface_for(route_name = nil, params = nil)

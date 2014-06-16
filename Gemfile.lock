@@ -11,6 +11,11 @@ PATH
       valise (~> 1.1)
       webmachine (>= 1.1.0)
 
+PATH
+  remote: ../../gems/stack_loop/
+  specs:
+    stack_loop (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -106,7 +111,7 @@ GEM
     paint (0.8.7)
     perftools.rb (2.0.1)
     rake (10.1.1)
-    rdf (1.1.2.1)
+    rdf (1.1.4)
     rdf-isomorphic (1.1.0)
       rdf (>= 1.1)
     rdf-json (1.0.0)
@@ -164,7 +169,7 @@ GEM
       unf_ext
     unf_ext (0.0.6)
     valise (1.1.1)
-    vcr (2.8.0)
+    vcr (2.9.2)
     webmachine (1.2.2)
       as-notifications (~> 1.0)
       i18n (>= 0.4.0)
@@ -191,5 +196,6 @@ DEPENDENCIES
   rdf-turtle
   rdf-xsd
   roadforest!
+  stack_loop!
   vcr
   webmock

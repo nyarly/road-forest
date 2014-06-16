@@ -1,3 +1,11 @@
+Review Focus/Manager "resource"
+  As it stands: Focus maintains a state of which "resource" a statement is
+  being added to. Passing over a new subject that would qualify changes
+  resource. There's two problems with this: reverse traversals can't correctly
+  record resources, and the underlying manager is difficult to use as a simple
+  graph. Is this needed to function, or was it a mental stepping stone that can
+  be disposed of?
+
 Ideas have crystalized about complete affordance support
   Graph Focus needs to support creating and accessing named graphs. Because:
   Create and Update affordances need payloads e.g. graph templates. Reflection
@@ -28,6 +36,33 @@ Ideas have crystalized about complete affordance support
     needs to be handled by a blob upload helper that will extract the file from
     the multipart/html-form
 
+
+  As I've been working this through, I've come to see that there's a potential
+  use case that I'm not positive is worth supporting: single affordance tagged
+  with multiple affordance patterns. On the one hand, it says "this resource
+  could have these two (or more) forms" which seems legit. But the machinary to
+  handle the case is more complicated, so I want to sketch some note for it now
+  and set it aside:
+
+  When submitting an updated graph, loop over all the affordance roots, and map
+  each of their graphs to a source_match/dest_match pair. Consider differences
+  between pairs, but also count # of successful source_match and dest_matches.
+  0, 1, >1 vs source/dest/patterns produces 27 states for the exchange, which
+  roughly map to a client-side version of 400/500 error states. e.g. 0 source
+  matches -> 0 patterns: lazy server, use parcelling; 1+ patterns -> server
+  error: sent data that doesn't match own patterns.
+
+  The further problem though is how to handle each of those states. 0sm+0p: use
+  parcelling, maybe log a warning. But 0sm+1p: ? client-code error handling? Or
+  at least error configuration? Default to parcelling fallback?
+
+  I forsee a skeleton method against the client RemoteHost -
+  handle_update_match(source_matches:Int, dest_matches:Int, patterns:Int,
+  match_pairs) -> call out to e.g. "send updates", "parcel updates",
+  "fail(message)"
+
+  I begin to wonder if parcelling will be something "Never To Do: its use
+  indicates a error state."
 
 RDFa + HTML support:
   Remember that RDFa + FORM children: the object of triples from RDFa are
@@ -61,7 +96,7 @@ Performance
 Define RDF affordance vocab
   Have reviewed rdforms, RDF Forms, Hydra, and draft RDF Affordances vocab. Not
   thrilled with any of them. Hydra might provide almost everything I want, but
-  there's extra things I'd rather leave out. Something like woud be required to
+  there's extra things I'd rather leave out. Something like would be required to
   complete the REST requirements. (q.v. Amundsen: RESTful Web APIs).
 
   Missing link is an authorization affordance: akin to the keyhole next to the
@@ -106,14 +141,6 @@ Ruby HTTP client that respects cache
 
 Focus Rigor switching:
   API for a GraphFocus to change the rigor it's using
-
-"Strict" vocabularies:
-  Vocab classes that have an RDFS document (in addition to their prefix and
-  URL), from which they can load properties and classes, but also the human
-  descriptions etc.
-  Tools to pull the document from it's source.
-  Tools to help edit new RDFS?
-  Integration with RDFa templates
 
 Pagination:
   A pagination vocab:
@@ -163,10 +190,6 @@ Handling status codes -
   3xx and Location following
   4xx - sometimes correctable, otherwise...
   5xx
-
-Strict Vocabularies: use the Vocab URL to pull the RDFS (or OWL?) description
-of the vocab and define properties in the vocab that way. Also, use human
-descriptions for fields in RDFa, for instance.
 
 Error Handling
   Specifically, when the server returns 500, a RemoteHost#<act>ing starts

@@ -26,7 +26,7 @@ describe "Path matching" do
     seg1 = ::RDF::Node.new(:seg1)
     seg2 = ::RDF::Node.new(:seg2)
     ::RDF::Graph.new.tap do |graph|
-      graph << [ root, RDF::RDFS.class, path.Root ]
+      graph << [ root, ::RDF.type, path.Root ]
       graph << [ root, path.forward, seg1 ]
       graph << [ seg1, path.predicate, voc.one ]
       graph << [ seg1, path.forward, seg2 ]
@@ -89,6 +89,65 @@ describe "Path matching" do
     match(pattern, match_against, root_node).should be_successful
   end
 
+  describe "reuse" do
+    let :pattern do
+      root = ::RDF::Node.new(:root)
+      lit1 = ::RDF::Node.new(:lit1)
+
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, ::RDF.type, path.Root ]
+        graph << [ root, path.forward, lit1 ]
+        graph << [ lit1, path.predicate, voc.one ]
+        graph << [ lit1, path.type, ::RDF::XSD.integer ]
+      end
+    end
+
+    let :matcher do
+      RoadForest::PathMatcher.new.tap do |matcher|
+        matcher.pattern = pattern
+      end
+    end
+
+    let :haystack_one do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root_node, voc.one, 3 ]
+      end
+
+    end
+
+    let :haystack_two do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root_node, voc.one, 4 ]
+      end
+    end
+
+    let :match_one do
+      matcher.match(root_node, haystack_one)
+    end
+
+    let :match_two do
+      matcher.match(root_node, haystack_two)
+    end
+
+    it "should return different matches from different graphs" do
+      match_one.should_not == match_two
+    end
+
+    it "should return different matched graphs" do
+      match_one.graph.should_not == match_two.graph
+    end
+
+    it "should return non-equivalent matched graphs" do
+      match_one.graph.should_not be_equivalent_to(match_two.graph)
+    end
+
+    it "should not mutate graphs after the fact" do
+      prior = match_one.graph.dup
+      match_two
+      prior.should be_equivalent_to(match_one.graph)
+    end
+  end
+
   describe "literal constraints" do
     let :match_against do
       ::RDF::Graph.new.tap do |graph|
@@ -102,10 +161,10 @@ describe "Path matching" do
       lit1 = ::RDF::Node.new(:lit1)
 
       ::RDF::Graph.new.tap do |graph|
-        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, ::RDF.type, path.Root ]
         graph << [ root, path.forward, lit1 ]
         graph << [ lit1, path.predicate, voc.one ]
-        graph << [ lit1, path.type, RDF.Integer ]
+        graph << [ lit1, path.type, ::RDF::XSD.integer ]
         graph << [ lit1, path.is, 3 ]
       end
     end
@@ -122,6 +181,39 @@ describe "Path matching" do
     end
   end
 
+  describe "type contraints" do
+    let :match_against do
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root_node, voc.one, 3 ]
+        graph << [ root_node, voc.one, "Humphrey Bogart" ]
+      end
+    end
+
+    let :pattern do
+      root = ::RDF::Node.new(:root)
+      lit1 = ::RDF::Node.new(:lit1)
+
+      ::RDF::Graph.new.tap do |graph|
+        graph << [ root, ::RDF.type, path.Root ]
+        graph << [ root, path.forward, lit1 ]
+        graph << [ lit1, path.predicate, voc.one ]
+        graph << [ lit1, path.type, ::RDF::XSD.integer ]
+      end
+    end
+
+    it "should succeed" do
+      match(pattern, match_against, root_node).should be_successful
+    end
+
+    it "should only have the matching items" do
+      graph = match(pattern, match_against, root_node).graph
+      v = voc
+      graph.should match_query { pattern [ :start, v.one, 3 ] }
+      graph.should_not match_query { pattern [ :start, v.one, "Humphrey Bogart" ] }
+    end
+
+  end
+
   describe "repeats" do
     def match_against(depth)
       ::RDF::List.new(root_node, ::RDF::Graph.new, (1..depth).to_a)
@@ -132,10 +224,10 @@ describe "Path matching" do
       lit1 = ::RDF::Node.new(:lit1)
 
       ::RDF::Graph.new.tap do |graph|
-        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, ::RDF.type, path.Root ]
         graph << [ root, path.forward, lit1 ]
         graph << [ lit1, path.predicate, ::RDF.first ]
-        graph << [ lit1, path.type, RDF.Integer ]
+        graph << [ lit1, path.type, ::RDF::XSD.integer ]
         graph << [ root, path.forward, root ]
         graph << [ root, path.predicate, ::RDF.rest ]
         graph << [ root, path.minRepeat, 2 ]
@@ -175,7 +267,7 @@ describe "Path matching" do
       seg1 = ::RDF::Node.new(:seg1)
       seg2 = ::RDF::Node.new(:seg2)
       ::RDF::Graph.new.tap do |graph|
-        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, ::RDF.type, path.Root ]
         graph << [ root, path.forward, seg1 ]
         graph << [ seg1, path.predicate, voc.one ]
         graph << [ seg1, path.minMulti, 2 ]
@@ -187,7 +279,7 @@ describe "Path matching" do
       root = ::RDF::Node.new(:root)
       seg1 = ::RDF::Node.new(:seg1)
       ::RDF::Graph.new.tap do |graph|
-        graph << [ root, RDF::RDFS.class, path.Root ]
+        graph << [ root, ::RDF.type, path.Root ]
         graph << [ root, path.forward, seg1 ]
         graph << [ seg1, path.predicate, voc.one ]
         graph << [ seg1, path.minMulti, 0 ]

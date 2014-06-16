@@ -153,10 +153,12 @@ module RoadForest::Graph
     end
 
     def add_list(property, extra=nil)
-      list = FocusList.new(::RDF::Node.new, access_manager)
-      access_manager.insert([subject, normalize_property(property, extra), list.subject])
+      unless extra.nil?
+        property = normalize_property([property, extra])
+      end
+      list = add_node(property).as_list
       yield list if block_given?
-      return list
+      list
     end
     #### End of old GraphFocus
 

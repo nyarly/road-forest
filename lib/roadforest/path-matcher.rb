@@ -8,23 +8,26 @@ module RoadForest
 
     class Match
       def initialize(matcher)
-        @matcher = matcher
+        @success = matcher.completed_child.accepting?
+        @graph = if @success
+            statements = matcher.completed_child.matched_statements.keys
+            ::RDF::Graph.new.tap do |graph|
+              statements.each do |stmt|
+                graph << stmt
+              end
+            end
+          end
       end
 
       def success?
-        @matcher.completed_child.accepting?
+        @success
       end
       alias successful? success?
       alias succeed? success?
 
       def graph
         if success?
-          statements = @matcher.completed_child.matched_statements.keys
-          ::RDF::Graph.new.tap do |graph|
-            statements.each do |stmt|
-              graph << stmt
-            end
-          end
+          @graph
         else
           raise NoMatch, "Pattern doesn't match graph"
         end
@@ -41,7 +44,7 @@ module RoadForest
       attr_accessor :graph_term
       attr_accessor :pattern_step
 
-      attr_accessor :exact_value, :before, :after, :order
+      attr_accessor :exact_value, :before, :after, :order, :type
 
       attr_reader :children
 
@@ -111,6 +114,7 @@ module RoadForest
           pattern  [  :next,  Graph::Path.after,      :after       ],  :optional  =>  true
           pattern  [  :next,  Graph::Path.before,     :before      ],  :optional  =>  true
           pattern  [  :next,  Graph::Path.order,      :order       ],  :optional  =>  true
+          pattern  [  :next,  Graph::Path.type,       :type        ],  :optional  =>  true
         end
       end
 
@@ -119,11 +123,11 @@ module RoadForest
                 when !resolved?
                   "?"
                 when accepting?
-                  "A"
+                  "Acpt"
                 when rejecting?
-                  "R"
+                  "Rjct"
                 end
-        "<#{self.class.name.sub(/.*::/,'')} #{predicate}*#{min_multi}-#{max_multi} #{min_repeat}-#{max_repeat}:#{step_count} #{state} >"
+        "<#{self.class.name.sub(/.*::/,'')} #{predicate}*M:#{min_multi}(<?#{available_count rescue "-"})-(#{accepting_count rescue "-"}<?)#{max_multi} R:#{min_repeat}-#{max_repeat}:#{step_count} #{state} >"
       end
 
       def step_count
@@ -198,6 +202,7 @@ module RoadForest
             node.before = before
             node.after = after
             node.order = order
+            node.type = type
           end
         end
       end
@@ -241,9 +246,9 @@ module RoadForest
                 when !resolved?
                   "?"
                 when accepting?
-                  "A"
+                  "Acpt"
                 when rejecting?
-                  "R"
+                  "Rjct"
                 end
         "[#{self.class.name.sub(/.*::/,'')} #{statement} #{graph_term}/#{pattern_step} #{state} ]"
       end
@@ -261,9 +266,14 @@ module RoadForest
       end
 
       def reject_value?
-        return false if before.nil? and after.nil?
-        return true if not (before.nil? or before > graph_term)
-        return true if not (after.nil? and after < graph_term)
+        unless before.nil? and after.nil?
+          return true if not (before.nil? or before > graph_term)
+          return true if not (after.nil? and after < graph_term)
+        end
+
+        unless type.nil?
+          return true if graph_term.datatype != type
+        end
 
         return false
       end
@@ -329,6 +339,7 @@ module RoadForest
             edge.after = solution[:after]
             edge.before = solution[:before]
             edge.order = solution[:order]
+            edge.type = solution[:type]
           end
         end
       end
@@ -343,10 +354,11 @@ module RoadForest
     end
 
     def initialize()
+      @logging = false
       reset
     end
 
-    attr_accessor :pattern
+    attr_accessor :pattern, :logging
     attr_reader :completed_child
 
     def match(root, graph)
@@ -375,7 +387,7 @@ module RoadForest
     def pattern_root
       @pattern_root ||=
         begin
-          roots = pattern.query(:predicate => RDF::RDFS.class, :object => Graph::Path.Root).to_a
+          roots = pattern.query(:predicate => ::RDF.type, :object => Graph::Path.Root).to_a
           if roots.length != 1
             raise "A pattern should have exactly one root, has: #{roots.length}\n#{roots.map(&:inspect).join('\n')}"
           end
@@ -388,6 +400,7 @@ module RoadForest
     end
 
     def notify_resolved(matching)
+      log "Resolved:", matching
       @completed_child = matching
     end
 
@@ -395,6 +408,11 @@ module RoadForest
       matching = next_matching_node
       unless matching.nil?
         matching.open
+        if matching.children.empty?
+          log "No match:", matching
+        else
+          log "Matches for:", matching
+        end
         add_matching_nodes(matching.children)
 
         check_complete(matching)
@@ -406,7 +424,14 @@ module RoadForest
     end
 
     def add_matching_nodes(list)
+      list.each do |node|
+        log "  Adding step:", node
+      end
       @search_queue += list
+    end
+
+    def log(*args)
+      puts args.join(" ") if @logging
     end
 
     def resolved?
@@ -415,6 +440,7 @@ module RoadForest
 
     def check_complete(matching)
       while matching.resolved?
+        log "Checking:", matching
         matching.parent.notify_resolved(matching)
         matching = matching.parent
       end

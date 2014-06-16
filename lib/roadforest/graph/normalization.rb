@@ -43,7 +43,7 @@ module RoadForest::Graph
     def normalize_context(from)
       case from
       when Array
-        from = expand_curie(from)
+        from = uri(expand_curie(from))
       when RDF::URI, Addressable::URI, String
         from = uri(from)
       else
@@ -107,7 +107,7 @@ module RoadForest::Graph
 
     def expand_curie_pair(prefix, property)
       vocab = Vocabs.fetch(prefix) do
-        vocab = RDF::Vocabulary.find do |vocab|
+        vocab = RDF::Vocabulary.detect do |vocab|
           unless vocab.__prefix__.is_a? RDF::URI
             Vocabs[vocab.__prefix__.to_s] = vocab
           end

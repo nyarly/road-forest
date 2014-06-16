@@ -26,7 +26,7 @@ describe RoadForest::RemoteHost do
   let :base_server do
     RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services)).tap do |server|
       server.add_credentials("user", "secret")
-     # server.trace = true
+      server.trace = true
     end
   end
 
