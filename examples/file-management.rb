@@ -75,7 +75,6 @@ module FileManagementExample
                 need[:lc, :digest]
 
                 list.append(need.subject)
-                puts "\n#{__FILE__}:#{__LINE__} => #{list.inspect}"
               end
             end
           end
@@ -86,6 +85,15 @@ module FileManagementExample
         def data
           @data = services.file_records.find do |record|
             record.name == params.remainder
+          end
+        end
+
+        def update_payload
+          payload_focus do |payload|
+            payload.add_node([:path, "forward"]) do |resolved|
+              resolved[[:path, "predicate"]] = [:lc, "resolved"]
+              resolved[[:path, "type"]] = [:xsd, "boolean"]
+            end
           end
         end
 

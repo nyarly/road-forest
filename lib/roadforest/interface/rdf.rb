@@ -40,6 +40,12 @@ module RoadForest
       def fill_graph(graph)
       end
 
+      def payload_focus(&block)
+        pair = payload_pair
+        focus = start_focus(pair.grapth, pair.root, &block)
+        focus.graph
+      end
+
       def start_focus(graph, resource_url=nil)
         access = RoadForest::Graph::WriteManager.new
         access.source_graph = graph
