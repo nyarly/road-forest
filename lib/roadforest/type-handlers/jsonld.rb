@@ -12,7 +12,6 @@ module RoadForest
         prefixes.keys.each do |prefix|
           prefixes[prefix.to_sym] = prefixes[prefix]
         end
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{rdf.dump(:ntriples)}"
         JSON::LD::Writer.buffer(:base_uri => base_uri.to_s,
                                 :prefixes => prefixes) do |writer|
           rdf.each_statement do |statement|

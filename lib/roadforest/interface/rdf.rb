@@ -17,7 +17,9 @@ module RoadForest
       end
 
       def update(graph)
-        graph_update(start_focus(graph))
+        start_focus(graph) do |focus|
+          graph_update(focus)
+        end
       end
 
       def graph_update(focus)
@@ -25,8 +27,10 @@ module RoadForest
       end
 
       def add_graph_child(graph)
-        add_child(start_focus(graph))
-        new_graph
+        start_focus(graph) do |focus|
+          add_child(focus)
+        end
+        new_graph #XXX?
       end
 
       def add_child(focus)
@@ -42,17 +46,17 @@ module RoadForest
 
       def payload_focus(&block)
         pair = payload_pair
-        focus = start_focus(pair.grapth, pair.root, &block)
-        focus.graph
+        return start_focus(pair.graph, pair.root, &block)
       end
 
-      def start_focus(graph, resource_url=nil)
+      def start_focus(graph = nil, resource_url=nil)
+        graph ||= ::RDF::Graph.new
         access = RoadForest::Graph::WriteManager.new
         access.source_graph = graph
         focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
 
         yield focus if block_given?
-        return focus
+        return graph
       end
 
       def copy_interface(node, route_name, params=nil)
@@ -84,11 +88,9 @@ module RoadForest
       end
 
       def new_graph
-        graph = ::RDF::Graph.new
-        focus = start_focus(graph, my_url)
-        fill_graph(focus)
-        puts "\n#{__FILE__}:#{__LINE__} => \n#{graph.dump(:ntriples)}"
-        self.response_data = graph
+        self.response_data = start_focus do |focus|
+          fill_graph(focus)
+        end
       end
     end
   end

@@ -4,28 +4,28 @@ require 'roadforest/resource'
 
 module RoadForest
   class Dispatcher < Webmachine::Dispatcher
-    def initialize(application)
+    def initialize(services)
       super(method(:create_resource))
-      @application = application
+      @services = services
       @route_names = {}
       @trace_by_default = false
     end
-    attr_accessor :application, :trace_by_default
+    attr_accessor :services, :trace_by_default
 
     def route_for_name(name)
       @route_names.fetch(name)
     end
 
+    def each_route(&block)
+      @routes.each(&block)
+    end
+
     def default_content_engine
-      @application.default_content_engine
+      @services.default_content_engine
     end
 
     def path_provider
       @path_provider ||= PathProvider.new(self)
-    end
-
-    def services
-      @application.services
     end
 
     # Add a named route to the dispatcher - the 90% case is handled by passing

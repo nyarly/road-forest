@@ -31,8 +31,8 @@ describe "RoadForest integration", :integration => true do
       require 'logger'
 
       RoadForest.serve(
-        FileManagementExample::Application.new("http://localhost:#{@server_port}"),
         FileManagementExample::ServicesHost.new.tap do |host|
+          host.root_url = "http://localhost:#{@server_port}"
           host.file_records = [
             FileManagementExample::FileRecord.new("one", false),
             FileManagementExample::FileRecord.new("two", false),

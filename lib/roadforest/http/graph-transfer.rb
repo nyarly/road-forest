@@ -25,17 +25,6 @@ module RoadForest
       end
 
       def make_request(method, url, graph, retry_limit=5)
-       raise "wtfbbq?" if Array === url
-        puts "\n#{__FILE__}:#{__LINE__} => #{[method, url].inspect}"
-        if graph.respond_to? :each_statement
-          puts "\n#{__FILE__}:#{__LINE__} =>"
-          graph.each_statement do |stmt|
-            p stmt
-          end
-        else
-          puts "\n#{__FILE__}:#{__LINE__} => #{graph.inspect}"
-        end
-        puts "\n#{__FILE__}:#{__LINE__} => #{:done.inspect}"
         headers = {"Accept" => type_handling.parsers.types.accept_header}
         body = nil
 

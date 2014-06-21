@@ -6,6 +6,9 @@ Review Focus/Manager "resource"
   graph. Is this needed to function, or was it a mental stepping stone that can
   be disposed of?
 
+Somehow the docs need to refer to
+  http://blog.soton.ac.uk/webteam/2010/09/02/the-modeler/
+
 Ideas have crystalized about complete affordance support
   Graph Focus needs to support creating and accessing named graphs. Because:
   Create and Update affordances need payloads e.g. graph templates. Reflection

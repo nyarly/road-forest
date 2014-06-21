@@ -3,9 +3,10 @@ require 'roadforest/application'
 require 'roadforest/interfaces'
 
 module RoadForest
-  def self.serve(application, services)
+  def self.serve(services)
     require 'webrick/accesslog'
-    application.services = services
+
+    application = RoadForest::Application.new(services)
 
     logfile = services.logger
     logfile.info("#{Time.now.to_s}: Starting Roadforest server")

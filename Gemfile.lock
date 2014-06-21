@@ -11,11 +11,6 @@ PATH
       valise (~> 1.1)
       webmachine (>= 1.1.0)
 
-PATH
-  remote: ../../gems/stack_loop/
-  specs:
-    stack_loop (0.1.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -161,6 +156,7 @@ GEM
       multi_json
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
+    stack_loop (0.1.0)
     sxp (0.1.4)
       json (>= 1.1.1)
     thor (0.18.1)
@@ -196,6 +192,6 @@ DEPENDENCIES
   rdf-turtle
   rdf-xsd
   roadforest!
-  stack_loop!
+  stack_loop
   vcr
   webmock

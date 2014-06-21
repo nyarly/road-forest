@@ -13,6 +13,7 @@ describe RoadForest::RemoteHost do
   let :services do
     require 'logger'
     FileManagementExample::ServicesHost.new.tap do |host|
+      host.root_url = "http://localhost:8778"
       host.file_records = [
         FileManagementExample::FileRecord.new("one", false),
         FileManagementExample::FileRecord.new("two", false),
@@ -24,9 +25,9 @@ describe RoadForest::RemoteHost do
   end
 
   let :base_server do
-    RoadForest::TestSupport::RemoteHost.new(FileManagementExample::Application.new("http://localhost:8778", services)).tap do |server|
+    RoadForest::TestSupport::RemoteHost.new(services).tap do |server|
       server.add_credentials("user", "secret")
-      server.trace = true
+      #server.trace = true
     end
   end
 
@@ -102,7 +103,7 @@ describe RoadForest::RemoteHost do
             end
           end
         ensure
-          dump_trace
+          #dump_trace
         end
       end
 

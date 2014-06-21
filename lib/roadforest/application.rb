@@ -13,33 +13,25 @@ require 'roadforest/authorization'
 
 module RoadForest
   class Application
-    include Graph::Normalization
-
-    def initialize(canonical_host, services = nil, configuration = nil, dispatcher = nil)
-      @canonical_host = normalize_resource(canonical_host)
+    def initialize(services, configuration = nil)
+      @services = services
       configuration ||= Webmachine::Configuration.default
-      dispatcher ||= Dispatcher.new(self)
       super(configuration, dispatcher)
-      self.services = services unless services.nil?
-
-      setup
     end
 
-    def setup
+    attr_reader :services
+
+    def dispatcher
+      services.dispatcher
     end
-
-    attr_accessor :services, :canonical_host, :default_content_engine
-
     alias router dispatcher
 
-    #XXX Is this the right place for this?
-    def services=(service_host)
-      @services = service_host
-      service_host.application = self
+    def canonical_host
+      services.canonical_host
     end
 
     def default_content_engine
-      @default_content_engine || ContentHandling.rdf_engine
+      services.default_content_engine
     end
   end
 end

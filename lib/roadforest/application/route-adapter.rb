@@ -24,6 +24,14 @@ module RoadForest
         interface_builder.call(route_name, params, router, router.services)
       end
 
+      def interface_class
+        if interface_builder.respond_to? :interface_class
+          interface_builder.interface_class
+        else
+          nil
+        end
+      end
+
       def trace?
         if @trace.nil?
           router.trace_by_default
@@ -52,6 +60,14 @@ module RoadForest
         end.join("/")
       end
 
+      def interface_class
+        if resource.respond_to? :interface_class
+          resource.interface_class
+        else
+          nil
+        end
+      end
+
       def build_params(vars = nil)
         vars ||= {}
         params = Application::Parameters.new
@@ -69,13 +85,24 @@ module RoadForest
       end
     end
 
+    class InterfaceBuilder
+      attr_reader :interface_class
+      def initialize(interface_class)
+        @interface_class = interface_class
+      end
+
+      def call(name, params, router, services)
+        interface_class.new(name, params, router.path_provider, services)
+      end
+    end
+
     class RouteBinding
       def initialize(router)
         @router = router
       end
 
       attr_accessor :route_name, :path_spec, :bindings, :guard
-      attr_accessor :resource_type, :interface_class, :services, :trace, :content_engine
+      attr_accessor :resource_type, :interface_builder, :interface_class, :services, :trace, :content_engine
 
       def resource_builder
         @resource_builder ||= proc do |request, response|
@@ -88,9 +115,7 @@ module RoadForest
       end
 
       def interface_builder
-        @interface_builder ||= proc do |name, params, router, services|
-          interface_class.new(name, params, router.path_provider, services)
-        end
+        @interface_builder ||= InterfaceBuilder.new(interface_class)
       end
 
       def build_interface(&block)

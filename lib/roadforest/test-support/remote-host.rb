@@ -3,9 +3,9 @@ require 'roadforest/remote-host'
 require 'roadforest/test-support/http-client'
 module RoadForest::TestSupport
   class RemoteHost < ::RoadForest::RemoteHost
-    def initialize(app)
-      @app = app
-      super(app.canonical_host)
+    def initialize(services)
+      @app = RoadForest::Application.new(services)
+      super(services.canonical_host)
     end
 
     def build_graph_store

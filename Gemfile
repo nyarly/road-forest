@@ -10,7 +10,7 @@ gem 'vcr'
 gem 'webmock'
 gem 'linkeddata'
 gem "equivalent-xml"
-gem "stack_loop", :path => "../../gems/stack_loop/"
+gem "stack_loop"
 
 group :test do
   gem 'rdf-isomorphic'
