@@ -1,9 +1,24 @@
 require 'roadforest/interface/application'
 
 module RoadForest
+  module Graph
+    module Helpers
+      def start_focus(graph = nil, resource_url=nil)
+        graph ||= ::RDF::Graph.new
+        access = RoadForest::Graph::WriteManager.new
+        access.source_graph = graph
+        focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
+
+        yield focus if block_given?
+        return graph
+      end
+    end
+  end
+
   module Interface
     class RDF < Application
-      include RoadForest::Graph::Etagging
+      include Graph::Etagging
+      include Graph::Helpers
 
       Payload = Struct.new(:root, :graph)
 
@@ -47,16 +62,6 @@ module RoadForest
       def payload_focus(&block)
         pair = payload_pair
         return start_focus(pair.graph, pair.root, &block)
-      end
-
-      def start_focus(graph = nil, resource_url=nil)
-        graph ||= ::RDF::Graph.new
-        access = RoadForest::Graph::WriteManager.new
-        access.source_graph = graph
-        focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
-
-        yield focus if block_given?
-        return graph
       end
 
       def copy_interface(node, route_name, params=nil)

@@ -17,6 +17,23 @@ module RoadForest
         StatementsFromGraph.new(graph)
       end
 
+      # Heuristically detect the input stream
+      def detect_format(stream)
+        # Got to look into the file to see
+        if stream.is_a?(IO) || stream.is_a?(StringIO)
+          stream.rewind
+          string = stream.read(1000)
+          stream.rewind
+        else
+          string = stream.to_s
+        end
+        case string
+        when /<html/i   then RDF::RDFa::Reader
+        when /@prefix/i then RDF::Turtle::Reader
+        else                 RDF::NTriples::Reader
+        end
+      end
+
       def normalize(graph)
         case graph
         when RDF::Queryable then graph
@@ -26,7 +43,7 @@ module RoadForest
           # Figure out which parser to use
           g = RDF::Graph.new
           reader_class = detect_format(graph)
-          reader_class.new(graph, :base_uri => @info.about).each {|s| g << s}
+          reader_class.new(graph, :base_uri => @info.nil? ? nil : @info.about).each {|s| g << s}
           g
         end
       end

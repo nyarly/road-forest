@@ -18,21 +18,20 @@ module RoadForest
         [:update, :create]
       end
 
-      def root_for(route, domain, type)
-        url = my_url
-        url.hash = "#{route.name}-#{type}"
+      def root_for(name, domain, type)
+        "#{my_url}##{name}-#{type}"
       end
 
       def new_graph
         graph = ::RDF::Graph.new
-        router.each_route do |route|
+        router.each_name_and_route do |name, route|
           interface_class = route.interface_class
           next if interface_class.nil?
           next unless interface_class.respond_to? :backfill_payload
 
           domains.each do |domain|
             types.each do |type|
-              payload_graph = interface_class.backfill_payload(domain, type, root_for(route, domain, type))
+              payload_graph = interface_class.backfill_payload(domain, type, root_for(name, domain, type))
 
               next if payload_graph.nil?
 

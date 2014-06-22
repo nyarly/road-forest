@@ -1,5 +1,6 @@
 require 'webmachine'
 require 'roadforest/application/route-adapter'
+require 'roadforest/application/path-provider'
 require 'roadforest/resource'
 
 module RoadForest
@@ -18,6 +19,10 @@ module RoadForest
 
     def each_route(&block)
       @routes.each(&block)
+    end
+
+    def each_name_and_route(&block)
+      @route_names.each_pair(&block)
     end
 
     def default_content_engine

@@ -23,7 +23,7 @@ module RoadForest
       #@!group Utility methods
 
       def path_for(route_name = nil, params = nil)
-        router.path_for(route_name, params || self.params)
+        router.path_provider.path_for(route_name, params || self.params)
       end
 
       def url_for(route_name, params = nil)
