@@ -9,6 +9,10 @@ module RoadForest
       @dispatcher.services
     end
 
+    def route_for_name(name, params=nil)
+      @dispatcher.mapped_route_for_name(@route_name, name, params)
+    end
+
     # Get the URL to the given resource, with optional variables to be used
     # for bindings in the path spec.
     # @param [Webmachine::Resource] resource the resource to link to
@@ -17,7 +21,7 @@ module RoadForest
     # @return [String] the URL
     def path_for(name, vars = nil)
       vars ||= {}
-      route = @dispatcher.route_for_name(name)
+      route = route_for_name(name)
       ::RDF::URI.parse(route.build_path(vars))
     end
 
@@ -40,7 +44,7 @@ module RoadForest
     end
 
     def interface_for(name, vars = nil)
-      route = @dispatcher.route_for_name(name)
+      route = route_for_name(name)
       params = route.build_params(vars)
       route.resource.build_interface(params)
     end

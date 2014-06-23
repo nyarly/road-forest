@@ -9,12 +9,25 @@ module RoadForest
       super(method(:create_resource))
       @services = services
       @route_names = {}
+      @route_mappings = []
       @trace_by_default = false
     end
     attr_accessor :services, :trace_by_default
 
     def route_for_name(name)
       @route_names.fetch(name)
+    end
+
+    def mapped_route_for_name(from, name, params)
+      mapping = @route_mappings.find do |mapping|
+        mapping.matches?(from, name, params)
+      end
+
+      unless mapping.nil?
+        name = mapping.to_name
+      end
+
+      return route_for_name(name)
     end
 
     def find_route(*args)
@@ -81,5 +94,46 @@ module RoadForest
       end
     end
     alias add_traced add_traced_route
+
+    def add_route_map(route_map)
+      @route_mappings << route_map
+    end
+
+    class RouteMap
+      class Configurator
+        def initialize(name, router)
+          @router = router
+          @map = RouteMap.new
+          @map.in_name = name
+        end
+
+        def from(name, params=nil)
+          @map.from_name = name
+          @map.from_params = [*params]
+          self
+        end
+
+        def to(name)
+          @map.to_name = name
+          @router.add_route_map(@map)
+          nil
+        end
+      end
+
+      def initialize
+      end
+      attr_accessor :in_name, :from_name, :from_params, :to_name
+
+      def matches?(in_name, name, params)
+        return false unless in_name == @in_name
+        return false unless name == @from_name
+        return false unless @from_params.all?{|name| params.has_key?(name)}
+        return true
+      end
+    end
+
+    def map_in(route_name)
+      RouteMap::Configurator.new(route_name, self)
+    end
   end
 end
