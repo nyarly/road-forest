@@ -72,8 +72,10 @@ module RoadForest
             payload = get_payload(resource)
             unless payload.nil?
               yield [node, Af.payload, payload.root]
-              payload.graph.each_statement do |stmt|
-                yield stmt
+              unless payload.graph.nil?
+                payload.graph.each_statement do |stmt|
+                  yield stmt
+                end
               end
             end
           end

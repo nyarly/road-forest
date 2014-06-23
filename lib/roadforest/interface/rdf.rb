@@ -1,16 +1,67 @@
 require 'roadforest/interface/application'
 
 module RoadForest
+  Payload = Struct.new(:root, :graph)
+
   module Graph
     module Helpers
-      def start_focus(graph = nil, resource_url=nil)
-        graph ||= ::RDF::Graph.new
-        access = RoadForest::Graph::WriteManager.new
-        access.source_graph = graph
-        focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
+      module Focus
+        def start_focus(graph = nil, resource_url=nil)
+          graph ||= ::RDF::Graph.new
+          access = RoadForest::Graph::WriteManager.new
+          access.source_graph = graph
+          focus = RoadForest::Graph::GraphFocus.new(access, resource_url || my_url)
 
-        yield focus if block_given?
-        return graph
+          yield focus if block_given?
+          return graph
+        end
+      end
+
+      module Payloads
+        include Focus
+
+        def payload_blocks
+          @payload_blocks ||= {}
+        end
+
+        def payload_block(domain, type, &block)
+          payload_blocks[[domain, type]] = block
+        end
+
+        def backfill_payload(domain, type, root)
+          if payload_blocks.has_key?([domain, type])
+            start_focus(nil, root) do |focus|
+              payload_blocks[[domain, type]][focus]
+            end
+          end
+        end
+
+        def payload_method(method_name, domain, type, &block)
+          payload_block(domain, type, &block)
+          define_method method_name do
+            backfill_route = path_provider.find_route do |route|
+              klass = route.interface_class
+              next if klass.nil?
+              next unless klass.respond_to? :domains
+              next unless klass.respond_to? :types
+              klass.domains.include?(domain) and klass.types.include?(type)
+            end
+            return nil if backfill_route.nil?
+
+            klass = backfill_route.interface_class
+
+            root_node = url_for(backfill_route.name) + klass.fragment_for(route_name, type)
+            return Payload.new(root_node, nil)
+          end
+        end
+
+        def payload_for_update(domain = nil, &block)
+          payload_method(:update_payload, domain || :general, :update, &block)
+        end
+
+        def payload_for_create(domain = nil, &block)
+          payload_method(:create_payload, domain || :general, :create, &block)
+        end
       end
     end
   end
@@ -18,9 +69,7 @@ module RoadForest
   module Interface
     class RDF < Application
       include Graph::Etagging
-      include Graph::Helpers
-
-      Payload = Struct.new(:root, :graph)
+      include Graph::Helpers::Focus
 
       # Utility method, useful for overriding #update_payload and
       # #create_payload

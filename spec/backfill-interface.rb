@@ -14,13 +14,16 @@ describe RoadForest::Utility::Backfill do
 
   let :test_interface_class do
     Class.new(RoadForest::Interface::RDF) do
-      extend RoadForest::Graph::Helpers
+      extend RoadForest::Graph::Helpers::Payloads
 
-      def self.backfill_payload(domain, type, root)
-        start_focus(nil, root) do |focus|
-          filename = focus.add_node([:path, :forward])
-          filename[[:path, :predicate]] = "http://sillyvocab.com/a"
-        end
+      payload_for_update do |focus|
+        filename = focus.add_node([:path, :forward])
+        filename[[:path, :predicate]] = "http://sillyvocab.com/a"
+      end
+
+      payload_for_create do |focus|
+        filename = focus.add_node([:path, :forward])
+        filename[[:path, :predicate]] = "http://sillyvocab.com/a"
       end
     end
   end
@@ -40,7 +43,11 @@ describe RoadForest::Utility::Backfill do
   end
 
   let :backfill do
-    RoadForest::Utility::Backfill.new(:payload, {}, dispatcher, services)
+    RoadForest::Utility::Backfill.new(:payload, {}, dispatcher.path_provider(:payload), services)
+  end
+
+  it "should have payloads that point to backfill" do
+    test_interface_class.new(:test, {}, dispatcher.path_provider(:test), services).update_payload.root.should == "http://example.com/payloads#test-update"
   end
 
   require 'rdf/turtle'

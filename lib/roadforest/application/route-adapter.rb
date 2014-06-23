@@ -21,7 +21,7 @@ module RoadForest
       end
 
       def build_interface(params)
-        interface_builder.call(route_name, params, router, router.services)
+        interface_builder.call(route_name, params, router.path_provider(route_name), router.services)
       end
 
       def interface_class
@@ -44,6 +44,7 @@ module RoadForest
     #Extension of Webmachine's Routes that allows for rendering url paths and
     #parameter lists.
     class Route < Webmachine::Dispatcher::Route
+      attr_accessor :name
       # Create a complete URL for this route, doing any necessary variable
       # substitution.
       # @param [Hash] vars values for the path variables
@@ -92,7 +93,7 @@ module RoadForest
       end
 
       def call(name, params, router, services)
-        interface_class.new(name, params, router.path_provider, services)
+        interface_class.new(name, params, router, services)
       end
     end
 
@@ -125,11 +126,14 @@ module RoadForest
       def route
         @route ||=
           begin
-            if guard.nil?
-              Route.new(path_spec, resource_adapter, bindings || {})
-            else
-              Route.new(path_spec, resource_adapter, bindings || {}, &guard)
-            end
+            route =
+              if guard.nil?
+                Route.new(path_spec, resource_adapter, bindings || {})
+              else
+                Route.new(path_spec, resource_adapter, bindings || {}, &guard)
+              end
+            route.name = route_name
+            route
           end
       end
 

@@ -101,21 +101,60 @@ module RoadForest
 
       alias child_nodes children
 
-      def self.edge_query_pattern(pattern_node)
-        path_direction = self.path_direction
-        RDF::Query.new do
-          pattern  [  pattern_node, path_direction, :next ]
-          pattern  [  :next,  Graph::Path.predicate,  :predicate   ]
-          pattern  [  :next,  Graph::Path.minMulti,   :min_multi   ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.maxMulti,   :max_multi   ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.minRepeat,  :min_repeat  ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.maxRepeat,  :max_repeat  ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.is,         :exact_value ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.after,      :after       ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.before,     :before      ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.order,      :order       ],  :optional  =>  true
-          pattern  [  :next,  Graph::Path.type,       :type        ],  :optional  =>  true
+      class << self
+        def find_child_edges(node)
+          node.pattern.query(edge_query_pattern(node.pattern_step)).map do |solution|
+            new do |edge|
+              edge.from(node, solution)
+            end
+          end
         end
+
+        def edge_query_pattern(pattern_node)
+          path_direction = self.path_direction
+          RDF::Query.new do
+            pattern  [  pattern_node, path_direction, :next ]
+            pattern  [  :next,  Graph::Path.predicate,  :predicate   ]
+            pattern  [  :next,  Graph::Path.minMulti,   :min_multi   ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.maxMulti,   :max_multi   ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.minRepeat,  :min_repeat  ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.maxRepeat,  :max_repeat  ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.is,         :exact_value ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.after,      :after       ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.before,     :before      ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.order,      :order       ],  :optional  =>  true
+            pattern  [  :next,  Graph::Path.type,       :type        ],  :optional  =>  true
+          end
+        end
+      end
+
+      def from(node, solution)
+        self.parent = node
+
+        self.pattern = node.pattern
+        self.graph = node.graph
+
+        self.stem = node.stem.merge(node.statement => true)
+        self.repeats = node.repeats
+        self.graph_term = node.graph_term
+
+        self.predicate = solution[:predicate]
+        unless solution[:min_multi].nil? and solution[:max_multi].nil?
+          self.min_multi = solution[:min_multi].nil? ? 0 : solution[:min_multi].object
+          self.max_multi = solution[:max_multi].nil? ? nil : solution[:max_multi].object
+        end
+        unless solution[:min_repeat].nil? and solution[:max_repeat].nil?
+          self.min_repeat = solution[:max_repeat].nil? ? 0 : solution[:min_repeat].object
+          self.max_repeat = solution[:max_repeat].nil? ? nil : solution[:max_repeat].object
+        end
+
+        self.exact_value = solution[:exact_value]
+
+        self.pattern_step = solution[:next]
+        self.after = solution[:after]
+        self.before = solution[:before]
+        self.order = solution[:order]
+        self.type = solution[:type]
       end
 
       def to_s
@@ -187,24 +226,7 @@ module RoadForest
       end
 
       def build_children
-        graph.query(pattern_hash).map do |statement|
-          next if stem.has_key?(statement)
-
-          Node.new do |node|
-            node.pattern = pattern
-            node.graph = graph
-            node.parent = self
-            node.graph_term = graph_node(statement)
-            node.pattern_step = pattern_step
-            node.statement = statement
-            node.stem = stem
-            node.repeats = self.repeats.merge({self.pattern_step => step_count + 1})
-            node.before = before
-            node.after = after
-            node.order = order
-            node.type = type
-          end
-        end
+        Node.find_child_nodes(self)
       end
     end
 
@@ -238,6 +260,35 @@ module RoadForest
 
     class Node < MatchStep
       attr_accessor :statement #the RDF statement that got here from parent
+
+      def self.find_child_nodes(edge)
+        edge.graph.query(edge.pattern_hash).map do |statement|
+          next if edge.stem.has_key?(statement)
+
+          Node.new do |node|
+            node.from(edge, statement)
+          end
+        end
+      end
+
+      def from(edge, statement)
+        self.parent = edge
+
+        self.pattern = edge.pattern
+        self.graph = edge.graph
+
+        self.stem = edge.stem
+        self.repeats = edge.repeats.merge({edge.pattern_step => edge.step_count + 1})
+        self.graph_term = edge.graph_node(statement)
+
+        self.statement = statement
+
+        self.pattern_step = edge.pattern_step
+        self.after = edge.after
+        self.before = edge.before
+        self.order = edge.order
+        self.type = edge.type
+      end
 
       alias child_edges children
 
@@ -314,42 +365,8 @@ module RoadForest
           end
       end
 
-      def find_child_edges(klass)
-        pattern.query(klass.edge_query_pattern(pattern_step)).map do |solution|
-          klass.new do |edge|
-            edge.pattern = pattern
-            edge.graph = graph
-            edge.parent = self
-            edge.stem = stem.merge(self.statement => true)
-            edge.repeats = self.repeats
-            edge.graph_term = graph_term
-
-            edge.pattern_step = solution[:next]
-            edge.predicate = solution[:predicate]
-            unless solution[:min_multi].nil? and solution[:max_multi].nil?
-              edge.min_multi = solution[:min_multi].nil? ? 0 : solution[:min_multi].object
-              edge.max_multi = solution[:max_multi].nil? ? nil : solution[:max_multi].object
-            end
-            unless solution[:min_repeat].nil? and solution[:max_repeat].nil?
-              edge.min_repeat = solution[:max_repeat].nil? ? 0 : solution[:min_repeat].object
-              edge.max_repeat = solution[:max_repeat].nil? ? nil : solution[:max_repeat].object
-            end
-
-            edge.exact_value = solution[:exact_value]
-            edge.after = solution[:after]
-            edge.before = solution[:before]
-            edge.order = solution[:order]
-            edge.type = solution[:type]
-          end
-        end
-      end
-
       def build_children
-        edges = [ForwardEdge, ReverseEdge ].map do |klass|
-          find_child_edges(klass)
-        end.inject do |edges, direction_list|
-          edges + direction_list
-        end
+        ForwardEdge.find_child_edges(self) + ReverseEdge.find_child_edges(self)
       end
     end
 
@@ -363,6 +380,17 @@ module RoadForest
 
     def match(root, graph)
       reset
+      setup(root, graph)
+      search_iteration until complete?
+      return Match.new(self)
+    end
+
+    def reset
+      @search_queue = []
+      @completed_child = nil
+    end
+
+    def setup(root, graph)
       add_matching_nodes([Node.new do |node|
         node.parent = self
         node.stem = {}
@@ -375,13 +403,6 @@ module RoadForest
         node.pattern_step = pattern_root
       end
       ])
-      search_iteration until complete?
-      return Match.new(self)
-    end
-
-    def reset
-      @search_queue = []
-      @completed_child = nil
     end
 
     def pattern_root

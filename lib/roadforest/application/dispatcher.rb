@@ -17,6 +17,14 @@ module RoadForest
       @route_names.fetch(name)
     end
 
+    def find_route(*args)
+      if block_given?
+        @routes.find{|route| yield(route)}
+      else
+        super
+      end
+    end
+
     def each_route(&block)
       @routes.each(&block)
     end
@@ -29,8 +37,8 @@ module RoadForest
       @services.default_content_engine
     end
 
-    def path_provider
-      @path_provider ||= PathProvider.new(self)
+    def path_provider(route_name)
+      PathProvider.new(route_name, self)
     end
 
     # Add a named route to the dispatcher - the 90% case is handled by passing

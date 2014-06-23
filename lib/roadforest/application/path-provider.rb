@@ -1,7 +1,12 @@
 module RoadForest
   class PathProvider
-    def initialize(dispatcher)
+    def initialize(route_name, dispatcher)
+      @route_name = route_name
       @dispatcher = dispatcher
+    end
+
+    def services
+      @dispatcher.services
     end
 
     # Get the URL to the given resource, with optional variables to be used
@@ -14,6 +19,18 @@ module RoadForest
       vars ||= {}
       route = @dispatcher.route_for_name(name)
       ::RDF::URI.parse(route.build_path(vars))
+    end
+
+    def find_route(&block)
+      @dispatcher.find_route(&block)
+    end
+
+    def each_name_and_route(&block)
+      @dispatcher.each_name_and_route(&block)
+    end
+
+    def url_for(route_name, params = nil)
+      ::RDF::URI.new(Addressable::URI.parse(services.canonical_host.to_s).join(path_for(route_name, params)))
     end
 
     def request_for(name, vars = nil)

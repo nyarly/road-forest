@@ -9,21 +9,21 @@ module RoadForest
     end
 
     class Application
-      def initialize(route_name, params, router, services)
+      def initialize(route_name, params, path_provider, services)
         @route_name = route_name
         @params = params
-        @router = router
+        @path_provider = path_provider
         @services = services
         @data = nil
         @response_values = {}
       end
-      attr_reader :route_name, :params, :services, :data, :router
+      attr_reader :route_name, :params, :services, :data, :path_provider
       attr_reader :response_values
 
       #@!group Utility methods
 
       def path_for(route_name = nil, params = nil)
-        router.path_provider.path_for(route_name, params || self.params)
+        path_provider.path_for(route_name, params || self.params)
       end
 
       def url_for(route_name, params = nil)
@@ -31,7 +31,7 @@ module RoadForest
       end
 
       def interface_for(route_name = nil, params = nil)
-        router.interface_for(route_name, params || self.params)
+        path_provider.interface_for(route_name, params || self.params)
       end
 
       def canonical_uri
