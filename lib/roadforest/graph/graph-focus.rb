@@ -45,14 +45,7 @@ module RoadForest::Graph
   end
 
   class GraphFocus
-    #XXX Any changes to this class heirarchy or to ContextFascade should start
-    #with a refactor like:
-    #  Reduce this to the single-node API ([] []=)
-    #  Change the ContextFascade into a family of classes (RO, RW, Update)
     include Normalization
-
-    #attr_accessor :source_graph, :target_graph, :subject, :root_url,
-    #:source_rigor
 
     attr_accessor :subject, :access_manager
 
@@ -113,6 +106,14 @@ module RoadForest::Graph
 
       access_manager.insert([subject, property, value])
       return value
+    end
+
+    def <<(data)
+      case data
+      when Array
+        data = normalize_statement(*data)
+      end
+      access_manager << data
     end
 
     def delete(property, extra=nil)

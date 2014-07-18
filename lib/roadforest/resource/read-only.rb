@@ -20,7 +20,7 @@ module RoadForest
         ### RoadForest interface
 
         def params
-          params = Application::Parameters.new do |params|
+          Application::Parameters.new do |params|
             params.path_info = @request.path_info
             params.query_params = @request.query_params
             params.path_tokens = @request.path_tokens
@@ -84,8 +84,12 @@ module RoadForest
 
         def content_types_provided
           content_engine.renderers.type_map
-        rescue => ex
+        rescue
           super
+        end
+
+        def required_grants(method)
+          @interface.required_grants(method)
         end
 
         def is_authorized?(header)
@@ -93,6 +97,7 @@ module RoadForest
           if(@authorization == :public || @authorization == :granted)
             return true
           end
+          #response.body = ... "here's where to find your permissions..."
           @interface.authentication_challenge
         end
 

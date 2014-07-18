@@ -6,7 +6,7 @@ module RoadForest::Graph
     Vocabs = {}
     Vocabs["rdf"] = RDF
 
-    def normalize_statement(subject, predicate, object, context)
+    def normalize_statement(subject, predicate, object, context=nil)
       subject = normalize_resource(subject) || RDF::Node.new
       predicate = normalize_uri(predicate)
       object = normalize_term(object) || RDF::Node.new

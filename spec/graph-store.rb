@@ -152,5 +152,13 @@ describe RoadForest::Graph do
         query.pattern [:subject, RDF::DC.dateCopyrighted, :value]
       end.execute(graph_store).should_not be_empty
     end
+
+    it "should be able insert statement-ish items" do
+      node = ::RDF::Node.new
+      step << [ node, ::RDF.type, [:dc, :dateCopyrighted]]
+      graph_store.should match_query{
+        pattern [ :node, ::RDF.type, ::RDF::DC.dateCopyrighted ]
+      }
+    end
   end
 end

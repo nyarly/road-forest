@@ -19,7 +19,10 @@ describe "The full affordances flow" do
   Aff = RoadForest::Graph::Af
 
   let :service_host do
-    RoadForest::Application::ServicesHost.new
+    RoadForest::Application::ServicesHost.new.tap do |services|
+      services.root_url = "http://example.com/a"
+      services.authz.cleartext_grants!
+    end
   end
 
   let :content_engine do
@@ -38,10 +41,7 @@ describe "The full affordances flow" do
   end
 
   let :augmenter do
-    RoadForest::Augment::Augmenter.new.tap do |augmenter|
-      augmenter.router = router
-      augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
-    end
+    RoadForest::Augment::Augmenter.new(service_host)
   end
 
   let :rdfa do
@@ -206,11 +206,9 @@ describe "The full affordances flow" do
     class TestInterface < RoadForest::Interface::RDF
     end
 
-    let :router do
-      RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestInterface
-        router.add :target, ["z"], :parent, TestInterface
-      end
+    before :each do
+      service_host.router.add :test, ["a"], :parent, TestInterface
+      service_host.router.add :target, ["z"], :parent, TestInterface
     end
 
     let :base_graph do
@@ -249,10 +247,8 @@ describe "The full affordances flow" do
     class TestInterface < RoadForest::Interface::RDF
     end
 
-    let :router do
-      RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestInterface
-      end
+    before :each do
+      service_host.router.add :test, ["a"], :parent, TestInterface
     end
 
     let :base_graph do
@@ -266,7 +262,6 @@ describe "The full affordances flow" do
       uaff = ::RDF::Node.new(:uaff)
       naff = ::RDF::Node.new(:naff)
       daff = ::RDF::Node.new(:daff)
-      zaff = ::RDF::Node.new(:zaff)
 
       RDF::Repository.new.tap do |graph|
         graph << [caff, ::RDF.type, Aff.Update]
@@ -289,10 +284,8 @@ describe "The full affordances flow" do
     class TestInterface < RoadForest::Interface::RDF
     end
 
-    let :router do
-      RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestInterface
-      end
+    before :each do
+      service_host.router.add :test, ["a"], :parent, TestInterface
     end
 
     let :base_graph do
@@ -334,12 +327,10 @@ describe "The full affordances flow" do
     class Blobby < RoadForest::Interface::Blob
     end
 
-    let :router do
-      RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestInterface
-        router.add :blob, ["z"], :leaf, RoadForest::Interface::Blob do |route|
-          route.content_engine = RoadForest::ContentHandling.images_engine
-        end
+    before :each do
+      service_host.router.add :test, ["a"], :parent, TestInterface
+      service_host.router.add :blob, ["z"], :leaf, RoadForest::Interface::Blob do |route|
+        route.content_engine = RoadForest::ContentHandling.images_engine
       end
     end
 
@@ -379,10 +370,8 @@ describe "The full affordances flow" do
     class TestInterface < RoadForest::Interface::RDF
     end
 
-    let :router do
-      RoadForest::Dispatcher.new(application).tap do |router|
-        router.add :test, ["a"], :parent, TestInterface
-      end
+    before :each do
+      service_host.router.add :test, ["a"], :parent, TestInterface
     end
 
     let :base_graph do

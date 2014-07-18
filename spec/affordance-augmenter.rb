@@ -34,7 +34,12 @@ describe RoadForest::Augment::Affordance do
   class EX < RDF::Vocabulary("http://example.com/"); end
 
   let :service_host do
-    RoadForest::Application::ServicesHost.new
+    RoadForest::Application::ServicesHost.new.tap do |services|
+      services.root_url = "http://example.com/a"
+
+      services.router.add :test, ["a"], :parent, test_interface
+      services.router.add :nest, ["a", "b", :id], :leaf, other_test_interface
+    end
   end
 
   let :content_engine do
@@ -42,24 +47,11 @@ describe RoadForest::Augment::Affordance do
   end
 
   let :application do
-    double("RoadForest::Application").tap do |app|
-      app.stub(:services).and_return(service_host)
-      app.stub(:default_content_engine).and_return(content_engine)
-    end
-  end
-
-  let :router do
-    RoadForest::Dispatcher.new(application).tap do |router|
-      router.add :test, ["a"], :parent, test_interface
-      router.add :nest, ["a", "b", :id], :leaf, other_test_interface
-    end
+    RoadForest::Application.new(service_host)
   end
 
   let :augmenter do
-    RoadForest::Augment::Augmenter.new.tap do |augmenter|
-      augmenter.router = router
-      augmenter.canonical_uri = Addressable::URI.parse("http://example.com/a")
-    end
+    RoadForest::Augment::Augmenter.new(service_host)
   end
 
   subject :augmented_graph do

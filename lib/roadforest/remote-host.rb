@@ -9,6 +9,15 @@ require 'roadforest/http/graph-transfer'
 require 'roadforest/http/adapters/excon'
 
 module RoadForest
+  # This is a client's main entry point in RoadForest - we instantiate a
+  # RemoteHost to represent the server in the local program and interact with
+  # it. The design goal is that, having created a RemoteHost object, you should
+  # be able to forget that it isn't, in fact, part of your program. So, the
+  # details of TCP (or indeed HTTP, or whatever the network is doing) become
+  # incidental to the abstraction.
+  #
+  # One consequence being that you should be able to use a mock host for
+  # testing.
   class RemoteHost
     include Graph::Normalization
 
@@ -108,7 +117,7 @@ module RoadForest
       elsif destination.respond_to?(:to_s)
         destination = destination.to_s
       end
-      response = user_agent.make_request("PUT", destination, {"Content-Type" => type}, io)
+      user_agent.make_request("PUT", destination, {"Content-Type" => type}, io)
     end
 
     #TODO:

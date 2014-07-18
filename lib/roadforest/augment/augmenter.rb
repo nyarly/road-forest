@@ -4,7 +4,18 @@ require 'roadforest/utility/class-registry'
 module RoadForest
   module Augment
     class Augmenter
-      attr_accessor :router
+      def initialize(services)
+        @services = services
+      end
+      attr_reader :services
+
+      def router
+        services.router
+      end
+
+      def canonical_uri
+        @canonical_uri ||= Addressable::URI.parse(services.root_url)
+      end
 
       def self.subject_augmentations_registry
         @subject_registry ||= Utility::ClassRegistry.new(self, "subject augmentation")
@@ -25,8 +36,6 @@ module RoadForest
           klass.new(self)
         end
       end
-
-      attr_accessor :canonical_uri
 
       def augment(graph)
         augmenting = Augment::Process.new(graph)

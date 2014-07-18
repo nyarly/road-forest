@@ -52,6 +52,12 @@
   rdfs:comment """Triggering this affordance expresses a desire to make changes
   to a resource""" .
 
+<#Permission> a rdfs:Class ;
+  rdfs:comment """URL for a permission that grants access to an affordance""" .
+
+<#PermissionList> a rdfs:Class ;
+  rdfs:comment """A collection of Permissions""" .
+
 #Consider: <#Append> - distinct from <#Create> in that the implication is
 #specifically to create a child (or otherwise related) resource to the target, where <#Create> might
 #specifically mean "create this resource" - review Fielding & 2616
@@ -78,11 +84,16 @@
 
 <#authorizedBy> a rdf:Property ;
   rdfs:domain <#Affordance> ;
-  rdfs:range rdfs:Resource ;
+  rdfs:range <#Permission> ;
   rdfs:comment """Opaque descriptors of authorization tokens - resource can be
   dereferenced by users with that token. It's recommended that the tokens be
   defreferenceable, and that they be accessible iff the user is authorized to
   activate the affordance in question.""" .
+
+<#grants> a rdf:Property ;
+  rdfs:domain <#PermissionList> ;
+  rdfs:range <#Permission> ;
+  rdfs:comment """Used to include a Permission in a grant list""" .
 
 # Target
 
@@ -105,7 +116,7 @@
 
 <#var> a rdf:Property ;
   rdfs:domain <#ResourceTemplate> ;
-  rdfs:range path:Literal , rdf:List ;
+  rdfs:range path:Literal , rdf:List , path:Target ;
   rdfs:comment """When the object is list, the members of the list should be
     path:Literal , and the the list order implies the order in which the parameters
     should be used""" .

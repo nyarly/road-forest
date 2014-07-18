@@ -56,7 +56,13 @@ module RoadForest::Graph
   end
 
   class WriteManager < ReadOnlyManager
+    include ::RDF::Writable
+
     def insert(statement)
+      destination_graph.insert(statement)
+    end
+
+    def insert_statement(statement)
       destination_graph.insert(statement)
     end
 

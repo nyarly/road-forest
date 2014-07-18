@@ -11,7 +11,7 @@ module RoadForest
       attr_writer :application
       attr_writer :router, :canonical_host, :type_handling
       attr_writer :logger, :authorization
-      attr_writer :root_url
+      attr_accessor :root_url
 
       attr_accessor :default_content_engine
 

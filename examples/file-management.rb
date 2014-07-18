@@ -80,7 +80,7 @@ module FileManagementExample
 
     class Need < RoadForest::Interface::RDF
       def data
-        @data = services.file_records.find do |record|
+        @data ||= services.file_records.find do |record|
           record.name == params.remainder
         end
       end

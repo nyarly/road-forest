@@ -2,12 +2,30 @@ require 'roadforest/augment/augmenter'
 module RoadForest
   module Augment
     class Augmentation
-      def self.register_for_subjects
-        Augmenter.subject_augmentations_registry.add(self.name, self)
-      end
+      class << self
+        def register_for_subjects
+          Augmenter.subject_augmentations_registry.add(self.name, self)
+        end
 
-      def self.register_for_objects
-        Augmenter.object_augmentations_registry.add(self.name, self)
+        def subject_precedes(other)
+          Augmenter.subject_augmentations_registry.seq(self.name, other)
+        end
+
+        def subject_follows(other)
+          Augmenter.subject_augmentations_registry.seq(other, self.name)
+        end
+
+        def register_for_objects
+          Augmenter.object_augmentations_registry.add(self.name, self)
+        end
+
+        def object_precedes(other)
+          Augmenter.object_augmentations_registry.seq(self.name, other)
+        end
+
+        def object_follows(other)
+          Augmenter.object_augmentations_registry.seq(other, self.name)
+        end
       end
 
       def initialize(augmenter)
@@ -49,7 +67,7 @@ module RoadForest
 
       def type_list
         @type_list ||=
-          resource.content_types_provided.inject(ContentHandling::MediaTypeList.new) do |list, (type, method)|
+          resource.content_types_provided.inject(ContentHandling::MediaTypeList.new) do |list, (type, _)|
             list.add_header_val(type)
           end
       end

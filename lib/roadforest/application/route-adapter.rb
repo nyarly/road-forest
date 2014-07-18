@@ -51,14 +51,35 @@ module RoadForest
       # @return [String] the valid URL for the route
       def build_path(vars = nil)
         vars ||= {}
-        "/" + path_spec.map do |segment|
+        vars = vars.to_hash
+        vars = vars.dup
+        path_spec = resolve_path_spec(vars)
+        if path_spec.any?{|segment| segment.is_a?(Symbol) or segment == "*"}
+          raise "Cannot build path - missing vars: #{path_spec.inspect}"
+        end
+        path = "/" + path_spec.join("/")
+        vars.delete('*')
+        unless vars.empty?
+          path += "?" + vars.map do |key,value|
+            [key,value].join("=")
+          end.join("&")
+        end
+        return path
+      end
+
+      def resolve_path_spec(vars)
+        path_spec.map do |segment|
           case segment
           when '*',Symbol
-            vars.fetch(segment)
+            if (string = vars.delete(segment)).nil?
+              segment
+            else
+              string
+            end
           when String
             segment
           end
-        end.join("/")
+        end
       end
 
       def interface_class

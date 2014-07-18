@@ -54,7 +54,7 @@ module RoadForest
         when 401
           #XXX What if challenge matches existing Auth header? i.e. current
           #creds are wrong?
-          request.headers["Authorization"] = keychain.challenge_response(url, response.headers["WWW-Authenticate"])
+          request.headers["Authorization"] = keychain.challenge_response(request.url, response.headers["WWW-Authenticate"])
           raise Retryable
         end
         return response

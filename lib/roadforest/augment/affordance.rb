@@ -14,6 +14,9 @@ module RoadForest
             node = ::RDF::Node.new
             yield [node, ::RDF.type, Af.Remove]
             yield [node, Af.target, term.uri]
+            term.resource.required_grants("DELETE").each do |grant|
+              yield [node, Af.authorizedBy, grant]
+            end
           end
         end
       end
@@ -45,6 +48,9 @@ module RoadForest
                 yield [node, ::RDF.type, Af.Navigate]
                 yield [node, Af.target, term.uri]
               end
+              term.resource.required_grants("GET").each do |grant|
+                yield [node, Af.authorizedBy, grant]
+              end
             end
           end
         end
@@ -63,12 +69,20 @@ module RoadForest
 
         end
 
+        def applicable?(resource)
+          resource.allowed_methods.include?(http_method)
+        end
+
         def apply(term)
           resource = term.resource
           if applicable?(resource)
             node = ::RDF::Node.new
             yield [node, ::RDF.type, affordance_type]
             yield [node, Af.target, term.uri]
+            term.resource.required_grants(http_method).each do |grant|
+              yield [node, Af.authorizedBy, grant]
+            end
+
             payload = get_payload(resource)
             unless payload.nil?
               yield [node, Af.payload, payload.root]
@@ -89,8 +103,8 @@ module RoadForest
           resource.interface.update_payload
         end
 
-        def applicable?(resource)
-          resource.allowed_methods.include?("PUT")
+        def http_method
+          "PUT"
         end
 
         def affordance_type
@@ -105,8 +119,8 @@ module RoadForest
           resource.interface.create_payload
         end
 
-        def applicable?(resource)
-          resource.allowed_methods.include?("POST")
+        def http_method
+          "POST"
         end
 
         def affordance_type

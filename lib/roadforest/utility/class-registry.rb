@@ -50,28 +50,68 @@ module RoadForest
         else
           @purpose = purpose
         end
+        @sequence = NameSequence.new
         @classes = {}
       end
 
-      def map_classes
-        names.map do |name|
-          yield get(name)
+      require 'tsort'
+      class NameSequence
+        include TSort
+
+        def initialize
+          @nodes = Hash.new do |h,k|
+            h[k] = []
+          end
+        end
+
+        def add(before, after)
+          @nodes[before] << after
+        end
+
+        def exists(node)
+          @nodes[node] ||= []
+        end
+
+        def tsort_each_node(&block)
+          @nodes.each_key(&block)
+        end
+
+        def tsort_each_child(node, &block)
+          @nodes.fetch(node).each(&block)
         end
       end
 
+      # @yield each class in name order
+      def map_classes
+        names.map do |name|
+          begin
+            yield get(name)
+          rescue UndefinedClass
+            warn "undefined name: #{name} used in sequencing"
+          end
+        end
+      end
+
+      def names
+        @sequence.tsort
+      end
+
       def add(name, klass)
+        @sequence.exists(name.to_sym)
         @classes[name.to_sym] = klass
         @classes[name.to_s] = klass
       end
 
-      def names
-        @classes.keys.select{|key| key.is_a? Symbol}
+      def seq(before, after)
+        @sequence.add(before.to_sym, after.to_sym)
       end
+
+      class UndefinedClass < StandardError; end
 
       def get(name)
         @classes.fetch(name)
       rescue KeyError
-        raise "No #@purpose class registered as name: #{name.inspect} (there are: #{names.inspect})"
+        raise UndefinedClass, "No #@purpose class registered as name: #{name.inspect} (there are: #{names.inspect})"
       end
     end
   end
