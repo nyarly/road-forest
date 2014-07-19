@@ -16,7 +16,7 @@ module RoadForest
       attr_accessor :default_content_engine
 
       def canonical_host
-        @canonical_host ||= normalize_resource(@root_url)
+        @canonical_host ||= RDF::URI.intern(@root_url)
       end
 
       def dispatcher

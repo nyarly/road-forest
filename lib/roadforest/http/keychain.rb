@@ -22,10 +22,11 @@ module RoadForest
       end
 
       def add_credentials(url, creds, realm)
-        if url.to_s[-1] != "/"
+        url = url.to_s.dup
+        if url[-1] != "/"
           url << "/"
         end
-        @realm_for_url[url.to_s] = realm
+        @realm_for_url[url] = realm
 
         url = Addressable::URI.parse(url)
         url.path = "/"

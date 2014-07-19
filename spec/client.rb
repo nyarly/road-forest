@@ -13,7 +13,7 @@ describe RoadForest::RemoteHost do
   let :services do
     require 'logger'
     FileManagementExample::ServicesHost.new.tap do |host|
-      host.root_url = "http://localhost:8778"
+      host.root_url = "http://localhost:8778/" # +/- a '/' at the end is finicky.
       host.file_records = [
         FileManagementExample::FileRecord.new("one", false),
         FileManagementExample::FileRecord.new("two", false),
